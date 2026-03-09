@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "pocSlug": { "value": "mypoc" },
+    "location": { "value": "eastus" },
+    "appChoice": { "value": "aifinance-next" },
+    "centralAcrResourceGroupName": { "value": "rg-eyaifin-acr" },
+    "centralAcrName": { "value": "creyaifinmain" },
+    "acrManagedIdentityResourceGroupName": { "value": "rg-eyaifin-acr" },
+    "acrManagedIdentityName": { "value": "acr-managed-identity" },
+    "pipelinePrincipalId": { "value": "<pipeline-service-principal-object-id>" },
+    "postgresAdminPassword": { "value": "<secure-password>" },
+    "mongoAdminUsername": { "value": "main" },
+    "pocAppConfigKeyValues": {
+      "value": [
+        { "key": "Backend:Url", "value": "https://backend-mypoc.azurewebsites.net", "contentType": "text/plain" },
+        { "key": "App:Name", "value": "mypoc", "contentType": "text/plain" }
+      ]
+    },
+    "openAIDeployments": {
+      "value": [
+        { "name": "gpt-4o", "model": "gpt-4o", "version": "2024-11-20", "capacity": 5000 },
+        { "name": "gpt-4o-mini", "model": "gpt-4o-mini", "version": "2024-07-18", "capacity": 10000 }
+      ]
+    },
+    "storageContainerNames": {
+      "value": ["chat-completions", "chats", "clients", "responses"]
+    },
+    "frontendImage": { "value": "DOCKER|creyaifinmain.azurecr.io/aifinance-frontend-poc-mypoc:latest" },
+    "backendImage": { "value": "DOCKER|creyaifinmain.azurecr.io/aifinance-backend-poc-mypoc:latest" }
+  }
+}
