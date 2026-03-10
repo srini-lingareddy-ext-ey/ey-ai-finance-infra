@@ -3,7 +3,8 @@
 param pocSlug string
 param location string
 
-var vaultName = 'kv-${pocSlug}'
+// Key Vault names are globally unique; suffix ensures uniqueness across subscriptions/tenants
+var vaultName = 'kv-${pocSlug}-poc'
 
 resource vault 'Microsoft.KeyVault/vaults@2024-12-01-preview' = {
   name: vaultName
@@ -27,7 +28,7 @@ resource vault 'Microsoft.KeyVault/vaults@2024-12-01-preview' = {
     enableSoftDelete: true
     softDeleteRetentionInDays: 90
     enableRbacAuthorization: true
-    enablePurgeProtection: false
+    enablePurgeProtection: true
     publicNetworkAccess: 'Enabled'
   }
 }

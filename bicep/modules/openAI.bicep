@@ -3,7 +3,7 @@ param pocSlug string
 param location string
 param openAIDeployments array = []
 
-var accountName = 'openai-${pocSlug}'
+var accountName = 'openai-${pocSlug}-poc'
 
 resource openaiAccount 'Microsoft.CognitiveServices/accounts@2025-06-01' = {
   name: accountName
