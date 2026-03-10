@@ -5,13 +5,8 @@
     "pocSlug": { "value": "mypoc" },
     "location": { "value": "eastus" },
     "appChoice": { "value": "aifinance-next" },
-    "centralAcrResourceGroupName": { "value": "rg-eyaifin-acr" },
-    "centralAcrName": { "value": "creyaifinmain" },
-    "acrManagedIdentityResourceGroupName": { "value": "rg-eyaifin-acr" },
-    "acrManagedIdentityName": { "value": "acr-managed-identity" },
     "pipelinePrincipalId": { "value": "<pipeline-service-principal-object-id>" },
     "postgresAdminPassword": { "value": "<secure-password>" },
-    "mongoAdminUsername": { "value": "main" },
     "pocAppConfigKeyValues": {
       "value": [
         { "key": "Backend:Url", "value": "https://backend-mypoc.azurewebsites.net", "contentType": "text/plain" },

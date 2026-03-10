@@ -37,6 +37,7 @@ resource appServiceFrontend 'Microsoft.Web/sites@2024-11-01' = {
       linuxFxVersion: frontendImage
       http20Enabled: true
       minTlsVersion: '1.3'
+      // Set environment variables here
       appSettings: [
         { name: 'AZURE_APP_CONFIGURATION_CONNECTION', value: appConfigEndpoint }
         { name: 'KEY_VAULT_URI', value: keyVaultUri }
@@ -62,6 +63,7 @@ resource appServiceBackend 'Microsoft.Web/sites@2024-11-01' = {
       linuxFxVersion: backendImage
       http20Enabled: true
       minTlsVersion: '1.3'
+      // Set environment variables here
       appSettings: [
         { name: 'AZURE_APP_CONFIGURATION_CONNECTION', value: appConfigEndpoint }
         { name: 'KEY_VAULT_URI', value: keyVaultUri }

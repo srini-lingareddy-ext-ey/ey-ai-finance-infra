@@ -1,4 +1,5 @@
-// POC stack (resource-group scope). Invoked by main.bicep with scope to rg-<pocSlug>.
+// POC core stack (resource-group scope): all resources except App Services.
+// Invoked by main.bicep. After deploy, populate Key Vault, then deploy poc-stack-appservices.bicep.
 targetScope = 'resourceGroup'
 
 @description('POC identifier used in resource names (e.g. mypoc).')
@@ -11,24 +12,6 @@ param location string = resourceGroup().location
 @allowed(['aifinance', 'aifinance-next'])
 param appChoice string = 'aifinance-next'
 
-@description('Resource ID of the central Container Registry in the main resource group. Omit to use centralAcrResourceGroupName + centralAcrName.')
-param centralAcrResourceId string = ''
-
-@description('Resource group containing the central ACR (used when centralAcrResourceId is not provided).')
-param centralAcrResourceGroupName string = 'rg-eyaifin-acr'
-
-@description('Name of the central Container Registry (used when centralAcrResourceId is not provided).')
-param centralAcrName string = 'creyaifinmain'
-
-@description('Resource ID of the user-assigned managed identity for ACR pull. Omit to use acrManagedIdentityResourceGroupName + acrManagedIdentityName.')
-param acrManagedIdentityResourceId string = ''
-
-@description('Resource group containing the ACR managed identity (used when acrManagedIdentityResourceId is not provided).')
-param acrManagedIdentityResourceGroupName string = 'rg-eyaifin-acr'
-
-@description('Name of the user-assigned managed identity for ACR pull (used when acrManagedIdentityResourceId is not provided).')
-param acrManagedIdentityName string = 'acr-managed-identity'
-
 @description('Principal ID of the user-assigned managed identity (for Key Vault Secrets User role on POC Key Vault).')
 param acrManagedIdentityPrincipalId string = ''
 
@@ -38,9 +21,6 @@ param pipelinePrincipalId string
 @secure()
 @description('PostgreSQL administrator login password.')
 param postgresAdminPassword string
-
-@description('MongoDB cluster administrator username.')
-param mongoAdminUsername string = 'main'
 
 @description('Optional key-values for App Configuration (POC-specific).')
 param pocAppConfigKeyValues array = []
@@ -59,14 +39,9 @@ param storageContainerNames array = [
   'responses'
 ]
 
-@description('Frontend container image (e.g. DOCKER|registry.azurecr.io/image:tag).')
-param frontendImage string
-
-@description('Backend container image (e.g. DOCKER|registry.azurecr.io/image:tag).')
-param backendImage string
-
-var centralAcrResourceIdFinal = empty(centralAcrResourceId) ? resourceId(subscription().subscriptionId, centralAcrResourceGroupName, 'Microsoft.ContainerRegistry/registries', centralAcrName) : centralAcrResourceId
-var acrManagedIdentityResourceIdFinal = empty(acrManagedIdentityResourceId) ? resourceId(subscription().subscriptionId, acrManagedIdentityResourceGroupName, 'Microsoft.ManagedIdentity/userAssignedIdentities', acrManagedIdentityName) : acrManagedIdentityResourceId
+// Not used by core; allow same parameters file as main.bicep / poc-stack-appservices.
+param frontendImage string = ''
+param backendImage string = ''
 
 // --- Modules ---
 module appConfig 'modules/appConfiguration.bicep' = {
@@ -92,15 +67,6 @@ module postgres 'modules/postgres.bicep' = {
     pocSlug: pocSlug
     location: location
     administratorLoginPassword: postgresAdminPassword
-  }
-}
-
-module mongo 'modules/mongo.bicep' = {
-  name: 'mongo'
-  params: {
-    pocSlug: pocSlug
-    location: location
-    administratorUserName: mongoAdminUsername
   }
 }
 
@@ -130,25 +96,6 @@ module storage 'modules/storage.bicep' = {
   }
 }
 
-module appService 'modules/appService.bicep' = {
-  name: 'appService'
-  params: {
-    pocSlug: pocSlug
-    location: location
-    centralAcrResourceId: centralAcrResourceIdFinal
-    acrManagedIdentityResourceId: acrManagedIdentityResourceIdFinal
-    appConfigEndpoint: appConfig.outputs.endpoint
-    keyVaultResourceId: keyVault.outputs.keyVaultResourceId
-    keyVaultUri: keyVault.outputs.keyVaultUri
-    frontendImage: frontendImage
-    backendImage: backendImage
-  }
-  dependsOn: [
-    appConfig
-    keyVault
-  ]
-}
-
 resource kv 'Microsoft.KeyVault/vaults@2024-12-01-preview' existing = {
   name: keyVault.outputs.keyVaultName
 }
@@ -165,7 +112,7 @@ resource kvRolePipeline 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   dependsOn: [keyVault]
 }
 
-// Grant App Service (user-assigned identity) access to Key Vault — same identity used by frontend and backend for ACR pull
+// Grant App Service (user-assigned identity) access to Key Vault — used by frontend/backend when poc-stack-appservices is deployed
 resource roleAssignmentAcrIdentity 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(acrManagedIdentityPrincipalId)) {
   name: guid(kv.id, acrManagedIdentityPrincipalId, 'Key Vault Secrets User')
   scope: kv
@@ -174,22 +121,19 @@ resource roleAssignmentAcrIdentity 'Microsoft.Authorization/roleAssignments@2022
     principalId: acrManagedIdentityPrincipalId
     principalType: 'ServicePrincipal'
   }
-  dependsOn: [appService, keyVault]
+  dependsOn: [keyVault]
 }
 
-// --- Outputs for pipeline ---
+// --- Outputs for pipeline and for poc-stack-appservices ---
 output keyVaultName string = keyVault.outputs.keyVaultName
+output keyVaultUri string = keyVault.outputs.keyVaultUri
 output appConfigEndpoint string = appConfig.outputs.endpoint
 output appConfigStoreName string = appConfig.outputs.storeName
 output postgresHost string = postgres.outputs.host
 output postgresDatabaseName string = postgres.outputs.databaseName
-output mongoConnectionStringPrefix string = mongo.outputs.connectionStringPrefix
-output mongoClusterName string = mongo.outputs.clusterName
 output searchEndpoint string = search.outputs.endpoint
 output searchName string = search.outputs.searchName
 output openaiEndpoint string = openAI.outputs.endpoint
 output openaiName string = openAI.outputs.openaiName
 output storageAccountName string = storage.outputs.storageAccountName
 output storageResourceId string = storage.outputs.storageResourceId
-output frontendAppName string = appService.outputs.frontendAppName
-output backendAppName string = appService.outputs.backendAppName
