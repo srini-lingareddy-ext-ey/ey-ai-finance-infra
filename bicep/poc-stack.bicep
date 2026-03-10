@@ -177,7 +177,7 @@ resource roleAssignmentAcrIdentity 'Microsoft.Authorization/roleAssignments@2022
   dependsOn: [appService, keyVault]
 }
 
-// --- Outputs for pipeline (T4, T6, T7) ---
+// --- Outputs for pipeline ---
 output keyVaultName string = keyVault.outputs.keyVaultName
 output appConfigEndpoint string = appConfig.outputs.endpoint
 output appConfigStoreName string = appConfig.outputs.storeName

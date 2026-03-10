@@ -1,5 +1,4 @@
 // App Service plan + frontend + backend for POC. Uses shared ACR managed identity for image pull; App Config + Key Vault refs.
-// Guide: appService.bicep (root). Source control removed for image-based deploy.
 param pocSlug string
 param location string
 param centralAcrResourceId string

@@ -1,4 +1,4 @@
-// Azure OpenAI for POC. Parameterized deployments (guide: templates/openaiTemplate.bicep).
+// Azure OpenAI for POC. Parameterized deployments.
 param pocSlug string
 param location string
 param openAIDeployments array = []

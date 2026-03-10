@@ -1,5 +1,4 @@
-// Key Vault for POC. Pipeline populates secrets (plan 5a). No secrets created in Bicep.
-// Guide: templates/kvTemplate.bicep — simplified: Standard SKU, Allow network.
+// Key Vault for POC. Pipeline populates secrets. No secrets created in Bicep.
 // RBAC: pipeline and App Service principals get roles from main.bicep.
 param pocSlug string
 param location string

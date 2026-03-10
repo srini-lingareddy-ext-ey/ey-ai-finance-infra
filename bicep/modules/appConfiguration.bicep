@@ -1,5 +1,4 @@
 // App Configuration store for POC. POC-specific key-values from parameter.
-// Guide: templates/appConfigurationTemplate.bicep
 param pocSlug string
 param location string
 param pocAppConfigKeyValues array = []

@@ -1,4 +1,4 @@
-// Azure AI Search for POC. Guide: templates/searchTemplate.bicep
+// Azure AI Search for POC.
 param pocSlug string
 param location string
 

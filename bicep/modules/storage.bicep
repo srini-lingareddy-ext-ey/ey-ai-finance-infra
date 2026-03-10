@@ -1,4 +1,4 @@
-// Storage account (Blob) for POC. Parameterized container list (guide: templates/storageTemplate.bicep).
+// Storage account (Blob) for POC. Parameterized container list.
 param pocSlug string
 param location string
 param containerNames array = []

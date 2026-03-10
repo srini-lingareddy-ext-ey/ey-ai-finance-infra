@@ -1,4 +1,4 @@
-// MongoDB (DocumentDB mongoClusters) for POC. Guide: templates/documentDBMongoTemplate.bicep
+// MongoDB (DocumentDB mongoClusters) for POC
 param pocSlug string
 param location string = 'eastus'
 param administratorUserName string = 'main'

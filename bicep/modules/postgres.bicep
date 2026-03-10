@@ -1,4 +1,4 @@
-// PostgreSQL (Citus server group) for POC. Guide: postgres.bicep (root).
+// PostgreSQL (Citus server group) for POC.
 @secure()
 param administratorLoginPassword string
 param pocSlug string
