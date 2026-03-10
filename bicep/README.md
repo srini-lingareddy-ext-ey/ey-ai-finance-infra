@@ -41,6 +41,43 @@ az deployment group create \
 
 Override `keyVaultName` and `appConfigEndpoint` with the actual values from phase 1 (e.g. `keyVaultName=@phase1-outputs.json`, or set in the parameters file). Same `pocSlug` and image names as in `main.parameters.json`.
 
+## GitHub Actions workflow
+
+A single workflow automates all phases: **Actions** → **Deploy POC** (manual `workflow_dispatch`).
+
+### Managed identity
+
+- **Name:** id-aifinance-poc-deploy  
+- **Resource group:** rg-eyaifin-pipeline  
+- **Federated credential:** Configured for this infra repo so the workflow can authenticate with Azure via OIDC (no client secret).  
+- Grant the managed identity **Contributor** at subscription scope. The core template grants it **Key Vault Administrator** on each POC Key Vault.
+
+### Required secrets
+
+Store these in **GitHub Secrets** (Settings → Secrets and variables → Actions). You can also store them in a **Key Vault in rg-eyaifin-pipeline**; if the workflow reads from that vault, grant **id-aifinance-poc-deploy** **Key Vault Secrets User** on that vault.
+
+| Secret name | Purpose |
+| ----------- | -------- |
+| **AZURE_POC_CLIENT_ID** | Managed identity's client (application) ID — used by Azure/login for OIDC. |
+| **AZURE_POC_TENANT_ID** | Azure AD tenant ID. |
+| **AZURE_POC_SUBSCRIPTION_ID** | Target subscription ID. |
+| **AZURE_POC_PIPELINE_PRINCIPAL_ID** | Managed identity's principal (object) ID — passed to Bicep as `pipelinePrincipalId`. |
+| **POSTGRES_ADMIN_PASSWORD** | PostgreSQL admin password for the POC — used by Bicep, Key Vault population, and init.sql. |
+| **EY_AI_FINANCE_REPO_TOKEN** (optional) | PAT to checkout the private **ey-ai-finance** repo; omit if `GITHUB_TOKEN` has access. |
+
+### Key Vault secret names (phase 2 / workflow step 2)
+
+The workflow writes these secrets into the **POC** Key Vault. The **ey-ai-finance** app must read the same names from Key Vault (or the workflow can be updated to match the app):
+
+- **PostgresConnectionString** — PostgreSQL connection string.  
+- **SearchApiKey** — Azure AI Search admin key.  
+- **OpenAIApiKey** — Azure OpenAI account key.  
+- **StorageConnectionString** — Storage account connection string.
+
+### Init script (phase 2.5 / workflow step 3)
+
+The workflow checks out the **ey-ai-finance** repo (same org as this repo) and runs **db/aifinance/init.sql** against the new Postgres database using the **postgresql-client** and **psql** (not `azure/sql-action`, which targets SQL Server).
+
 ## Naming
 
 - **Resource group:** `rg-<pocSlug>` (e.g. `rg-mypoc`).

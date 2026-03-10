@@ -1,0 +1,164 @@
+# POC deployment: provision core, populate Key Vault, run init.sql, deploy app services.
+# Uses managed identity id-aifinance-poc-deploy in rg-eyaifin-pipeline (federated credential for this repo).
+# Required secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID,
+#   AZURE_POC_PIPELINE_PRINCIPAL_ID, POSTGRES_ADMIN_PASSWORD. Optional: EY_AI_FINANCE_REPO_TOKEN.
+
+name: Deploy POC
+
+on:
+  workflow_dispatch:
+    inputs:
+      pocSlug:
+        description: 'POC identifier (e.g. mypoc). Resource group will be rg-<pocSlug>.'
+        required: true
+        type: string
+      location:
+        description: 'Azure region (e.g. eastus)'
+        required: true
+        type: string
+        default: 'eastus'
+      appChoice:
+        description: 'App choice'
+        required: false
+        type: choice
+        options:
+          - aifinance-next
+          - aifinance
+        default: 'aifinance-next'
+      frontendImage:
+        description: 'Frontend container image (e.g. DOCKER|creyaifinmain.azurecr.io/aifinance-frontend:latest)'
+        required: true
+        type: string
+      backendImage:
+        description: 'Backend container image (e.g. DOCKER|creyaifinmain.azurecr.io/aifinance-backend:latest)'
+        required: true
+        type: string
+
+env:
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_POC_CLIENT_ID }}
+  AZURE_TENANT_ID: ${{ secrets.AZURE_POC_TENANT_ID }}
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
+
+jobs:
+  deploy-poc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout infra repo
+        uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_POC_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_POC_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
+
+      - name: Build parameters and deploy core stack
+        id: deploy-core
+        env:
+          PRINCIPAL_ID: ${{ secrets.AZURE_POC_PIPELINE_PRINCIPAL_ID }}
+          PG_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+        run: |
+          POC_SLUG="${{ inputs.pocSlug }}"
+          APP_CHOICE="${{ inputs.appChoice }}"
+          LOCATION="${{ inputs.location }}"
+          FRONTEND_IMAGE="${{ inputs.frontendImage }}"
+          BACKEND_IMAGE="${{ inputs.backendImage }}"
+
+          # Build parameters JSON (sensitive values passed via CLI below)
+          jq --arg pocSlug "$POC_SLUG" \
+             --arg location "$LOCATION" \
+             --arg appChoice "$APP_CHOICE" \
+             --arg frontendImage "$FRONTEND_IMAGE" \
+             --arg backendImage "$BACKEND_IMAGE" \
+             '.parameters.pocSlug.value = $pocSlug
+              | .parameters.location.value = $location
+              | .parameters.appChoice.value = $appChoice
+              | .parameters.frontendImage.value = $frontendImage
+              | .parameters.backendImage.value = $backendImage
+              | .parameters.pocAppConfigKeyValues.value = [
+                  { key: "Backend:Url", value: ("https://backend-" + $pocSlug + ".azurewebsites.net"), contentType: "text/plain" },
+                  { key: "App:Name", value: $pocSlug, contentType: "text/plain" }
+                ]
+              | del(.parameters.pipelinePrincipalId, .parameters.postgresAdminPassword)' \
+            bicep/main.parameters.json > deploy-parameters.json
+
+          az deployment sub create \
+            --location "$LOCATION" \
+            --name "poc-core-${POC_SLUG}" \
+            --template-file bicep/main.bicep \
+            --parameters @deploy-parameters.json \
+            --parameters pipelinePrincipalId="$PRINCIPAL_ID" postgresAdminPassword="$PG_PASSWORD"
+
+      - name: Capture core deployment outputs
+        id: core-outputs
+        run: |
+          az deployment sub show \
+            --name "poc-core-${{ inputs.pocSlug }}" \
+            --query properties.outputs \
+            -o json > core-outputs.json
+          echo "resourceGroupName=$(jq -r '.resourceGroupName.value' core-outputs.json)" >> $GITHUB_OUTPUT
+          echo "keyVaultName=$(jq -r '.keyVaultName.value' core-outputs.json)" >> $GITHUB_OUTPUT
+          echo "appConfigEndpoint=$(jq -r '.appConfigEndpoint.value' core-outputs.json)" >> $GITHUB_OUTPUT
+          echo "postgresHost=$(jq -r '.postgresHost.value' core-outputs.json)" >> $GITHUB_OUTPUT
+          echo "postgresDatabaseName=$(jq -r '.postgresDatabaseName.value' core-outputs.json)" >> $GITHUB_OUTPUT
+          echo "searchName=$(jq -r '.searchName.value' core-outputs.json)" >> $GITHUB_OUTPUT
+          echo "openaiName=$(jq -r '.openaiName.value' core-outputs.json)" >> $GITHUB_OUTPUT
+          echo "storageAccountName=$(jq -r '.storageAccountName.value' core-outputs.json)" >> $GITHUB_OUTPUT
+
+      - name: Populate Key Vault with secrets
+        run: |
+          RG="${{ steps.core-outputs.outputs.resourceGroupName }}"
+          KV="${{ steps.core-outputs.outputs.keyVaultName }}"
+          PG_HOST="${{ steps.core-outputs.outputs.postgresHost }}"
+          PG_DB="${{ steps.core-outputs.outputs.postgresDatabaseName }}"
+          SEARCH_NAME="${{ steps.core-outputs.outputs.searchName }}"
+          OPENAI_NAME="${{ steps.core-outputs.outputs.openaiName }}"
+          STORAGE_NAME="${{ steps.core-outputs.outputs.storageAccountName }}"
+          PG_PASSWORD="${{ secrets.POSTGRES_ADMIN_PASSWORD }}"
+
+          # Postgres connection string (Citus admin user is 'citus')
+          PG_CONN="postgresql://citus:${PG_PASSWORD}@${PG_HOST}:5432/${PG_DB}?sslmode=require"
+          az keyvault secret set --vault-name "$KV" --name "PostgresConnectionString" --value "$PG_CONN" --output none
+
+          SEARCH_KEY=$(az search admin-key show --resource-group "$RG" --service-name "$SEARCH_NAME" --query primaryKey -o tsv)
+          az keyvault secret set --vault-name "$KV" --name "SearchApiKey" --value "$SEARCH_KEY" --output none
+
+          OPENAI_KEY=$(az cognitiveservices account keys list --name "$OPENAI_NAME" --resource-group "$RG" --query key1 -o tsv)
+          az keyvault secret set --vault-name "$KV" --name "OpenAIApiKey" --value "$OPENAI_KEY" --output none
+
+          STORAGE_CONN=$(az storage account show-connection-string --name "$STORAGE_NAME" --resource-group "$RG" -o tsv)
+          az keyvault secret set --vault-name "$KV" --name "StorageConnectionString" --value "$STORAGE_CONN" --output none
+
+      - name: Checkout ey-ai-finance repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/ey-ai-finance
+          path: ey-ai-finance
+          token: ${{ secrets.EY_AI_FINANCE_REPO_TOKEN || github.token }}
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Run init.sql on Postgres
+        env:
+          PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+        run: |
+          psql "host=${{ steps.core-outputs.outputs.postgresHost }} port=5432 dbname=${{ steps.core-outputs.outputs.postgresDatabaseName }} user=citus sslmode=require" \
+            -f ey-ai-finance/db/aifinance/init.sql
+
+      - name: Deploy app services
+        run: |
+          RG="${{ steps.core-outputs.outputs.resourceGroupName }}"
+          KV="${{ steps.core-outputs.outputs.keyVaultName }}"
+          APP_CFG="${{ steps.core-outputs.outputs.appConfigEndpoint }}"
+          az deployment group create \
+            --resource-group "$RG" \
+            --template-file bicep/poc-stack-appservices.bicep \
+            --parameters \
+              pocSlug=${{ inputs.pocSlug }} \
+              location=${{ inputs.location }} \
+              keyVaultName="$KV" \
+              appConfigEndpoint="$APP_CFG" \
+              frontendImage='${{ inputs.frontendImage }}' \
+              backendImage='${{ inputs.backendImage }}'
