@@ -73,13 +73,22 @@ jobs:
 
           az group create --name "$RG_NAME" --location "$LOCATION" --output none
           echo "Created resource group: $RG_NAME"
-          az keyvault create \
+
+          if ! az keyvault create \
             --name "$VAULT_NAME" \
             --resource-group "$RG_NAME" \
             --location "$LOCATION" \
             --enable-rbac-authorization true \
-            --output none
-          echo "Created Key Vault: $VAULT_NAME"
+            --output none; then
+            KV_EXIT=$?
+            if az keyvault show --name "$VAULT_NAME" --resource-group "$RG_NAME" &>/dev/null; then
+              echo "Key Vault $VAULT_NAME already exists; continuing."
+            else
+              exit $KV_EXIT
+            fi
+          else
+            echo "Created Key Vault: $VAULT_NAME"
+          fi
 
           echo "vaultName=$VAULT_NAME" >> $GITHUB_OUTPUT
           echo "resourceGroup=$RG_NAME" >> $GITHUB_OUTPUT
@@ -98,6 +107,15 @@ jobs:
             --assignee "$PRINCIPAL_ID" \
             --scope "$SCOPE" \
             --output none
+          EXIT_CODE=$?
+          if [ $EXIT_CODE -ne 0 ]; then
+            EXISTING=$(az role assignment list --scope "$SCOPE" --assignee "$PRINCIPAL_ID" --query "[?roleDefinitionName=='Key Vault Secrets Officer'].id" -o tsv 2>/dev/null)
+            if [ -n "$EXISTING" ]; then
+              echo "Role assignment already exists for vault: $VAULT_NAME"
+              exit 0
+            fi
+            exit $EXIT_CODE
+          fi
           echo "Role assignment created for vault: $VAULT_NAME"
 
       - name: Wait for RBAC propagation

@@ -9,28 +9,28 @@ on:
   workflow_dispatch:
     inputs:
       pocSlug:
-        description: 'POC identifier (e.g. mypoc). Resource group will be rg-<pocSlug>.'
+        description: "POC identifier (e.g. mypoc). Resource group will be rg-<pocSlug>."
         required: true
         type: string
       location:
-        description: 'Azure region (e.g. eastus)'
+        description: "Azure region (e.g. eastus)"
         required: true
         type: string
-        default: 'eastus'
+        default: "eastus"
       appChoice:
-        description: 'App choice'
+        description: "App choice"
         required: false
         type: choice
         options:
           - aifinance-next
           - aifinance
-        default: 'aifinance-next'
+        default: "aifinance-next"
       frontendImage:
-        description: 'Frontend container image (e.g. DOCKER|creyaifinmain.azurecr.io/aifinance-frontend:latest)'
+        description: "Frontend container image (e.g. DOCKER|creyaifinmain.azurecr.io/aifinance-frontend:latest)"
         required: true
         type: string
       backendImage:
-        description: 'Backend container image (e.g. DOCKER|creyaifinmain.azurecr.io/aifinance-backend:latest)'
+        description: "Backend container image (e.g. DOCKER|creyaifinmain.azurecr.io/aifinance-backend:latest)"
         required: true
         type: string
 
@@ -42,6 +42,9 @@ env:
 jobs:
   deploy-poc:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout infra repo
         uses: actions/checkout@v4
