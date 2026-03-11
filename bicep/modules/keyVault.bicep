@@ -35,4 +35,4 @@ resource vault 'Microsoft.KeyVault/vaults@2024-12-01-preview' = {
 
 output keyVaultName string = vault.name
 output keyVaultResourceId string = vault.id
-output keyVaultUri string = 'https://${vault.name}${environment().suffixes.keyvaultDns}'
+output keyVaultUri string = 'https://${vault.name}.vault.azure.net/'

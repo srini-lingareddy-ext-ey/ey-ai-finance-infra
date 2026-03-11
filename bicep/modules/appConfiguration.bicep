@@ -30,7 +30,7 @@ resource keyValues 'Microsoft.AppConfiguration/configurationStores/keyValues@202
   name: kv.key
   properties: {
     value: kv.value
-    contentType: kv.contentType ?? 'application/json'
+    contentType: coalesce(kv.contentType, 'application/json')
   }
 }]
 
