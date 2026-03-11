@@ -18,7 +18,7 @@ param availabilityZone string = '1'
 param postgresqlVersion string = '16'
 param citusVersion string = '12.1'
 
-var clusterName = 'pg-${pocSlug}'
+var clusterName = 'pg-${pocSlug}-poc'
 
 resource serverGroup 'Microsoft.DBforPostgreSQL/serverGroupsv2@2023-03-02-preview' = {
   name: clusterName
@@ -61,5 +61,6 @@ resource firewallAzureServices 'Microsoft.DBforPostgreSQL/serverGroupsv2/firewal
   }
 }
 
-output host string = serverGroup.properties.fullyQualifiedDomainName
+// Coordinator FQDN: API exposes it as first entry in serverNames (no fullyQualifiedDomainName on cluster)
+output host string = serverGroup.properties.serverNames[0]
 output databaseName string = 'citus'

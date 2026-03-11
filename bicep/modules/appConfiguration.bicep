@@ -3,7 +3,7 @@ param pocSlug string
 param location string
 param pocAppConfigKeyValues array = []
 
-var storeName = 'appconfig-${pocSlug}'
+var storeName = 'appconfig-${pocSlug}-poc'
 
 resource configurationStore 'Microsoft.AppConfiguration/configurationStores@2025-02-01-preview' = {
   name: storeName

@@ -2,7 +2,7 @@
 param pocSlug string
 param location string
 
-var searchName = 'search-${pocSlug}'
+var searchName = 'search-${pocSlug}-poc'
 
 resource searchService 'Microsoft.Search/searchServices@2025-05-01' = {
   name: searchName
@@ -13,7 +13,7 @@ resource searchService 'Microsoft.Search/searchServices@2025-05-01' = {
   properties: {
     replicaCount: 1
     partitionCount: 1
-    hostingMode: 'default'
+    hostingMode: 'Default'
     computeType: 'Default'
     publicNetworkAccess: 'Enabled'
     networkRuleSet: {

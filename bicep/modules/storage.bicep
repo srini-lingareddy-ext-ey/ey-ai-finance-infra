@@ -4,15 +4,15 @@ param location string
 param containerNames array = []
 param sku string = 'Standard_LRS'
 
-// Storage account name: 3-24 chars, lowercase letters and numbers only (no hyphens)
-var storageAccountName = 'st${take(replace(pocSlug, '-', ''), 22)}'
+// Storage account name: 3-24 chars, lowercase letters and numbers only (no hyphens). Pattern: st-<pocSlug>-poc + unique suffix (Azure names are globally unique).
+var sanitizedSlug = replace(pocSlug, '-', '')
+var storageAccountName = 'st${take(sanitizedSlug, 8)}poc${take(uniqueString(resourceGroup().id), 11)}'
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2025-01-01' = {
   name: storageAccountName
   location: location
   sku: {
     name: sku
-    tier: 'Standard'
   }
   kind: 'StorageV2'
   properties: {
@@ -44,10 +44,6 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2025-01-01' = {
 resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2025-01-01' = {
   parent: storageAccount
   name: 'default'
-  sku: {
-    name: sku
-    tier: 'Standard'
-  }
   properties: {
     containerDeleteRetentionPolicy: { enabled: true, days: 7 }
     deleteRetentionPolicy: { allowPermanentDelete: false, enabled: true, days: 7 }
