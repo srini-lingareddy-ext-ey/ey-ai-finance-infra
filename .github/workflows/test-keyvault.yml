@@ -8,15 +8,15 @@ on:
   workflow_dispatch:
     inputs:
       name:
-        description: 'Short name for resource group and Key Vault (e.g. mytest)'
+        description: "Short name for resource group and Key Vault (e.g. mytest)"
         required: true
         type: string
       secretKey:
-        description: 'Name of the secret to create in the vault'
+        description: "Name of the secret to create in the vault"
         required: true
         type: string
       secretValue:
-        description: 'Value to store for the secret'
+        description: "Value to store for the secret"
         required: true
         type: string
 
@@ -28,6 +28,9 @@ env:
 jobs:
   test-keyvault:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Azure login (OIDC)
         uses: azure/login@v2
