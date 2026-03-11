@@ -1,0 +1,65 @@
+# Deploy main.bicep: resource group + Key Vault, App Configuration, OpenAI, Postgres.
+# Trigger manually and pass pocSlug (and optionally location). Password from GitHub secret.
+# Required secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, POSTGRES_ADMIN_PASSWORD.
+
+name: Deploy main (RG + modules)
+
+on:
+  workflow_dispatch:
+    inputs:
+      pocSlug:
+        description: "POC identifier (e.g. test-main1). Resource group will be rg-<pocSlug>-poc."
+        required: true
+        type: string
+      location:
+        description: "Azure region"
+        required: false
+        type: string
+        default: "eastus"
+
+env:
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_POC_CLIENT_ID }}
+  AZURE_TENANT_ID: ${{ secrets.AZURE_POC_TENANT_ID }}
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
+
+jobs:
+  deploy-main:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_POC_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_POC_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
+
+      - name: Deploy main.bicep (RG + Key Vault, App Config, OpenAI, Postgres)
+        env:
+          PG_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+        run: |
+          POC_SLUG="${{ inputs.pocSlug }}"
+          LOCATION="${{ inputs.location }}"
+
+          az deployment sub create \
+            --location "$LOCATION" \
+            --name "main-${POC_SLUG}-${{ github.run_number }}" \
+            --template-file bicep/main.bicep \
+            --parameters \
+              pocSlug="$POC_SLUG" \
+              location="$LOCATION" \
+              administratorLoginPassword="$PG_PASSWORD" \
+              openAIDeployments='[]' \
+              pocAppConfigKeyValues='[]'
+
+      - name: Show outputs
+        run: |
+          az deployment sub show \
+            --name "main-${{ inputs.pocSlug }}-${{ github.run_number }}" \
+            --query properties.outputs \
+            -o json

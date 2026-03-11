@@ -2,6 +2,57 @@
 
 Deploys a **resource group** (`rg-<pocSlug>`) and a per-POC stack in two phases: **core** (App Configuration, Key Vault, PostgreSQL, Azure AI Search, Azure OpenAI, Storage) and **App Services** (frontend + backend). Staggering lets you populate Key Vault before the apps start.
 
+## Testing the stack locally
+
+1. **Validate** (no resources created):
+
+   ```bash
+   az bicep build --file bicep/main.bicep
+   az deployment sub validate \
+     --location eastus \
+     --template-file bicep/main.bicep \
+     --parameters pocSlug=eyaifin-testing administratorLoginPassword='YourSecurePassword1!' \
+     --parameters openAIDeployments='[]' pocAppConfigKeyValues='[]'
+   ```
+
+2. **What-if** (preview changes against the subscription):
+
+   ```bash
+   az deployment sub what-if \
+     --location eastus \
+     --template-file bicep/main.bicep \
+     --parameters pocSlug=eyaifin-testing administratorLoginPassword='YourSecurePassword1!' \
+     --parameters openAIDeployments='[]' pocAppConfigKeyValues='[]'
+   ```
+
+3. **Deploy** (creates RG and all modules). Use a parameters file or inline:
+
+   ```bash
+   # Copy example and set a real password, then:
+   cp bicep/main.parameters.example.json bicep/main.parameters.json
+   # Edit main.parameters.json: set administratorLoginPassword
+
+   az deployment sub create \
+     --location eastus \
+     --template-file bicep/main.bicep \
+     --parameters bicep/main.parameters.json
+   ```
+
+   Or inline (avoid putting the password in shell history):
+
+   ```bash
+   az deployment sub create \
+     --location eastus \
+     --template-file bicep/main.bicep \
+     --parameters pocSlug=eyaifin-testing location=eastus \
+     --parameters openAIDeployments='[]' pocAppConfigKeyValues='[]' \
+     --parameters administratorLoginPassword="$(read -s p; echo $p)"
+   ```
+
+   **Note:** Use **subscription** scope (`az deployment sub create`), not `az deployment group create`, because the template creates the resource group first, then deploys into it.
+
+   **Postgres password:** Must be 8–256 characters and contain at least 3 of: lowercase, uppercase, digit, symbol (e.g. `YourSecurePassword1!`). Plain words like `YourSecurePassword` will be rejected.
+
 ## Prerequisites
 
 - Deploy at **subscription** scope for phase 1 (the template creates the resource group).
@@ -30,7 +81,19 @@ Using the phase 1 outputs (e.g. `keyVaultName`, `postgresHost`), have your pipel
 
 ### Phase 3 — App Services (resource group scope)
 
-Deploy the frontend and backend App Services into the existing resource group. Pass `keyVaultName` and `appConfigEndpoint` from phase 1 outputs (e.g. into `main-appservices.parameters.json` or via `--parameters`).
+Deploy the frontend and backend App Services into the existing resource group. You can either pass parameters manually or **populate them from the core deployment** using the script.
+
+**Option A — Dynamic (recommended):** Script reads `keyVaultName` and `appConfigEndpoint` from the core deployment in the same resource group. Requires `jq`.
+
+```bash
+./scripts/deploy-appservices.sh rg-eyaifin-testing
+# Or override pocSlug and images:
+./scripts/deploy-appservices.sh rg-eyaifin-testing mypoc 'DOCKER|creyaifinmain.azurecr.io/aifinance-frontend:latest' 'DOCKER|creyaifinmain.azurecr.io/aifinance-backend:latest'
+```
+
+If the core stack was deployed with a different deployment name, set `CORE_DEPLOYMENT_NAME` (default is `pocStack`, from main.bicep).
+
+**Option B — Manual:** Pass `keyVaultName` and `appConfigEndpoint` in `main-appservices.parameters.json` or via `--parameters`.
 
 ```bash
 az deployment group create \
@@ -39,7 +102,7 @@ az deployment group create \
   --parameters bicep/main-appservices.parameters.json
 ```
 
-Override `keyVaultName` and `appConfigEndpoint` with the actual values from phase 1 (e.g. `keyVaultName=@phase1-outputs.json`, or set in the parameters file). Same `pocSlug` and image names as in `main.parameters.json`.
+Override `keyVaultName` and `appConfigEndpoint` with the actual values from phase 1. Same `pocSlug` and image names as in `main.parameters.json`.
 
 ## GitHub Actions workflow
 
