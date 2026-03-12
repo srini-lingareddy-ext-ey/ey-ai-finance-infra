@@ -1,0 +1,87 @@
+# SQL Init Script to Application Deployment Pipeline
+
+# Initialize PostgreSQL Database for POC environments
+# This workflow runs the init.sql script to create the initial database schema.
+
+# LIMITATIONS:
+#   - Initial schema creation ONLY - does not support migrations or schema updates
+#   - Running on an existing database will skip tables that already exist (CREATE TABLE IF NOT EXISTS)
+
+# MANUAL FOLLOW-UP STEPS:
+#   - Verify tables were created: connect to DB and run \dt to list tables
+
+# SECRETS: EY_AI_FINANCE_REPO_TOKEN: Provides access to ey-ai-finance repo | POSTGRES_ADMIN_PASSWORD: PostgreSQL citus user password
+
+name: Initialize PostgreSQL DB
+
+on:
+  workflow_dispatch:
+    inputs:
+      postgresHost:
+        description: "PostgreSQL host"
+        required: true
+        type: choice
+        options:
+          - c-pg-testing.xjsfsppadu6346.postgres.cosmos.azure.com
+          - c-pg-testing-poc.jyzqkluxm3liya.postgres.cosmos.azure.com
+        default: "c-pg-testing.xjsfsppadu6346.postgres.cosmos.azure.com"
+      databaseName:
+        description: "Database name"
+        required: true
+        default: "citus"
+      appChoice:
+        description: "App variant (checks which init.sql to use)"
+        required: true
+        type: choice
+        options:
+          - aifinance-next
+          - aifinance
+        default: "aifinance-next"
+
+jobs:
+  init-database:
+    name: "Run init.sql"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout ey-ai-finance repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/ey-ai-finance
+          path: ey-ai-finance
+          token: ${{ secrets.EY_AI_FINANCE_REPO_TOKEN }}
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Run init.sql on Postgres
+        env:
+          PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+          PGCONNECT_TIMEOUT: "30"
+        run: |
+          set -euo pipefail
+
+          INIT_SQL="ey-ai-finance/db/${{ inputs.appChoice }}/init.sql"
+
+          echo "Connecting to: ${{ inputs.postgresHost }}"
+          echo "Database: ${{ inputs.databaseName }}"
+          echo "Schema: ${{ inputs.appChoice }}"
+          echo "Script: ${INIT_SQL}"
+
+          # Verify init.sql exists
+          if [[ ! -f "${INIT_SQL}" ]]; then
+            echo "Error: ${INIT_SQL} not found"
+            exit 1
+          fi
+
+          # Tests if connection works
+          psql "host=${{ inputs.postgresHost }} port=5432 dbname=${{ inputs.databaseName }} user=citus sslmode=require" \
+            -c "SELECT 1;" > /dev/null
+
+          echo "Connection successful. Running init.sql..."
+
+          psql "host=${{ inputs.postgresHost }} port=5432 dbname=${{ inputs.databaseName }} user=citus sslmode=require" \
+            -v ON_ERROR_STOP=1 \
+            -f "${INIT_SQL}"
+
+          echo "Database initialization completed successfully."
