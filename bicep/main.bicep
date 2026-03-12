@@ -11,7 +11,7 @@ param location string = 'eastus'
 param openAIDeployments array = []
 param pocAppConfigKeyValues array = []
 
-// Optional Postgres overrides (passed through to main-resources)
+// Optional Postgres overrides (passed through to core-resources)
 param coordinatorVCores int = 2
 param coordinatorStorageQuotaInMb int = 262144
 param coordinatorServerEdition string = 'GeneralPurpose'
@@ -32,7 +32,7 @@ resource rg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   location: location
 }
 
-module mainResources 'main-resources.bicep' = {
+module mainResources 'core-resources.bicep' = {
   name: 'mainResources'
   scope: rg
   params: {
