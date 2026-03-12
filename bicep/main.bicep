@@ -4,9 +4,6 @@
 
 targetScope = 'subscription'
 
-@description('Principal (object) ID of the pipeline identity — granted Key Vault Administrator so the workflow can populate secrets.')
-param pipelinePrincipalId string
-
 @secure()
 param administratorLoginPassword string
 param pocSlug string
@@ -39,7 +36,6 @@ module mainResources 'core-resources.bicep' = {
   name: 'mainResources'
   scope: rg
   params: {
-    pipelinePrincipalId: pipelinePrincipalId
     pocSlug: pocSlug
     location: location
     administratorLoginPassword: administratorLoginPassword
