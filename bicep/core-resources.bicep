@@ -32,7 +32,21 @@ module keyVault 'modules/keyVault.bicep' = {
   params: {
     pocSlug: pocSlug
     location: location
-    pipelinePrincipalId: pipelinePrincipalId
+  }
+}
+
+resource kv 'Microsoft.KeyVault/vaults@2024-12-01-preview' existing = {
+  name: keyVault.outputs.keyVaultName
+}
+
+// Grant pipeline identity Key Vault Administrator so the workflow can populate secrets
+resource kvRolePipeline 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(kv.id, pipelinePrincipalId, 'Key Vault Administrator')
+  scope: kv
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '00482a5a-887f-4fb3-b363-3b7fe8e74463')
+    principalId: pipelinePrincipalId
+    principalType: 'ServicePrincipal'
   }
 }
 
