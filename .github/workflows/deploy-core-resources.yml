@@ -1,6 +1,6 @@
 # Deploy main.bicep: resource group + Key Vault, App Configuration, OpenAI, Postgres.
-# Trigger manually and pass pocSlug (and optionally location). Password from GitHub secret.
-# Required secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, POSTGRES_ADMIN_PASSWORD.
+# Trigger manually and pass pocSlug (and optionally location). Password and pipeline principal from GitHub secrets.
+# Required secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, POSTGRES_ADMIN_PASSWORD, AZURE_POC_PIPELINE_PRINCIPAL_ID.
 
 name: Deploy Resource Group and Core Resources
 
@@ -42,6 +42,7 @@ jobs:
       - name: Deploy main.bicep (ResourceGroup + Key Vault, App Config, OpenAI, Postgres)
         env:
           PG_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+          PIPELINE_PRINCIPAL_ID: ${{ secrets.AZURE_POC_PIPELINE_PRINCIPAL_ID }}
         run: |
           POC_SLUG="${{ inputs.pocSlug }}"
           LOCATION="${{ inputs.location }}"
@@ -53,6 +54,7 @@ jobs:
             --parameters \
               pocSlug="$POC_SLUG" \
               location="$LOCATION" \
+              pipelinePrincipalId="$PIPELINE_PRINCIPAL_ID" \
               administratorLoginPassword="$PG_PASSWORD" \
               openAIDeployments='[]' \
               pocAppConfigKeyValues='[]'
@@ -70,6 +72,9 @@ jobs:
           echo "postgresHost=$(jq -r '.postgresHost.value' core-outputs.json)" >> $GITHUB_OUTPUT
           echo "postgresDatabaseName=$(jq -r '.postgresDatabaseName.value' core-outputs.json)" >> $GITHUB_OUTPUT
           echo "openaiName=$(jq -r '.openaiName.value' core-outputs.json)" >> $GITHUB_OUTPUT
+
+      - name: Wait for RBAC propagation
+        run: echo "Waiting 30s for Key Vault role assignment to propagate..." && sleep 30
 
       - name: Populate Key Vault with secrets
         env:

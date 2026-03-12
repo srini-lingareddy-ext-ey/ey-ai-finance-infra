@@ -1,6 +1,9 @@
 // Deployed into an existing resource group. Contains all POC modules.
 // Invoked from main.bicep with scope set to the resource group.
 
+@description('Principal (object) ID of the pipeline identity — granted Key Vault Administrator so the workflow can populate secrets.')
+param pipelinePrincipalId string
+
 @secure()
 param administratorLoginPassword string
 param pocSlug string
@@ -29,6 +32,21 @@ module keyVault 'modules/keyVault.bicep' = {
   params: {
     pocSlug: pocSlug
     location: location
+  }
+}
+
+resource kv 'Microsoft.KeyVault/vaults@2024-12-01-preview' existing = {
+  name: keyVault.outputs.keyVaultName
+}
+
+// Grant pipeline identity Key Vault Administrator so the workflow can populate secrets
+resource kvRolePipeline 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(kv.id, pipelinePrincipalId, 'Key Vault Administrator')
+  scope: kv
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '00482a5a-887f-4fb3-b363-3b7fe8e74463')
+    principalId: pipelinePrincipalId
+    principalType: 'ServicePrincipal'
   }
 }
 
