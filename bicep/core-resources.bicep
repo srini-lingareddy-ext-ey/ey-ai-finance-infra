@@ -1,8 +1,5 @@
-// Creates the resource group (subscription scope) then deploys all modules into it.
-// Run: az deployment sub create --location <region> --template-file bicep/main.bicep --parameters <params>
-// (Resource group must be created at subscription scope; resources deploy into that RG.)
-
-targetScope = 'subscription'
+// Deployed into an existing resource group. Contains all POC modules.
+// Invoked from main.bicep with scope set to the resource group.
 
 @secure()
 param administratorLoginPassword string
@@ -11,7 +8,7 @@ param location string = 'eastus'
 param openAIDeployments array = []
 param pocAppConfigKeyValues array = []
 
-// Optional Postgres overrides (passed through to main-resources)
+// Optional Postgres overrides (match modules/postgres.bicep defaults)
 param coordinatorVCores int = 2
 param coordinatorStorageQuotaInMb int = 262144
 param coordinatorServerEdition string = 'GeneralPurpose'
@@ -27,20 +24,38 @@ param availabilityZone string = '1'
 param postgresqlVersion string = '16'
 param citusVersion string = '12.1'
 
-resource rg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
-  name: 'rg-${pocSlug}-poc'
-  location: location
+module keyVault 'modules/keyVault.bicep' = {
+  name: 'keyVault'
+  params: {
+    pocSlug: pocSlug
+    location: location
+  }
 }
 
-module mainResources 'main-resources.bicep' = {
-  name: 'mainResources'
-  scope: rg
+module openAI 'modules/openAI.bicep' = {
+  name: 'openAI'
+  params: {
+    pocSlug: pocSlug
+    location: location
+    openAIDeployments: openAIDeployments
+  }
+}
+
+module appConfiguration 'modules/appConfiguration.bicep' = {
+  name: 'appConfiguration'
+  params: {
+    pocSlug: pocSlug
+    location: location
+    pocAppConfigKeyValues: pocAppConfigKeyValues
+  }
+}
+
+module postgres 'modules/postgres.bicep' = {
+  name: 'postgres'
   params: {
     pocSlug: pocSlug
     location: location
     administratorLoginPassword: administratorLoginPassword
-    openAIDeployments: openAIDeployments
-    pocAppConfigKeyValues: pocAppConfigKeyValues
     coordinatorVCores: coordinatorVCores
     coordinatorStorageQuotaInMb: coordinatorStorageQuotaInMb
     coordinatorServerEdition: coordinatorServerEdition
@@ -58,13 +73,11 @@ module mainResources 'main-resources.bicep' = {
   }
 }
 
-output resourceGroupName string = rg.name
-output resourceGroupLocation string = rg.location
-output keyVaultName string = mainResources.outputs.keyVaultName
-output keyVaultUri string = mainResources.outputs.keyVaultUri
-output openaiEndpoint string = mainResources.outputs.openaiEndpoint
-output openaiName string = mainResources.outputs.openaiName
-output appConfigEndpoint string = mainResources.outputs.appConfigEndpoint
-output appConfigStoreName string = mainResources.outputs.appConfigStoreName
-output postgresHost string = mainResources.outputs.postgresHost
-output postgresDatabaseName string = mainResources.outputs.postgresDatabaseName
+output keyVaultName string = keyVault.outputs.keyVaultName
+output keyVaultUri string = keyVault.outputs.keyVaultUri
+output openaiEndpoint string = openAI.outputs.endpoint
+output openaiName string = openAI.outputs.openaiName
+output appConfigEndpoint string = appConfiguration.outputs.endpoint
+output appConfigStoreName string = appConfiguration.outputs.storeName
+output postgresHost string = postgres.outputs.host
+output postgresDatabaseName string = postgres.outputs.databaseName

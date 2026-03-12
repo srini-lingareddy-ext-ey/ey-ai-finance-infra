@@ -61,6 +61,5 @@ resource firewallAzureServices 'Microsoft.DBforPostgreSQL/serverGroupsv2/firewal
   }
 }
 
-// Coordinator FQDN: API exposes it as first entry in serverNames (no fullyQualifiedDomainName on cluster)
-output host string = serverGroup.properties.serverNames[0]
+output host string = serverGroup.properties.serverNames[0].fullyQualifiedDomainName
 output databaseName string = 'citus'
