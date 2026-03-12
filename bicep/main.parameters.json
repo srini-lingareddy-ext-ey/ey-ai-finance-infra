@@ -19,9 +19,6 @@
         { "name": "gpt-4o-mini", "model": "gpt-4o-mini", "version": "2024-07-18", "capacity": 10000 }
       ]
     },
-    "storageContainerNames": {
-      "value": ["chat-completions", "chats", "clients", "responses"]
-    },
     "frontendImage": { "value": "DOCKER|creyaifinmain.azurecr.io/aifinance-frontend-poc-mypoc:latest" },
     "backendImage": { "value": "DOCKER|creyaifinmain.azurecr.io/aifinance-backend-poc-mypoc:latest" }
   }

@@ -28,14 +28,6 @@ param openAIDeployments array = [
   , { name: 'gpt-4o-mini', model: 'gpt-4o-mini', version: '2024-07-18', capacity: 10000 }
 ]
 
-@description('Storage account blob container names to create.')
-param storageContainerNames array = [
-  'chat-completions'
-  'chats'
-  'clients'
-  'responses'
-]
-
 @description('Frontend container image (e.g. DOCKER|registry.azurecr.io/image:tag).')
 param frontendImage string
 
@@ -68,7 +60,6 @@ module pocStack 'poc-stack-core.bicep' = {
     postgresAdminPassword: postgresAdminPassword
     pocAppConfigKeyValues: pocAppConfigKeyValues
     openAIDeployments: openAIDeployments
-    storageContainerNames: storageContainerNames
   }
 }
 
@@ -79,9 +70,5 @@ output appConfigEndpoint string = pocStack.outputs.appConfigEndpoint
 output appConfigStoreName string = pocStack.outputs.appConfigStoreName
 output postgresHost string = pocStack.outputs.postgresHost
 output postgresDatabaseName string = pocStack.outputs.postgresDatabaseName
-output searchEndpoint string = pocStack.outputs.searchEndpoint
-output searchName string = pocStack.outputs.searchName
 output openaiEndpoint string = pocStack.outputs.openaiEndpoint
 output openaiName string = pocStack.outputs.openaiName
-output storageAccountName string = pocStack.outputs.storageAccountName
-output storageResourceId string = pocStack.outputs.storageResourceId

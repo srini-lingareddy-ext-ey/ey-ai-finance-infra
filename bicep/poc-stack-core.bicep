@@ -31,14 +31,6 @@ param openAIDeployments array = [
   , { name: 'gpt-4o-mini', model: 'gpt-4o-mini', version: '2024-07-18', capacity: 10000 }
 ]
 
-@description('Storage account blob container names to create.')
-param storageContainerNames array = [
-  'chat-completions'
-  'chats'
-  'clients'
-  'responses'
-]
-
 // Not used by core; allow same parameters file as main.bicep / poc-stack-appservices.
 param frontendImage string = ''
 param backendImage string = ''
@@ -70,29 +62,12 @@ module postgres 'modules/postgres.bicep' = {
   }
 }
 
-module search 'modules/search.bicep' = {
-  name: 'search'
-  params: {
-    pocSlug: pocSlug
-    location: location
-  }
-}
-
 module openAI 'modules/openAI.bicep' = {
   name: 'openAI'
   params: {
     pocSlug: pocSlug
     location: location
     openAIDeployments: openAIDeployments
-  }
-}
-
-module storage 'modules/storage.bicep' = {
-  name: 'storage'
-  params: {
-    pocSlug: pocSlug
-    location: location
-    containerNames: storageContainerNames
   }
 }
 
@@ -131,9 +106,5 @@ output appConfigEndpoint string = appConfig.outputs.endpoint
 output appConfigStoreName string = appConfig.outputs.storeName
 output postgresHost string = postgres.outputs.host
 output postgresDatabaseName string = postgres.outputs.databaseName
-output searchEndpoint string = search.outputs.endpoint
-output searchName string = search.outputs.searchName
 output openaiEndpoint string = openAI.outputs.endpoint
 output openaiName string = openAI.outputs.openaiName
-output storageAccountName string = storage.outputs.storageAccountName
-output storageResourceId string = storage.outputs.storageResourceId

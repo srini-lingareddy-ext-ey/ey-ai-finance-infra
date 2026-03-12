@@ -1,6 +1,23 @@
 # POC Bicep Stack
 
-Deploys a **resource group** (`rg-<pocSlug>`) and a per-POC stack in two phases: **core** (App Configuration, Key Vault, PostgreSQL, Azure AI Search, Azure OpenAI, Storage) and **App Services** (frontend + backend). Staggering lets you populate Key Vault before the apps start.
+Deploys a **resource group** (`rg-<pocSlug>`) and a per-POC stack in two phases: **core** (App Configuration, Key Vault, PostgreSQL, Azure OpenAI) and **App Services** (frontend + backend). Staggering lets you populate Key Vault before the apps start.
+
+## Modules
+
+### resourceGroup.bicep (standalone)
+
+Creates only a resource group at **subscription** scope. Use when you need to provision the RG separately (e.g. for client onboarding) without deploying the full core stack.
+
+- **Path:** `bicep/modules/resourceGroup.bicep`
+- **Scope:** subscription
+- **Parameters:** `pocSlug`, `location`
+- **Resource group name:** `rg-<pocSlug>-poc`
+
+```bash
+az deployment sub create --location eastus --template-file bicep/modules/resourceGroup.bicep --parameters pocSlug=mypoc location=eastus
+```
+
+**Outputs:** `name` (RG name), `resourceGroupLocation`
 
 ## Prerequisites
 
@@ -70,9 +87,7 @@ Store these in **GitHub Secrets** (Settings → Secrets and variables → Action
 The workflow writes these secrets into the **POC** Key Vault. The **ey-ai-finance** app must read the same names from Key Vault (or the workflow can be updated to match the app):
 
 - **PostgresConnectionString** — PostgreSQL connection string.  
-- **SearchApiKey** — Azure AI Search admin key.  
-- **OpenAIApiKey** — Azure OpenAI account key.  
-- **StorageConnectionString** — Storage account connection string.
+- **OpenAIApiKey** — Azure OpenAI account key.
 
 ### Init script (phase 2.5 / workflow step 3)
 
@@ -80,8 +95,8 @@ The workflow checks out the **ey-ai-finance** repo (same org as this repo) and r
 
 ## Naming
 
-- **Resource group:** `rg-<pocSlug>` (e.g. `rg-mypoc`).
-- **Resources in the RG:** `<resource-name>-<pocSlug>` (e.g. `appconfig-mypoc`, `kv-mypoc`, `pg-mypoc`, `frontend-mypoc`, `backend-mypoc`). Storage account uses `st` + slug (no hyphens, 3–24 chars).
+- **Resource group:** `rg-<pocSlug>` (e.g. `rg-mypoc`). Standalone **resourceGroup.bicep** uses `rg-<pocSlug>-poc`.
+- **Resources in the RG:** `<resource-name>-<pocSlug>` (e.g. `appconfig-mypoc`, `kv-mypoc`, `pg-mypoc`, `frontend-mypoc`, `backend-mypoc`).
 
 ## Parameters
 
@@ -96,7 +111,6 @@ The workflow checks out the **ey-ai-finance** repo (same org as this repo) and r
 | postgresAdminPassword | Yes | PostgreSQL administrator password (secure). |
 | pocAppConfigKeyValues | No | Array of { key, value, contentType? } for App Configuration. |
 | openAIDeployments | No | Array of { name, model, version, capacity } for OpenAI deployments. |
-| storageContainerNames | No | Blob container names to create. |
 | frontendImage | Yes* | Container image for frontend; used only when running phase 3 (same file or pipeline). |
 | backendImage | Yes* | Container image for backend; used only when running phase 3. |
 
@@ -121,9 +135,7 @@ The workflow checks out the **ey-ai-finance** repo (same org as this repo) and r
 - **keyVaultName** — Key Vault name (pipeline writes secrets here; pass to phase 3).
 - **appConfigEndpoint**, **appConfigStoreName** — App Configuration (pass **appConfigEndpoint** to phase 3).
 - **postgresHost**, **postgresDatabaseName** — PostgreSQL.
-- **searchEndpoint**, **searchName** — Azure AI Search.
 - **openaiEndpoint**, **openaiName** — Azure OpenAI.
-- **storageAccountName**, **storageResourceId** — Storage account.
 
 ### Phase 3 (poc-stack-appservices)
 

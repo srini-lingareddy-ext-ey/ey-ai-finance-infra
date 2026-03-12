@@ -69,9 +69,7 @@ jobs:
           echo "appConfigEndpoint=$(jq -r '.appConfigEndpoint.value' core-outputs.json)" >> $GITHUB_OUTPUT
           echo "postgresHost=$(jq -r '.postgresHost.value' core-outputs.json)" >> $GITHUB_OUTPUT
           echo "postgresDatabaseName=$(jq -r '.postgresDatabaseName.value' core-outputs.json)" >> $GITHUB_OUTPUT
-          echo "searchName=$(jq -r '.searchName.value' core-outputs.json)" >> $GITHUB_OUTPUT
           echo "openaiName=$(jq -r '.openaiName.value' core-outputs.json)" >> $GITHUB_OUTPUT
-          echo "storageAccountName=$(jq -r '.storageAccountName.value' core-outputs.json)" >> $GITHUB_OUTPUT
 
       - name: Populate Key Vault with secrets
         env:
@@ -92,7 +90,7 @@ jobs:
           az keyvault secret set --vault-name "$KV" --name "OpenAIApiKey" --value "$OPENAI_KEY" --output none
           echo "Set OpenAIApiKey in $KV"
 
-      - name: Verify Key Vault secrets (names only) Temporary
+      - name: Verify Key Vault secrets (names only)
         run: |
           KV="${{ steps.core-outputs.outputs.keyVaultName }}"
           echo "Secret names in $KV:"
@@ -105,6 +103,4 @@ jobs:
           echo "appConfigEndpoint=${{ steps.core-outputs.outputs.appConfigEndpoint }}"
           echo "postgresHost=${{ steps.core-outputs.outputs.postgresHost }}"
           echo "postgresDatabaseName=${{ steps.core-outputs.outputs.postgresDatabaseName }}"
-          echo "searchName=${{ steps.core-outputs.outputs.searchName }}"
           echo "openaiName=${{ steps.core-outputs.outputs.openaiName }}"
-          echo "storageAccountName=${{ steps.core-outputs.outputs.storageAccountName }}"
