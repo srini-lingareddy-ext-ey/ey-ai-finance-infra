@@ -55,7 +55,7 @@ jobs:
               location="$LOCATION" \
               administratorLoginPassword="$PG_PASSWORD" \
               openAIDeployments='[]' \
-              pocAppConfigKeyValues='[]'
+              pocAppConfigKeyValues='[{"key":"TestKey","value":"TestValue"}]'
 
       - name: Capture deployment outputs
         id: core-outputs
@@ -67,6 +67,7 @@ jobs:
           echo "resourceGroupName=$(jq -r '.resourceGroupName.value' core-outputs.json)" >> $GITHUB_OUTPUT
           echo "keyVaultName=$(jq -r '.keyVaultName.value' core-outputs.json)" >> $GITHUB_OUTPUT
           echo "appConfigEndpoint=$(jq -r '.appConfigEndpoint.value' core-outputs.json)" >> $GITHUB_OUTPUT
+          echo "appConfigStoreName=$(jq -r '.appConfigStoreName.value' core-outputs.json)" >> $GITHUB_OUTPUT
           echo "postgresHost=$(jq -r '.postgresHost.value' core-outputs.json)" >> $GITHUB_OUTPUT
           echo "postgresDatabaseName=$(jq -r '.postgresDatabaseName.value' core-outputs.json)" >> $GITHUB_OUTPUT
           echo "openaiName=$(jq -r '.openaiName.value' core-outputs.json)" >> $GITHUB_OUTPUT
@@ -99,11 +100,23 @@ jobs:
           echo "Secret names in $KV:"
           az keyvault secret list --vault-name "$KV" --query "[].name" -o tsv | tr '\t' '\n' | sed 's/^/  - /'
 
+      - name: Add App Configuration key-value with label
+        run: |
+          APP_CONFIG_NAME="${{ steps.core-outputs.outputs.appConfigStoreName }}"
+          az appconfig kv set \
+            --name "$APP_CONFIG_NAME" \
+            --key "TestKeyWithLabel" \
+            --value "TestValueWithLabel" \
+            --label "TestLabel" \
+            --yes
+          echo "Set key TestKeyWithLabel (label TestLabel) in App Configuration"
+
       - name: Show deployment outputs
         run: |
           echo "resourceGroupName=${{ steps.core-outputs.outputs.resourceGroupName }}"
           echo "keyVaultName=${{ steps.core-outputs.outputs.keyVaultName }}"
           echo "appConfigEndpoint=${{ steps.core-outputs.outputs.appConfigEndpoint }}"
+          echo "appConfigStoreName=${{ steps.core-outputs.outputs.appConfigStoreName }}"
           echo "postgresHost=${{ steps.core-outputs.outputs.postgresHost }}"
           echo "postgresDatabaseName=${{ steps.core-outputs.outputs.postgresDatabaseName }}"
           echo "openaiName=${{ steps.core-outputs.outputs.openaiName }}"

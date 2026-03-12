@@ -32,10 +32,6 @@ module keyVault 'modules/keyVault.bicep' = {
   }
 }
 
-resource kv 'Microsoft.KeyVault/vaults@2024-12-01-preview' existing = {
-  name: keyVault.outputs.keyVaultName
-}
-
 module openAI 'modules/openAI.bicep' = {
   name: 'openAI'
   params: {

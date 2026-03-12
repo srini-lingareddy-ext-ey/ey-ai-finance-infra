@@ -60,14 +60,6 @@ jobs:
         id: deploy-core
         env:
           PRINCIPAL_ID: ${{ secrets.AZURE_POC_PIPELINE_PRINCIPAL_ID }}
-          PRINCIPAL_ID: ${{ secrets.AZURE_POC_PIPELINE_PRINCIPAL_ID }}
-          PRINCIPAL_ID: ${{ secrets.AZURE_POC_PIPELINE_PRINCIPAL_ID }}
-          PRINCIPAL_ID: ${{ secrets.AZURE_POC_PIPELINE_PRINCIPAL_ID }}
-          PRINCIPAL_ID: ${{ secrets.AZURE_POC_PIPELINE_PRINCIPAL_ID }}
-          PRINCIPAL_ID: ${{ secrets.AZURE_POC_PIPELINE_PRINCIPAL_ID }}
-          PRINCIPAL_ID: ${{ secrets.AZURE_POC_PIPELINE_PRINCIPAL_ID }}
-          PRINCIPAL_ID: ${{ secrets.AZURE_POC_PIPELINE_PRINCIPAL_ID }}
-          PRINCIPAL_ID: ${{ secrets.AZURE_POC_PIPELINE_PRINCIPAL_ID }}
           PG_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
         run: |
           POC_SLUG="${{ inputs.pocSlug }}"
