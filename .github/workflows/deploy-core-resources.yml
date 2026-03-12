@@ -100,13 +100,12 @@ jobs:
           echo "Secret names in $KV:"
           az keyvault secret list --vault-name "$KV" --query "[].name" -o tsv | tr '\t' '\n' | sed 's/^/  - /'
 
-      - name: Add App Configuration key-values (test key-value and key-value with label)
+      - name: Sync App Configuration from backend_configs.yml
         run: |
-          APP_CONFIG_NAME="${{ steps.core-outputs.outputs.appConfigStoreName }}"
-          az appconfig kv set --name "$APP_CONFIG_NAME" --key "TestKey" --value "TestValue" --yes
-          echo "Set key TestKey in App Configuration"
-          az appconfig kv set --name "$APP_CONFIG_NAME" --key "TestKeyWithLabel" --value "TestValueWithLabel" --label "TestLabel" --yes
-          echo "Set key TestKeyWithLabel (label TestLabel) in App Configuration"
+          pip install pyyaml --quiet
+          python scripts/sync_appconfig_from_yaml.py \
+            --config bicep/configs/backend_configs.yml \
+            --store "${{ steps.core-outputs.outputs.appConfigStoreName }}"
 
       - name: Show deployment outputs
         run: |
