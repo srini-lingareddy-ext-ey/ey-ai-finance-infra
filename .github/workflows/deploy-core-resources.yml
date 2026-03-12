@@ -55,7 +55,7 @@ jobs:
               location="$LOCATION" \
               administratorLoginPassword="$PG_PASSWORD" \
               openAIDeployments='[]' \
-              pocAppConfigKeyValues='[{"key":"TestKey","value":"TestValue"}]'
+              pocAppConfigKeyValues='[]'
 
       - name: Capture deployment outputs
         id: core-outputs
@@ -100,15 +100,12 @@ jobs:
           echo "Secret names in $KV:"
           az keyvault secret list --vault-name "$KV" --query "[].name" -o tsv | tr '\t' '\n' | sed 's/^/  - /'
 
-      - name: Add App Configuration key-value with label
+      - name: Add App Configuration key-values (test key-value and key-value with label)
         run: |
           APP_CONFIG_NAME="${{ steps.core-outputs.outputs.appConfigStoreName }}"
-          az appconfig kv set \
-            --name "$APP_CONFIG_NAME" \
-            --key "TestKeyWithLabel" \
-            --value "TestValueWithLabel" \
-            --label "TestLabel" \
-            --yes
+          az appconfig kv set --name "$APP_CONFIG_NAME" --key "TestKey" --value "TestValue" --yes
+          echo "Set key TestKey in App Configuration"
+          az appconfig kv set --name "$APP_CONFIG_NAME" --key "TestKeyWithLabel" --value "TestValueWithLabel" --label "TestLabel" --yes
           echo "Set key TestKeyWithLabel (label TestLabel) in App Configuration"
 
       - name: Show deployment outputs
