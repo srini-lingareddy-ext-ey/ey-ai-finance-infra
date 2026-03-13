@@ -79,7 +79,7 @@ jobs:
         run: |
           RG="${{ steps.core-outputs.outputs.resourceGroupName }}"
           KV="${{ steps.core-outputs.outputs.keyVaultName }}"
-          az keyvault network-rule set --name "$KV" --resource-group "$RG" --default-action Allow
+          az keyvault update --name "$KV" --resource-group "$RG" --default-action Allow
           echo "Key Vault $KV: default-action set to Allow"
 
       - name: Populate Key Vault with Secrets
