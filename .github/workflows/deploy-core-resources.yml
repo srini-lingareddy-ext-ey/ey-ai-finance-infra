@@ -29,7 +29,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Checkout repo
+      - name: Checkout Repo
         uses: actions/checkout@v4
 
       - name: Azure login (OIDC)
@@ -57,7 +57,7 @@ jobs:
               openAIDeployments='[]' \
               pocAppConfigKeyValues='[]'
 
-      - name: Capture deployment outputs
+      - name: Capture Deployment Outputs
         id: core-outputs
         run: |
           az deployment sub show \
@@ -72,10 +72,17 @@ jobs:
           echo "postgresDatabaseName=$(jq -r '.postgresDatabaseName.value' core-outputs.json)" >> $GITHUB_OUTPUT
           echo "openaiName=$(jq -r '.openaiName.value' core-outputs.json)" >> $GITHUB_OUTPUT
 
-      - name: Wait for RBAC propagation
+      - name: Wait for RBAC Propagation
         run: echo "Waiting 30s for RBAC (contributor / Key Vault Data Access Administrator) to propagate..." && sleep 30
 
-      - name: Populate Key Vault with secrets
+      - name: Allow Key Vault access from all networks
+        run: |
+          RG="${{ steps.core-outputs.outputs.resourceGroupName }}"
+          KV="${{ steps.core-outputs.outputs.keyVaultName }}"
+          az keyvault network-rule set --name "$KV" --resource-group "$RG" --default-action Allow
+          echo "Key Vault $KV: default-action set to Allow"
+
+      - name: Populate Key Vault with Secrets
         env:
           PG_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
         run: |
@@ -94,7 +101,7 @@ jobs:
           az keyvault secret set --vault-name "$KV" --name "OpenAIApiKey" --value "$OPENAI_KEY" --output none
           echo "Set OpenAIApiKey in $KV"
 
-      - name: Verify Key Vault secrets (names only)
+      - name: Verify Key Vault Secrets (Names Only)
         run: |
           KV="${{ steps.core-outputs.outputs.keyVaultName }}"
           echo "Secret names in $KV:"
@@ -105,9 +112,10 @@ jobs:
           pip install pyyaml --quiet
           python scripts/sync_appconfig_from_yaml.py \
             --config bicep/configs/backend_configs.yml \
-            --store "${{ steps.core-outputs.outputs.appConfigStoreName }}"
+            --store "${{ steps.core-outputs.outputs.appConfigStoreName }}" \
+            --label "${{ inputs.pocSlug }}"
 
-      - name: Show deployment outputs
+      - name: Show Deployment Outputs
         run: |
           echo "resourceGroupName=${{ steps.core-outputs.outputs.resourceGroupName }}"
           echo "keyVaultName=${{ steps.core-outputs.outputs.keyVaultName }}"
