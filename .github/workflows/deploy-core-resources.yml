@@ -1,6 +1,7 @@
-# Deploy main.bicep: resource group + Key Vault, App Configuration, OpenAI, Postgres.
-# Trigger manually and pass pocSlug (and optionally location). Password and pipeline principal from GitHub secrets.
+# Deploy main.bicep: resource group + Key Vault, App Configuration, OpenAI, Postgres; then deploy App Services.
+# Trigger manually and pass pocSlug (and optionally location, frontend/backend images). Password and pipeline principal from GitHub secrets.
 # Required secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, POSTGRES_ADMIN_PASSWORD.
+# For app services image pull: ACR_MANAGED_IDENTITY_CLIENT_ID (client ID of acr-managed-identity).
 
 name: Deploy Resource Group and Core Resources
 
@@ -16,6 +17,16 @@ on:
         required: false
         type: string
         default: "eastus"
+      frontendImage:
+        description: "Frontend container image (e.g. DOCKER|creyaifinmain.azurecr.io/ey-ai-finance-frontend:latest)"
+        required: false
+        type: string
+        default: "DOCKER|creyaifinmain.azurecr.io/ey-ai-finance-frontend:latest"
+      backendImage:
+        description: "Backend container image (e.g. DOCKER|creyaifinmain.azurecr.io/ey-ai-finance-backend:latest)"
+        required: false
+        type: string
+        default: "DOCKER|creyaifinmain.azurecr.io/ey-ai-finance-backend:latest"
 
 env:
   AZURE_CLIENT_ID: ${{ secrets.AZURE_POC_CLIENT_ID }}
@@ -124,3 +135,20 @@ jobs:
           echo "postgresHost=${{ steps.core-outputs.outputs.postgresHost }}"
           echo "postgresDatabaseName=${{ steps.core-outputs.outputs.postgresDatabaseName }}"
           echo "openaiName=${{ steps.core-outputs.outputs.openaiName }}"
+
+      - name: Deploy app services
+        run: |
+          RG="${{ steps.core-outputs.outputs.resourceGroupName }}"
+          KV="${{ steps.core-outputs.outputs.keyVaultName }}"
+          APP_CFG="${{ steps.core-outputs.outputs.appConfigEndpoint }}"
+          az deployment group create \
+            --resource-group "$RG" \
+            --template-file bicep/appservices-stack.bicep \
+            --parameters \
+              pocSlug=${{ inputs.pocSlug }} \
+              location=${{ inputs.location }} \
+              keyVaultName="$KV" \
+              appConfigEndpoint="$APP_CFG" \
+              frontendImage='${{ inputs.frontendImage }}' \
+              backendImage='${{ inputs.backendImage }}' \
+              acrManagedIdentityClientId='${{ secrets.ACR_MANAGED_IDENTITY_CLIENT_ID }}'

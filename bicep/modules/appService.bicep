@@ -1,9 +1,13 @@
 // App Service plan + frontend + backend for POC. Uses shared ACR managed identity for image pull; App Config + Key Vault refs.
 param pocSlug string
 param location string
+@description('Reserved for future use (e.g. AcrPull role assignment).')
 param centralAcrResourceId string
 param acrManagedIdentityResourceId string
+@description('Client ID (applicationId) of the user-assigned managed identity used for ACR pull. Required for acrUseManagedIdentityCreds.')
+param acrManagedIdentityClientId string
 param appConfigEndpoint string
+@description('Reserved for future use (e.g. Key Vault role assignment).')
 param keyVaultResourceId string
 param keyVaultUri string
 param frontendImage string
@@ -13,6 +17,7 @@ param sku string = 'P1v3'
 var appServicePlanName = 'asp-${pocSlug}'
 var frontendName = 'frontend-${pocSlug}'
 var backendName = 'backend-${pocSlug}'
+var sharedAppSettings = [ { name: 'AZURE_APP_CONFIGURATION_CONNECTION', value: appConfigEndpoint }, { name: 'KEY_VAULT_URI', value: keyVaultUri } ]
 
 resource appServicePlan 'Microsoft.Web/serverfarms@2024-11-01' = {
   name: appServicePlanName
@@ -28,7 +33,7 @@ resource appServiceFrontend 'Microsoft.Web/sites@2024-11-01' = {
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
-      [acrManagedIdentityResourceId]: {}
+      '${acrManagedIdentityResourceId}': {}
     }
   }
   properties: {
@@ -37,11 +42,9 @@ resource appServiceFrontend 'Microsoft.Web/sites@2024-11-01' = {
       linuxFxVersion: frontendImage
       http20Enabled: true
       minTlsVersion: '1.3'
-      // Set environment variables here
-      appSettings: [
-        { name: 'AZURE_APP_CONFIGURATION_CONNECTION', value: appConfigEndpoint }
-        { name: 'KEY_VAULT_URI', value: keyVaultUri }
-      ]
+      acrUseManagedIdentityCreds: true
+      acrUserManagedIdentityID: acrManagedIdentityClientId
+      appSettings: sharedAppSettings
     }
     clientCertEnabled: false
     clientCertMode: 'Optional'
@@ -54,7 +57,7 @@ resource appServiceBackend 'Microsoft.Web/sites@2024-11-01' = {
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
-      [acrManagedIdentityResourceId]: {}
+      '${acrManagedIdentityResourceId}': {}
     }
   }
   properties: {
@@ -63,11 +66,9 @@ resource appServiceBackend 'Microsoft.Web/sites@2024-11-01' = {
       linuxFxVersion: backendImage
       http20Enabled: true
       minTlsVersion: '1.3'
-      // Set environment variables here
-      appSettings: [
-        { name: 'AZURE_APP_CONFIGURATION_CONNECTION', value: appConfigEndpoint }
-        { name: 'KEY_VAULT_URI', value: keyVaultUri }
-      ]
+      acrUseManagedIdentityCreds: true
+      acrUserManagedIdentityID: acrManagedIdentityClientId
+      appSettings: sharedAppSettings
     }
     clientCertEnabled: false
     clientCertMode: 'Optional'
