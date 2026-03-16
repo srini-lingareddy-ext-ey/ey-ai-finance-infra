@@ -1,160 +1,177 @@
 # POC Bicep Stack
 
-Deploys a **resource group** (`rg-<pocSlug>`) and a per-POC stack in two phases: **core** (App Configuration, Key Vault, PostgreSQL, Azure OpenAI) and **App Services** (frontend + backend). Staggering lets you populate Key Vault before the apps start.
+Deploys a **resource group** (`rg-<pocSlug>-poc`) and a per-POC stack: **core** (Key Vault, App Configuration, PostgreSQL, Azure OpenAI) and **App Services** (frontend + backend). The recommended way to run a full deploy is the GitHub Actions workflow.
 
-## Modules
+---
 
-### resourceGroup.bicep (standalone)
+## How to run the workflow
 
-Creates only a resource group at **subscription** scope. Use when you need to provision the RG separately (e.g. for client onboarding) without deploying the full core stack.
+The **Deploy Resource Group and Core Resources** workflow runs all phases in one go (core → Key Vault population → App Configuration sync → App Services). Run it manually from the GitHub Actions tab.
 
-- **Path:** `bicep/modules/resourceGroup.bicep`
-- **Scope:** subscription
-- **Parameters:** `pocSlug`, `location`
-- **Resource group name:** `rg-<pocSlug>-poc`
+### 1. Prerequisites
 
-```bash
-az deployment sub create --location eastus --template-file bicep/modules/resourceGroup.bicep --parameters pocSlug=mypoc location=eastus
-```
+- **Azure:** A user-assigned managed identity **id-aifinance-poc-deploy** in resource group **rg-eyaifin-pipeline**, with a federated credential for this repo (OIDC). Grant this identity **Contributor** at subscription scope.
+- **GitHub Secrets:** In the repo go to **Settings → Secrets and variables → Actions** and add:
 
-**Outputs:** `name` (RG name), `resourceGroupLocation`
+| Secret | Purpose |
+|--------|--------|
+| **AZURE_POC_CLIENT_ID** | Managed identity's client (application) ID for Azure login. |
+| **AZURE_POC_TENANT_ID** | Azure AD tenant ID. |
+| **AZURE_POC_SUBSCRIPTION_ID** | Target subscription ID. |
+| **POSTGRES_ADMIN_PASSWORD** | PostgreSQL admin password (used by Bicep, Key Vault, and the app). |
+| **ACR_MANAGED_IDENTITY_CLIENT_ID** | Client ID of **acr-managed-identity** (in rg-eyaifin-acr) for App Services image pull. Get with: `az identity show --resource-group rg-eyaifin-acr --name acr-managed-identity --query clientId -o tsv` |
 
-## Prerequisites
+Optional: **EY_AI_FINANCE_REPO_TOKEN** — PAT to checkout a private app repo; omit if not needed.
 
-- Deploy at **subscription** scope for phase 1 (the template creates the resource group).
-- **Central ACR:** Registry **creyaifinmain** in resource group **rg-eyaifin-acr** (resource IDs are hardcoded in the templates for this subscription).
+### 2. Trigger the workflow
+
+1. Open the repo on GitHub → **Actions**.
+2. Select **Deploy Resource Group and Core Resources** in the left sidebar.
+3. Click **Run workflow**.
+4. Fill in the inputs:
+   - **pocSlug** (required): POC identifier, e.g. `test-main1`. The resource group will be `rg-<pocSlug>-poc`.
+   - **location** (optional): Azure region; default `eastus`.
+   - **frontendImage** / **backendImage** (optional): Container images for the web apps; defaults point at `creyaifinmain.azurecr.io`.
+5. Click **Run workflow** (green button).
+
+### 3. What the workflow does
+
+| Step | What happens |
+|------|----------------------|
+| 1 | Deploys **main.bicep** at subscription scope: creates `rg-<pocSlug>-poc` and core resources (Key Vault, App Configuration, OpenAI, Postgres). |
+| 2 | Captures deployment outputs (resource group name, Key Vault name, App Config endpoint, Postgres host/DB, OpenAI name). |
+| 3 | Waits 30s for RBAC propagation, then sets Key Vault default action to Allow. |
+| 4 | Populates the POC Key Vault with **PostgresConnectionString** and **OpenAIApiKey**. |
+| 5 | Syncs App Configuration from `bicep/configs/backend_configs.yml` into the App Config store. |
+| 6 | Deploys **appservices-stack.bicep** into the resource group (frontend and backend App Services). |
+
+When it finishes, the POC resource group contains the full stack and the apps pull images from the central ACR using **acr-managed-identity**.
+
+---
+
+## Prerequisites (infrastructure)
+
+- **Central ACR:** Registry **creyaifinmain** in resource group **rg-eyaifin-acr** (resource IDs are hardcoded in the templates).
 - **ACR pull:** User-assigned managed identity **acr-managed-identity** in **rg-eyaifin-acr** has **AcrPull** on the registry. App Services use this identity (and **Key Vault Secrets User** on each POC Key Vault).
-- Pipeline identity needs **Key Vault Administrator** (granted by the core template) and **AcrPush** on the central ACR for build/push.
+- **App Configuration:** If you deploy App Configuration (via workflow or Bicep) and get a **Forbidden** error, ensure the identity has **App Configuration Data Owner** on the resource group (or the App Configuration store), and **Contributor** to create the store.
 
-## Deploy (staggered)
+---
+
+## Manual deploy (without the workflow)
+
+If you prefer to run Bicep locally or in your own pipeline:
 
 ### Phase 1 — Core (subscription scope)
-
-Creates the resource group and all resources **except** App Services. Use the outputs to populate Key Vault in phase 2.
 
 ```bash
 az deployment sub create \
   --location eastus \
   --template-file bicep/main.bicep \
-  --parameters bicep/main.parameters.json
+  --parameters bicep/parameters/main.parameters.json
 ```
 
-Use `--location` to set the deployment location. The resource group name is **rg-<pocSlug>** (e.g. `rg-mypoc`).
+Or pass parameters inline (workflow-style, no Key Vault/App Config key-values):
+
+```bash
+az deployment sub create \
+  --location eastus \
+  --template-file bicep/main.bicep \
+  --parameters \
+    pocSlug=mypoc \
+    location=eastus \
+    administratorLoginPassword='YOUR_SECURE_PASSWORD' \
+    openAIDeployments='[]' \
+    pocAppConfigKeyValues='[]'
+```
+
+Resource group name will be **rg-<pocSlug>-poc** (e.g. `rg-mypoc-poc`).
 
 ### Phase 2 — Populate Key Vault
 
-Using the phase 1 outputs (e.g. `keyVaultName`, `postgresHost`), have your pipeline or script write the required secrets into the POC Key Vault. The pipeline identity has **Key Vault Administrator** on that vault.
+Using the phase 1 outputs, write **PostgresConnectionString** and **OpenAIApiKey** (and any other secrets) into the POC Key Vault. The deployment identity needs **Key Vault Administrator** (or equivalent) on that vault.
 
 ### Phase 3 — App Services (resource group scope)
 
-Deploy the frontend and backend App Services into the existing resource group. Pass `keyVaultName` and `appConfigEndpoint` from phase 1 outputs (e.g. into `main-appservices.parameters.json` or via `--parameters`).
-
 ```bash
 az deployment group create \
-  --resource-group rg-mypoc \
-  --template-file bicep/poc-stack-appservices.bicep \
-  --parameters bicep/main-appservices.parameters.json
+  --resource-group rg-mypoc-poc \
+  --template-file bicep/appservices-stack.bicep \
+  --parameters bicep/parameters/main-appservices.parameters.json
 ```
 
-Override `keyVaultName` and `appConfigEndpoint` with the actual values from phase 1 (e.g. `keyVaultName=@phase1-outputs.json`, or set in the parameters file). Same `pocSlug` and image names as in `main.parameters.json`.
+Set `keyVaultName` and `appConfigEndpoint` in the parameters file (or override on the command line) to the values from phase 1 outputs.
 
-## GitHub Actions workflow
+---
 
-A single workflow automates all phases: **Actions** → **Deploy POC** (manual `workflow_dispatch`).
+## Modules and stack templates
 
-### Managed identity
+- **main.bicep** — Subscription scope: creates the resource group and deploys **core-resources.bicep** (Key Vault, App Configuration, OpenAI, Postgres). Does not deploy App Services.
+- **core-resources.bicep** — Resource group scope: invoked by main.bicep; deploys the four core modules. Not run standalone in the normal flow.
+- **appservices-stack.bicep** — Resource group scope: deploys the App Service plan and frontend/backend web apps; call after core is deployed and Key Vault is populated.
 
-- **Name:** id-aifinance-poc-deploy  
-- **Resource group:** rg-eyaifin-pipeline  
-- **Federated credential:** Configured for this infra repo so the workflow can authenticate with Azure via OIDC (no client secret).  
-- Grant the managed identity **Contributor** at subscription scope. The core template grants it **Key Vault Administrator** on each POC Key Vault.
+Standalone module for RG only: **bicep/modules/resourceGroup.bicep** (subscription scope, creates only `rg-<pocSlug>-poc`). For per-module docs and commands, see the wiki (e.g. **stack_template.md**, **bicep_templates.md**).
 
-### Required secrets
-
-Store these in **GitHub Secrets** (Settings → Secrets and variables → Actions). You can also store them in a **Key Vault in rg-eyaifin-pipeline**; if the workflow reads from that vault, grant **id-aifinance-poc-deploy** **Key Vault Secrets User** on that vault.
-
-| Secret name | Purpose |
-| ----------- | -------- |
-| **AZURE_POC_CLIENT_ID** | Managed identity's client (application) ID — used by Azure/login for OIDC. |
-| **AZURE_POC_TENANT_ID** | Azure AD tenant ID. |
-| **AZURE_POC_SUBSCRIPTION_ID** | Target subscription ID. |
-| **AZURE_POC_PIPELINE_PRINCIPAL_ID** | Managed identity's principal (object) ID — passed to Bicep as `pipelinePrincipalId`. |
-| **POSTGRES_ADMIN_PASSWORD** | PostgreSQL admin password for the POC — used by Bicep, Key Vault population, and init.sql. |
-| **EY_AI_FINANCE_REPO_TOKEN** (optional) | PAT to checkout the private **ey-ai-finance** repo; omit if `GITHUB_TOKEN` has access. |
-
-### Key Vault secret names (phase 2 / workflow step 2)
-
-The workflow writes these secrets into the **POC** Key Vault. The **ey-ai-finance** app must read the same names from Key Vault (or the workflow can be updated to match the app):
-
-- **PostgresConnectionString** — PostgreSQL connection string.  
-- **OpenAIApiKey** — Azure OpenAI account key.
-
-### Init script (phase 2.5 / workflow step 3)
-
-The workflow checks out the **ey-ai-finance** repo (same org as this repo) and runs **db/aifinance/init.sql** against the new Postgres database using the **postgresql-client** and **psql** (not `azure/sql-action`, which targets SQL Server).
+---
 
 ## Naming
 
-- **Resource group:** `rg-<pocSlug>` (e.g. `rg-mypoc`). Standalone **resourceGroup.bicep** uses `rg-<pocSlug>-poc`.
-- **Resources in the RG:** `<resource-name>-<pocSlug>` (e.g. `appconfig-mypoc`, `kv-mypoc`, `pg-mypoc`, `frontend-mypoc`, `backend-mypoc`).
+- **Resource group:** `rg-<pocSlug>-poc` (e.g. `rg-mypoc-poc`).
+- **Resources in the RG:** `<resource-name>-<pocSlug>-poc` (e.g. `appconfig-mypoc-poc`, `kv-mypoc-poc`, `pg-mypoc-poc`). App Services: `frontend-<pocSlug>`, `backend-<pocSlug>`.
 
-## Parameters
+---
 
-### main.bicep / poc-stack-core (phase 1)
+## Parameters (summary)
+
+### main.bicep (phase 1)
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| pocSlug | Yes | POC identifier (e.g. mypoc). Resource group will be `rg-{pocSlug}`; other resources use `{resource-name}-{pocSlug}`. |
-| location | Yes | Azure region for the resource group and all resources. |
-| appChoice | No | `aifinance` or `aifinance-next` (default: aifinance-next). |
-| pipelinePrincipalId | Yes | Object (principal) ID of the pipeline identity (service principal or managed identity). |
-| postgresAdminPassword | Yes | PostgreSQL administrator password (secure). |
-| pocAppConfigKeyValues | No | Array of { key, value, contentType? } for App Configuration. |
+| pocSlug | Yes | POC identifier. Resource group will be `rg-<pocSlug>-poc`. |
+| location | No | Azure region (default: eastus). |
+| administratorLoginPassword | Yes | PostgreSQL administrator password (secure). |
 | openAIDeployments | No | Array of { name, model, version, capacity } for OpenAI deployments. |
-| frontendImage | Yes* | Container image for frontend; used only when running phase 3 (same file or pipeline). |
-| backendImage | Yes* | Container image for backend; used only when running phase 3. |
+| pocAppConfigKeyValues | No | Array of { key, value, contentType? } for App Configuration. |
 
-\* `main.parameters.json` can still include these for use with `main-appservices.parameters.json` or pipeline.
+Optional Postgres overrides (e.g. coordinatorVCores, nodeCount, postgresqlVersion, citusVersion) are passed through to core-resources; see **main.bicep** and **modules/postgres.bicep** for names.
 
-### poc-stack-appservices (phase 3)
+### appservices-stack.bicep (phase 3)
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
 | pocSlug | Yes | Same POC identifier as phase 1. |
 | location | No | Defaults to resource group location. |
-| keyVaultName | Yes | Key Vault name in this RG (from phase 1 output **keyVaultName**). |
-| appConfigEndpoint | Yes | App Configuration endpoint (from phase 1 output **appConfigEndpoint**). |
-| frontendImage | Yes | Container image for frontend (e.g. DOCKER\|creyaifinmain.azurecr.io/image:tag). |
+| keyVaultName | Yes | Key Vault name in this RG (from phase 1 output). |
+| appConfigEndpoint | Yes | App Configuration endpoint (from phase 1 output). |
+| frontendImage | Yes | Container image for frontend (e.g. DOCKER\|creyaifinmain.azurecr.io/…). |
 | backendImage | Yes | Container image for backend. |
+| acrManagedIdentityClientId | Yes | Client ID of **acr-managed-identity** (for ACR image pull). |
+
+---
 
 ## Outputs
 
-### Phase 1 (main.bicep / core)
+### Phase 1 (main.bicep)
 
-- **resourceGroupName** — Name of the created resource group (`rg-<pocSlug>`).
-- **keyVaultName** — Key Vault name (pipeline writes secrets here; pass to phase 3).
-- **appConfigEndpoint**, **appConfigStoreName** — App Configuration (pass **appConfigEndpoint** to phase 3).
+- **resourceGroupName**, **resourceGroupLocation** — Created RG.
+- **keyVaultName**, **keyVaultUri** — Key Vault (pipeline writes secrets here; pass keyVaultName to phase 3).
+- **appConfigEndpoint**, **appConfigStoreName** — App Configuration (pass appConfigEndpoint to phase 3).
 - **postgresHost**, **postgresDatabaseName** — PostgreSQL.
 - **openaiEndpoint**, **openaiName** — Azure OpenAI.
 
-### Phase 3 (poc-stack-appservices)
+### Phase 3 (appservices-stack.bicep)
 
 - **frontendAppName**, **backendAppName** — App Service names.
+
+---
+
+## Optional: core only or app services only
+
+- **Core only (existing RG):** Deploy **core-resources.bicep** at resource group scope with the same parameters as main (no RG creation). Omit frontend/backend images if not running App Services.
+- **App services only:** Use **appservices-stack.bicep** as in phase 3, with `keyVaultName` and `appConfigEndpoint` from the existing core deployment.
+
+---
 
 ## Post-deploy
 
 - App Services pull images from **creyaifinmain** using the shared managed identity **acr-managed-identity**.
-- Pipeline populates Key Vault in phase 2; App Services read secrets at runtime from Key Vault.
-
-## Optional: core or app-services only (existing resource group)
-
-To deploy only the **core** stack into an existing resource group (no RG creation):
-
-```bash
-az deployment group create \
-  --resource-group rg-mypoc \
-  --template-file bicep/poc-stack-core.bicep \
-  --parameters bicep/main.parameters.json
-```
-
-Omit `frontendImage` and `backendImage` from the parameters when calling `poc-stack-core.bicep` (they are not used). For **app services only**, use `poc-stack-appservices.bicep` as in phase 3 above, with `keyVaultName` and `appConfigEndpoint` set from the existing core deployment.
+- The workflow (or your pipeline) populates Key Vault in phase 2; App Services read secrets at runtime from Key Vault.
