@@ -23,10 +23,8 @@ param backendImage string
 @description('Client ID of the user-assigned managed identity acr-managed-identity (used for ACR image pull). Get with: az identity show --ids <acr-managed-identity-resource-id> --query clientId -o tsv')
 param acrManagedIdentityClientId string
 
-// Central ACR and identity (creyaifinmain, acr-managed-identity in rg-eyaifin-acr) — hardcoded for this subscription.
-var centralAcrResourceIdFinal = '/subscriptions/08d343af-2a3c-4f13-86a5-d9bde4948ae8/resourceGroups/rg-eyaifin-acr/providers/Microsoft.ContainerRegistry/registries/creyaifinmain'
+// Central ACR identity (acr-managed-identity in rg-eyaifin-acr) — hardcoded for this subscription.
 var acrManagedIdentityResourceIdFinal = '/subscriptions/08d343af-2a3c-4f13-86a5-d9bde4948ae8/resourceGroups/rg-eyaifin-acr/providers/Microsoft.ManagedIdentity/userAssignedIdentities/acr-managed-identity'
-var keyVaultResourceId = resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.KeyVault/vaults', keyVaultName)
 var keyVaultUri = 'https://${keyVaultName}${environment().suffixes.keyvaultDns}/'
 
 module appService 'modules/appService.bicep' = {
@@ -34,10 +32,8 @@ module appService 'modules/appService.bicep' = {
   params: {
     pocSlug: pocSlug
     location: location
-    centralAcrResourceId: centralAcrResourceIdFinal
     acrManagedIdentityResourceId: acrManagedIdentityResourceIdFinal
     appConfigEndpoint: appConfigEndpoint
-    keyVaultResourceId: keyVaultResourceId
     keyVaultUri: keyVaultUri
     frontendImage: frontendImage
     backendImage: backendImage

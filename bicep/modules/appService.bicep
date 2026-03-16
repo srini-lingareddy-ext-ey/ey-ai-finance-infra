@@ -1,14 +1,10 @@
 // App Service plan + frontend + backend for POC. Uses shared ACR managed identity for image pull; App Config + Key Vault refs.
 param pocSlug string
 param location string
-@description('Reserved for future use (e.g. AcrPull role assignment).')
-param centralAcrResourceId string
 param acrManagedIdentityResourceId string
 @description('Client ID (applicationId) of the user-assigned managed identity used for ACR pull. Required for acrUseManagedIdentityCreds.')
 param acrManagedIdentityClientId string
 param appConfigEndpoint string
-@description('Reserved for future use (e.g. Key Vault role assignment).')
-param keyVaultResourceId string
 param keyVaultUri string
 param frontendImage string
 param backendImage string

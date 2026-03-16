@@ -18,15 +18,15 @@ on:
         type: string
         default: "eastus"
       frontendImage:
-        description: "Frontend container image (e.g. DOCKER|creyaifinmain.azurecr.io/ey-ai-finance-frontend:latest)"
+        description: "Frontend container image (e.g. DOCKER|creyaifinmain.azurecr.io/aifinance-frontend:latest)"
         required: false
         type: string
-        default: "DOCKER|creyaifinmain.azurecr.io/ey-ai-finance-frontend:latest"
+        default: "DOCKER|creyaifinmain.azurecr.io/aifinance-frontend:latest"
       backendImage:
-        description: "Backend container image (e.g. DOCKER|creyaifinmain.azurecr.io/ey-ai-finance-backend:latest)"
+        description: "Backend container image (e.g. DOCKER|creyaifinmain.azurecr.io/aifinance-backend:latest)"
         required: false
         type: string
-        default: "DOCKER|creyaifinmain.azurecr.io/ey-ai-finance-backend:latest"
+        default: "DOCKER|creyaifinmain.azurecr.io/aifinance-backend:latest"
 
 env:
   AZURE_CLIENT_ID: ${{ secrets.AZURE_POC_CLIENT_ID }}
