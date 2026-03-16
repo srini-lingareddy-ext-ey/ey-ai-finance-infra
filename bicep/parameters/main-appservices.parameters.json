@@ -11,6 +11,9 @@
     },
     "backendImage": {
       "value": "DOCKER|creyaifinmain.azurecr.io/aifinance-backend:latest"
+    },
+    "acrManagedIdentityClientId": {
+      "value": "<client-id-of-acr-managed-identity>"
     }
   }
 }
