@@ -1,12 +1,12 @@
 # ey-ai-finance-infra
 
-Azure infrastructure for EY AI Finance POC environments. Bicep templates deploy a per-POC stack: resource group, App Configuration, Key Vault, PostgreSQL (Citus), Azure OpenAI, and frontend/backend App Services. The recommended way to deploy is the GitHub Actions workflow.
+Azure infrastructure for EY AI Finance POC environments. Bicep templates deploy a per-POC stack: resource group, App Configuration, Key Vault, PostgreSQL (Citus), Azure OpenAI, Blob Storage, and frontend/backend App Services. The recommended way to deploy is the GitHub Actions workflow.
 
 ---
 
 ## How to run the workflow
 
-The **Deploy Resource Group and Core Resources** workflow runs all phases in one go (core → Key Vault population → App Configuration sync → App Services). Run it manually from the GitHub Actions tab.
+The **Deploy POC** workflow runs all phases in one go (core → Key Vault population → App Configuration sync → **Postgres init (init.sql)** → App Services). Run it manually from the GitHub Actions tab.
 
 ### 1. Prerequisites
 
@@ -20,17 +20,19 @@ The **Deploy Resource Group and Core Resources** workflow runs all phases in one
 | **AZURE_POC_SUBSCRIPTION_ID**      | Target subscription ID.                                                                                                                                                                                 |
 | **POSTGRES_ADMIN_PASSWORD**        | PostgreSQL admin password (used by Bicep, Key Vault, and the app).                                                                                                                                      |
 | **ACR_MANAGED_IDENTITY_CLIENT_ID** | Client ID of **acr-managed-identity** (in rg-eyaifin-acr) for App Services image pull. Get with: `az identity show --resource-group rg-eyaifin-acr --name acr-managed-identity --query clientId -o tsv` |
+| **EY_AI_FINANCE_REPO_TOKEN**       | PAT to checkout the **ey-ai-finance** repo; required for the init step (run init.sql on the new Postgres).                                                                 |
 
-Optional: **EY_AI_FINANCE_REPO_TOKEN** — PAT to checkout a private app repo; omit if not needed.
+Omit **EY_AI_FINANCE_REPO_TOKEN** only if you skip or replace the init step.
 
 ### 2. Trigger the workflow
 
 1. Open the repo on GitHub → **Actions**.
-2. Select **Deploy Resource Group and Core Resources** in the left sidebar.
+2. Select **Deploy POC** in the left sidebar.
 3. Click **Run workflow**.
 4. Fill in the inputs:
    - **pocSlug** (required): POC identifier, e.g. `test-main1`. The resource group will be `rg-<pocSlug>-poc`.
    - **location** (optional): Azure region; default `eastus`.
+   - **appChoice** (optional): App variant for init.sql; chooses `db/<appChoice>/init.sql` from the ey-ai-finance repo (`aifinance-next` or `aifinance`; default `aifinance-next`).
    - **frontendImage** / **backendImage** (optional): Container images for the web apps; defaults point at `creyaifinmain.azurecr.io`.
 5. Click **Run workflow** (green button).
 
@@ -38,12 +40,13 @@ Optional: **EY_AI_FINANCE_REPO_TOKEN** — PAT to checkout a private app repo; o
 
 | Step | What happens                                                                                                                                  |
 | ---- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1    | Deploys **main.bicep** at subscription scope: creates `rg-<pocSlug>-poc` and core resources (Key Vault, App Configuration, OpenAI, Postgres). |
-| 2    | Captures deployment outputs (resource group name, Key Vault name, App Config endpoint, Postgres host/DB, OpenAI name).                        |
+| 1    | Deploys **main.bicep** at subscription scope: creates `rg-<pocSlug>-poc` and core resources (Key Vault, App Configuration, OpenAI, Postgres, Blob Storage). |
+| 2    | Captures deployment outputs (resource group name, Key Vault name, App Config endpoint, Postgres host/DB, OpenAI name, storage account name/ID). |
 | 3    | Waits 30s for RBAC propagation, then sets Key Vault default action to Allow.                                                                  |
 | 4    | Populates the POC Key Vault with **PostgresConnectionString** and **OpenAIApiKey**.                                                           |
 | 5    | Syncs App Configuration from `bicep/configs/backend_configs.yml` into the App Config store.                                                   |
-| 6    | Deploys **appservices-stack.bicep** into the resource group (frontend and backend App Services).                                              |
+| 6    | Runs **init.sql** on the new Postgres: checks out the **ey-ai-finance** repo and executes `db/<appChoice>/init.sql` (creates schema/tables).   |
+| 7    | Deploys **appservices-stack.bicep** into the resource group (frontend and backend App Services).                                              |
 
 When it finishes, the POC resource group contains the full stack and the apps pull images from the central ACR using **acr-managed-identity**.
 
@@ -81,7 +84,8 @@ az deployment sub create \
     location=eastus \
     administratorLoginPassword='YOUR_SECURE_PASSWORD' \
     openAIDeployments='[]' \
-    pocAppConfigKeyValues='[]'
+    pocAppConfigKeyValues='[]' \
+    blobContainerNames='[]'
 ```
 
 Resource group name will be **rg-<pocSlug>-poc** (e.g. `rg-mypoc-poc`).
@@ -105,8 +109,8 @@ Set `keyVaultName` and `appConfigEndpoint` in the parameters file (or override o
 
 ## Modules and stack templates
 
-- **main.bicep** — Subscription scope: creates the resource group and deploys **core-resources.bicep** (Key Vault, App Configuration, OpenAI, Postgres). Does not deploy App Services.
-- **core-resources.bicep** — Resource group scope: invoked by main.bicep; deploys the four core modules. Not run standalone in the normal flow.
+- **main.bicep** — Subscription scope: creates the resource group and deploys **core-resources.bicep** (Key Vault, App Configuration, OpenAI, Postgres, Blob Storage). Does not deploy App Services.
+- **core-resources.bicep** — Resource group scope: invoked by main.bicep; deploys the five core modules. Not run standalone in the normal flow.
 - **appservices-stack.bicep** — Resource group scope: deploys the App Service plan and frontend/backend web apps; call after core is deployed and Key Vault is populated.
 
 Standalone module for RG only: **bicep/modules/resourceGroup.bicep** (subscription scope, creates only `rg-<pocSlug>-poc`). For per-module docs and commands, see the wiki (e.g. **stack_template.md**, **bicep_templates.md**).
@@ -116,7 +120,7 @@ Standalone module for RG only: **bicep/modules/resourceGroup.bicep** (subscripti
 ## Naming
 
 - **Resource group:** `rg-<pocSlug>-poc` (e.g. `rg-mypoc-poc`).
-- **Resources in the RG:** `<resource-name>-<pocSlug>-poc` (e.g. `appconfig-mypoc-poc`, `kv-mypoc-poc`, `pg-mypoc-poc`). App Services: `frontend-<pocSlug>`, `backend-<pocSlug>`.
+- **Resources in the RG:** `<resource-name>-<pocSlug>-poc` (e.g. `appconfig-mypoc-poc`, `kv-mypoc-poc`, `pg-mypoc-poc`). App Services: `frontend-<pocSlug>`, `backend-<pocSlug>`. Storage account: `st<slug>poc<unique>` (globally unique; lowercase, no hyphens).
 
 ---
 
@@ -131,6 +135,7 @@ Standalone module for RG only: **bicep/modules/resourceGroup.bicep** (subscripti
 | administratorLoginPassword | Yes      | PostgreSQL administrator password (secure).                         |
 | openAIDeployments          | No       | Array of { name, model, version, capacity } for OpenAI deployments. |
 | pocAppConfigKeyValues      | No       | Array of { key, value, contentType? } for App Configuration.        |
+| blobContainerNames         | No       | Array of blob container names to create (default: []).               |
 
 Optional Postgres overrides (e.g. coordinatorVCores, nodeCount, postgresqlVersion, citusVersion) are passed through to core-resources; see **main.bicep** and **modules/postgres.bicep** for names.
 
@@ -157,6 +162,7 @@ Optional Postgres overrides (e.g. coordinatorVCores, nodeCount, postgresqlVersio
 - **appConfigEndpoint**, **appConfigStoreName** — App Configuration (pass appConfigEndpoint to phase 3).
 - **postgresHost**, **postgresDatabaseName** — PostgreSQL.
 - **openaiEndpoint**, **openaiName** — Azure OpenAI.
+- **storageAccountName**, **storageResourceId** — Blob Storage account (optional containers via `blobContainerNames`).
 
 ### Phase 3 (appservices-stack.bicep)
 

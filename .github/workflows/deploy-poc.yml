@@ -3,7 +3,7 @@
 # Required secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, POSTGRES_ADMIN_PASSWORD.
 # For init.sql: EY_AI_FINANCE_REPO_TOKEN (to checkout ey-ai-finance repo). For app services image pull: ACR_MANAGED_IDENTITY_CLIENT_ID.
 
-name: Deploy Resource Group and Core Resources
+name: Deploy POC
 
 on:
   workflow_dispatch:
@@ -42,7 +42,7 @@ env:
   AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
 
 jobs:
-  deploy-main:
+  deploy-main-resources:
     runs-on: ubuntu-latest
     outputs:
       resourceGroupName: ${{ steps.core-outputs.outputs.resourceGroupName }}
@@ -160,9 +160,8 @@ jobs:
           echo "storageResourceId=${{ steps.core-outputs.outputs.storageResourceId }}"
 
   init-postgres:
-    name: Run init.sql on Postgres
     runs-on: ubuntu-latest
-    needs: deploy-main
+    needs: deploy-main-resources
     permissions:
       contents: read
     steps:
@@ -184,8 +183,8 @@ jobs:
           set -euo pipefail
 
           INIT_SQL="ey-ai-finance/db/${{ inputs.appChoice }}/init.sql"
-          PG_HOST="${{ needs.deploy-main.outputs.postgresHost }}"
-          PG_DB="${{ needs.deploy-main.outputs.postgresDatabaseName }}"
+          PG_HOST="${{ needs.deploy-main-resources.outputs.postgresHost }}"
+          PG_DB="${{ needs.deploy-main-resources.outputs.postgresDatabaseName }}"
 
           echo "Connecting to: ${PG_HOST}"
           echo "Database: ${PG_DB}"
@@ -210,7 +209,7 @@ jobs:
 
   deploy-app-services:
     runs-on: ubuntu-latest
-    needs: [deploy-main, init-postgres]
+    needs: [deploy-main-resources, init-postgres]
     permissions:
       id-token: write
       contents: read
@@ -227,9 +226,9 @@ jobs:
 
       - name: Deploy app services
         run: |
-          RG="${{ needs.deploy-main.outputs.resourceGroupName }}"
-          KV="${{ needs.deploy-main.outputs.keyVaultName }}"
-          APP_CFG="${{ needs.deploy-main.outputs.appConfigEndpoint }}"
+          RG="${{ needs.deploy-main-resources.outputs.resourceGroupName }}"
+          KV="${{ needs.deploy-main-resources.outputs.keyVaultName }}"
+          APP_CFG="${{ needs.deploy-main-resources.outputs.appConfigEndpoint }}"
           az deployment group create \
             --resource-group "$RG" \
             --template-file bicep/appservices-stack.bicep \
