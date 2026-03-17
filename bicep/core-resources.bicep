@@ -23,6 +23,7 @@ param nodeEnablePublicIpAccess bool = true
 param availabilityZone string = '1'
 param postgresqlVersion string = '16'
 param citusVersion string = '12.1'
+param blobContainerNames array = []
 
 module keyVault 'modules/keyVault.bicep' = {
   name: 'keyVault'
@@ -73,6 +74,15 @@ module postgres 'modules/postgres.bicep' = {
   }
 }
 
+module blobStorage 'modules/blobStorage.bicep' = {
+  name: 'blobStorage'
+  params: {
+    pocSlug: pocSlug
+    location: location
+    containerNames: blobContainerNames
+  }
+}
+
 output keyVaultName string = keyVault.outputs.keyVaultName
 output keyVaultUri string = keyVault.outputs.keyVaultUri
 output openaiEndpoint string = openAI.outputs.endpoint
@@ -81,3 +91,5 @@ output appConfigEndpoint string = appConfiguration.outputs.endpoint
 output appConfigStoreName string = appConfiguration.outputs.storeName
 output postgresHost string = postgres.outputs.host
 output postgresDatabaseName string = postgres.outputs.databaseName
+output storageAccountName string = blobStorage.outputs.storageAccountName
+output storageResourceId string = blobStorage.outputs.storageResourceId

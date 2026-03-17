@@ -50,7 +50,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_POC_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
 
-      - name: Deploy main.bicep (ResourceGroup + Key Vault, App Config, OpenAI, Postgres)
+      - name: Deploy main.bicep (ResourceGroup + Key Vault, App Config, OpenAI, Postgres, Blob Storage)
         env:
           PG_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
         run: |
@@ -66,7 +66,8 @@ jobs:
               location="$LOCATION" \
               administratorLoginPassword="$PG_PASSWORD" \
               openAIDeployments='[]' \
-              pocAppConfigKeyValues='[]'
+              pocAppConfigKeyValues='[]' \
+              blobContainerNames='[]'
 
       - name: Capture Deployment Outputs
         id: core-outputs
@@ -82,6 +83,8 @@ jobs:
           echo "postgresHost=$(jq -r '.postgresHost.value' core-outputs.json)" >> $GITHUB_OUTPUT
           echo "postgresDatabaseName=$(jq -r '.postgresDatabaseName.value' core-outputs.json)" >> $GITHUB_OUTPUT
           echo "openaiName=$(jq -r '.openaiName.value' core-outputs.json)" >> $GITHUB_OUTPUT
+          echo "storageAccountName=$(jq -r '.storageAccountName.value' core-outputs.json)" >> $GITHUB_OUTPUT
+          echo "storageResourceId=$(jq -r '.storageResourceId.value' core-outputs.json)" >> $GITHUB_OUTPUT
 
       - name: Wait for RBAC Propagation
         run: echo "Waiting 30s for RBAC (contributor / Key Vault Data Access Administrator) to propagate..." && sleep 30
@@ -135,6 +138,8 @@ jobs:
           echo "postgresHost=${{ steps.core-outputs.outputs.postgresHost }}"
           echo "postgresDatabaseName=${{ steps.core-outputs.outputs.postgresDatabaseName }}"
           echo "openaiName=${{ steps.core-outputs.outputs.openaiName }}"
+          echo "storageAccountName=${{ steps.core-outputs.outputs.storageAccountName }}"
+          echo "storageResourceId=${{ steps.core-outputs.outputs.storageResourceId }}"
 
       - name: Deploy app services
         run: |

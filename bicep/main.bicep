@@ -26,6 +26,7 @@ param nodeEnablePublicIpAccess bool = true
 param availabilityZone string = '1'
 param postgresqlVersion string = '16'
 param citusVersion string = '12.1'
+param blobContainerNames array = []
 
 resource rg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: 'rg-${pocSlug}-poc'
@@ -55,6 +56,7 @@ module mainResources 'core-resources.bicep' = {
     availabilityZone: availabilityZone
     postgresqlVersion: postgresqlVersion
     citusVersion: citusVersion
+    blobContainerNames: blobContainerNames
   }
 }
 
@@ -68,3 +70,5 @@ output appConfigEndpoint string = mainResources.outputs.appConfigEndpoint
 output appConfigStoreName string = mainResources.outputs.appConfigStoreName
 output postgresHost string = mainResources.outputs.postgresHost
 output postgresDatabaseName string = mainResources.outputs.postgresDatabaseName
+output storageAccountName string = mainResources.outputs.storageAccountName
+output storageResourceId string = mainResources.outputs.storageResourceId

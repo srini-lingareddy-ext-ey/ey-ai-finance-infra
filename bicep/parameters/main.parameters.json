@@ -5,21 +5,41 @@
     "pocSlug": { "value": "mypoc" },
     "location": { "value": "eastus" },
     "appChoice": { "value": "aifinance-next" },
-    "pipelinePrincipalId": { "value": "<pipeline-service-principal-object-id>" },
-    "postgresAdminPassword": { "value": "<secure-password>" },
+    "pipelinePrincipalId": {
+      "value": "<pipeline-service-principal-object-id>"
+    },
+    "postgresAdminPassword": { "value": "<secure-password123>" },
     "pocAppConfigKeyValues": {
       "value": [
-        { "key": "Backend:Url", "value": "https://backend-mypoc.azurewebsites.net", "contentType": "text/plain" },
+        {
+          "key": "Backend:Url",
+          "value": "https://backend-mypoc.azurewebsites.net",
+          "contentType": "text/plain"
+        },
         { "key": "App:Name", "value": "mypoc", "contentType": "text/plain" }
       ]
     },
     "openAIDeployments": {
       "value": [
-        { "name": "gpt-4o", "model": "gpt-4o", "version": "2024-11-20", "capacity": 5000 },
-        { "name": "gpt-4o-mini", "model": "gpt-4o-mini", "version": "2024-07-18", "capacity": 10000 }
+        {
+          "name": "gpt-4o",
+          "model": "gpt-4o",
+          "version": "2024-11-20",
+          "capacity": 5000
+        },
+        {
+          "name": "gpt-4o-mini",
+          "model": "gpt-4o-mini",
+          "version": "2024-07-18",
+          "capacity": 10000
+        }
       ]
     },
-    "frontendImage": { "value": "DOCKER|creyaifinmain.azurecr.io/aifinance-frontend-poc-mypoc:latest" },
-    "backendImage": { "value": "DOCKER|creyaifinmain.azurecr.io/aifinance-backend-poc-mypoc:latest" }
+    "frontendImage": {
+      "value": "DOCKER|creyaifinmain.azurecr.io/aifinance-frontend-poc-mypoc:latest"
+    },
+    "backendImage": {
+      "value": "DOCKER|creyaifinmain.azurecr.io/aifinance-backend-poc-mypoc:latest"
+    }
   }
 }
