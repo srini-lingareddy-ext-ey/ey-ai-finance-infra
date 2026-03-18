@@ -3,8 +3,10 @@
 param pocSlug string
 param location string
 
-// Key Vault names are globally unique; suffix ensures uniqueness across subscriptions/tenants
-var vaultName = 'kv-${pocSlug}-poc'
+// Key Vault names are globally unique; must be 3-24 alphanumeric chars (no consecutive hyphens)
+// Pattern kv-<slug>-poc uses 7 chars fixed, so slug is truncated to 17 chars max
+var slugForVault = substring(pocSlug, 0, min(17, length(pocSlug)))
+var vaultName = 'kv-${slugForVault}-poc'
 
 resource vault 'Microsoft.KeyVault/vaults@2024-12-01-preview' = {
   name: vaultName
