@@ -41,6 +41,7 @@ resource appServiceFrontend 'Microsoft.Web/sites@2024-11-01' = {
       acrUseManagedIdentityCreds: true
       acrUserManagedIdentityID: acrManagedIdentityClientId
       appSettings: sharedAppSettings
+      healthCheckPath: '/api/health'
     }
     clientCertEnabled: false
     clientCertMode: 'Optional'
@@ -65,6 +66,7 @@ resource appServiceBackend 'Microsoft.Web/sites@2024-11-01' = {
       acrUseManagedIdentityCreds: true
       acrUserManagedIdentityID: acrManagedIdentityClientId
       appSettings: sharedAppSettings
+      healthCheckPath: '/api/health'
     }
     clientCertEnabled: false
     clientCertMode: 'Optional'

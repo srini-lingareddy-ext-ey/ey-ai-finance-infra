@@ -181,3 +181,4 @@ Optional Postgres overrides (e.g. coordinatorVCores, nodeCount, postgresqlVersio
 
 - App Services pull images from **creyaifinmain** using the shared managed identity **acr-managed-identity**.
 - The workflow (or your pipeline) populates Key Vault in phase 2; App Services read secrets at runtime from Key Vault.
+- **Health checks:** Both frontend and backend web apps have App Service health checks enabled with probe path **`/api/health`**. Each app must expose a `GET /api/health` endpoint that returns HTTP 2xx when healthy; otherwise the platform may mark instances unhealthy and avoid routing traffic to them.
