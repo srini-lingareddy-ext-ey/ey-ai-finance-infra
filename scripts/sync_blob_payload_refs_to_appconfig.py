@@ -6,9 +6,8 @@ Reads bicep/configs/blob_payloads.json, walks tenants -> <root> (e.g. configs) -
 
 Each key maps to the blob name (path within the container), with {pocSlug} replaced by --poc-slug.
 
-Key format (version is always included; last segment is the full filename, e.g. all.json):
-  payloads:<ver>:<folder>:<filename>
-  (e.g. payloads:v1:kpi:all.json, payloads:v1:pnl:residential.json, payloads:v2:kpi:all.json)
+Key format: **`payloads:`** + the path **after** **`/payloads/`** in that blob name, with **`/`** replaced by **`:`**; the **last segment uses the filename without extension** (no **`.json`**).
+  Example: blob `…/configs/v1/payloads/kpi/all.json` → key **`payloads:kpi:all`** (`v1` stays only in the **value** path, not in the key).
 
 Value: <pocSlug>/<root>/<ver>/payloads/<folder>/<filename>  (relative blob name in the tenants container)
 """
@@ -45,13 +44,27 @@ def iter_payload_entries(
     return rows
 
 
+def app_config_key_from_blob_path_after_payloads(relative_blob: str) -> str:
+    """Build key: payloads:<path after /payloads/>, slashes -> colons; last segment = stem (no .json)."""
+    marker = "/payloads/"
+    if marker not in relative_blob:
+        raise ValueError(f"expected '/payloads/' in blob path: {relative_blob!r}")
+    after = relative_blob.split(marker, 1)[1]
+    parts = after.split("/")
+    if parts:
+        parts[-1] = Path(parts[-1]).stem
+    return "payloads:" + ":".join(parts)
+
+
 def build_keys(rows: list[tuple[str, str, str, str]]) -> list[tuple[str, str, str, str, str, str]]:
     """Return list of (key, blob_path_template, root, ver, folder, fname)."""
     out: list[tuple[str, str, str, str, str, str]] = []
     for root, ver, folder, fname in rows:
-        key = f"payloads:{ver}:{folder}:{fname}"
+        # Same suffix as in blob name; key mirrors only the part after .../payloads/
+        relative_no_slug = f"{root}/{ver}/payloads/{folder}/{fname}"
+        key = app_config_key_from_blob_path_after_payloads(relative_no_slug)
         # blob name within container (template with literal {pocSlug} for docs, substituted by caller)
-        blob_path = f"{{pocSlug}}/{root}/{ver}/payloads/{folder}/{fname}"
+        blob_path = f"{{pocSlug}}/{relative_no_slug}"
         out.append((key, blob_path, root, ver, folder, fname))
     return out
 
