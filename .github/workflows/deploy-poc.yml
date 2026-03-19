@@ -108,19 +108,36 @@ jobs:
       - name: Wait for RBAC Propagation
         run: echo "Waiting 30s for RBAC (contributor / Key Vault Data Access Administrator) to propagate..." && sleep 30
 
+      # Storage may be locked down by policy after create; relax networking so the runner can reach the blob endpoint.
       - name: Create blob folder structure in tenants container
         run: |
+          set -euo pipefail
           RG="${{ steps.core-outputs.outputs.resourceGroupName }}"
           SA="${{ steps.core-outputs.outputs.storageAccountName }}"
           POC_SLUG="${{ inputs.pocSlug }}"
-          KEY=$(az storage account keys list --account-name "$SA" --resource-group "$RG" --query '[0].value' -o tsv)
-          # Use a temp file (not --data preview) for reliable uploads from CI and local runs
+
+          az storage account update \
+            --resource-group "$RG" \
+            --name "$SA" \
+            --public-network-access Enabled \
+            --default-action Allow \
+            --bypass AzureServices
+
+          echo "Waiting 15s for storage network settings to propagate..."
+          sleep 15
+
+          # Connection string avoids some CLI auth edge cases; temp file avoids --data preview
+          CONN=$(az storage account show-connection-string --name "$SA" --resource-group "$RG" --query connectionString -o tsv)
           TMP=$(mktemp)
           printf '{}' > "$TMP"
           for path in "${POC_SLUG}/configs/v1/payloads/kpi/all.json" "${POC_SLUG}/configs/v1/payloads/pnl/all.json"; do
-            az storage blob upload --auth-mode key --account-name "$SA" --account-key "$KEY" \
-              --container-name "tenants" --name "$path" --content-type "application/json" \
-              --file "$TMP" --overwrite
+            az storage blob upload \
+              --connection-string "$CONN" \
+              --container-name "tenants" \
+              --name "$path" \
+              --content-type "application/json" \
+              --file "$TMP" \
+              --overwrite
           done
           rm -f "$TMP"
           echo "Created tenants/${POC_SLUG}/configs/v1/payloads/kpi/all.json and pnl/all.json"
