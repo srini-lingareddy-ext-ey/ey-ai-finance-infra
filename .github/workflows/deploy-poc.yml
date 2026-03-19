@@ -128,9 +128,13 @@ jobs:
 
           # Connection string avoids some CLI auth edge cases; temp file avoids --data preview
           CONN=$(az storage account show-connection-string --name "$SA" --resource-group "$RG" --query connectionString -o tsv)
+          MANIFEST="bicep/configs/blob_payload_manifest.json"
           TMP=$(mktemp)
           printf '{}' > "$TMP"
-          for path in "${POC_SLUG}/configs/v1/payloads/kpi/all.json" "${POC_SLUG}/configs/v1/payloads/pnl/all.json"; do
+          # Paths: tenants/<pocSlug>/configs/v1/payloads/<kpi|pnl>/<filename> (filenames from manifest)
+          while IFS= read -r rel; do
+            [ -z "$rel" ] && continue
+            path="${POC_SLUG}/configs/v1/payloads/${rel}"
             az storage blob upload \
               --connection-string "$CONN" \
               --container-name "tenants" \
@@ -138,9 +142,9 @@ jobs:
               --content-type "application/json" \
               --file "$TMP" \
               --overwrite
-          done
+          done < <(jq -r 'to_entries[] | .key as $folder | .value[] | "\($folder)/\(.)"' "$MANIFEST")
           rm -f "$TMP"
-          echo "Created tenants/${POC_SLUG}/configs/v1/payloads/kpi/all.json and pnl/all.json"
+          echo "Seeded payload JSON blobs from ${MANIFEST} under tenants/${POC_SLUG}/configs/v1/payloads/"
 
       - name: Allow Key Vault access from all networks
         run: |
