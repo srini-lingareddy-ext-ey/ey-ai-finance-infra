@@ -74,6 +74,7 @@ jobs:
         run: |
           POC_SLUG="${{ inputs.pocSlug }}"
           LOCATION="${{ inputs.location }}"
+          BLOB_CONTAINERS=$(cat bicep/configs/blob_containers.json)
 
           az deployment sub create \
             --location "$LOCATION" \
@@ -85,7 +86,7 @@ jobs:
               administratorLoginPassword="$PG_PASSWORD" \
               openAIDeployments='[]' \
               pocAppConfigKeyValues='[]' \
-              blobContainerNames='[]'
+              blobContainerNames="$BLOB_CONTAINERS"
 
       - name: Capture Deployment Outputs
         id: core-outputs
@@ -106,6 +107,19 @@ jobs:
 
       - name: Wait for RBAC Propagation
         run: echo "Waiting 30s for RBAC (contributor / Key Vault Data Access Administrator) to propagate..." && sleep 30
+
+      - name: Create blob folder structure in tenants container
+        run: |
+          RG="${{ steps.core-outputs.outputs.resourceGroupName }}"
+          SA="${{ steps.core-outputs.outputs.storageAccountName }}"
+          POC_SLUG="${{ inputs.pocSlug }}"
+          KEY=$(az storage account keys list --account-name "$SA" --resource-group "$RG" --query '[0].value' -o tsv)
+          # Virtual folders + empty JSON in kpi and pnl (tenant folder = pocSlug)
+          for path in "${POC_SLUG}/configs/v1/payloads/kpi/all.json" "${POC_SLUG}/configs/v1/payloads/pnl/all.json"; do
+            az storage blob upload --account-name "$SA" --account-key "$KEY" \
+              --container-name "tenants" --name "$path" --content-type "application/json" --data '{}' --overwrite
+          done
+          echo "Created tenants/${POC_SLUG}/configs/v1/payloads/kpi/all.json and pnl/all.json"
 
       - name: Allow Key Vault access from all networks
         run: |
