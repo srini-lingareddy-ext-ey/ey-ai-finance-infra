@@ -1,0 +1,74 @@
+{
+  "tenants": {
+    "configs": {
+      "v1": {
+        "payloads": {
+          "kpi": [
+            "all.json",
+            "cloud_services.json",
+            "commercial.json",
+            "professional_services.json",
+            "residential.json",
+            "software_products.json"
+          ],
+          "pnl": [
+            "all.json",
+            "cloud_services.json",
+            "commercial.json",
+            "professional_services.json",
+            "residential.json",
+            "software_products.json"
+          ]
+        }
+      },
+      "v2": {
+        "payloads": {
+          "kpi": [
+            "all.json",
+            "cloud_services.json",
+            "commercial.json",
+            "professional_services.json",
+            "residential.json",
+            "software_products.json"
+          ],
+          "pnl": [
+            "all.json",
+            "cloud_services.json",
+            "commercial.json",
+            "professional_services.json",
+            "residential.json",
+            "software_products.json"
+          ]
+        },
+        "test2": {
+          "kpi": [
+            "all.json",
+            "cloud_services.json",
+            "commercial.json",
+            "professional_services.json",
+            "residential.json",
+            "software_products.json"
+          ],
+          "pnl": [
+            "all.json",
+            "cloud_services.json",
+            "commercial.json",
+            "professional_services.json",
+            "residential.json",
+            "software_products.json"
+          ]
+        }
+      }
+    }
+  },
+  "chat": {
+    "data": {
+      "v1": {
+        "payloads": {
+          "kpi": ["all.json"],
+          "pnl": ["all.json"]
+        }
+      }
+    }
+  }
+}

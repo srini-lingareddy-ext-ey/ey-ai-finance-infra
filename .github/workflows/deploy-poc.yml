@@ -74,7 +74,9 @@ jobs:
         run: |
           POC_SLUG="${{ inputs.pocSlug }}"
           LOCATION="${{ inputs.location }}"
-          BLOB_CONTAINERS=$(cat bicep/configs/blob_containers.json)
+          MANIFEST="bicep/configs/blob_payloads.json"
+          # Top-level keys (e.g. tenants, chat) = blob container names for Bicep + seeding
+          BLOB_CONTAINERS=$(jq -c 'keys' "$MANIFEST")
 
           az deployment sub create \
             --location "$LOCATION" \
@@ -109,7 +111,7 @@ jobs:
         run: echo "Waiting 30s for RBAC (contributor / Key Vault Data Access Administrator) to propagate..." && sleep 30
 
       # Storage may be locked down by policy after create; relax networking so the runner can reach the blob endpoint.
-      - name: Create blob folder structure in tenants container
+      - name: Create blob payload files (from blob_payloads.json)
         run: |
           set -euo pipefail
           RG="${{ steps.core-outputs.outputs.resourceGroupName }}"
@@ -126,25 +128,26 @@ jobs:
           echo "Waiting 15s for storage network settings to propagate..."
           sleep 15
 
-          # Connection string avoids some CLI auth edge cases; temp file avoids --data preview
           CONN=$(az storage account show-connection-string --name "$SA" --resource-group "$RG" --query connectionString -o tsv)
-          MANIFEST="bicep/configs/blob_payload_manifest.json"
+          MANIFEST="bicep/configs/blob_payloads.json"
           TMP=$(mktemp)
           printf '{}' > "$TMP"
-          # Paths: tenants/<pocSlug>/configs/v1/payloads/<kpi|pnl>/<filename> (filenames from manifest)
-          while IFS= read -r rel; do
-            [ -z "$rel" ] && continue
-            path="${POC_SLUG}/configs/v1/payloads/${rel}"
+          # Per container: second level may be configs, data, ... then v1/v2 → payloads/test2 → kpi/pnl
+          # Blob path: {pocSlug}/<root>/<ver>/<segment>/<kpi|pnl>/<file>
+          while IFS="$(printf '\t')" read -r CONTAINER template; do
+            [ -z "$CONTAINER" ] && continue
+            [ -z "$template" ] && continue
+            path="${template//\{pocSlug\}/$POC_SLUG}"
             az storage blob upload \
               --connection-string "$CONN" \
-              --container-name "tenants" \
+              --container-name "$CONTAINER" \
               --name "$path" \
               --content-type "application/json" \
               --file "$TMP" \
               --overwrite
-          done < <(jq -r 'to_entries[] | .key as $folder | .value[] | "\($folder)/\(.)"' "$MANIFEST")
+          done < <(jq -r 'to_entries[] | .key as $container | .value | to_entries[] | .key as $root | .value | to_entries[] | .key as $ver | .value | to_entries[] | .key as $segment | .value | to_entries[] | .key as $folder | .value[] | "\($container)\t{pocSlug}/\($root)/\($ver)/\($segment)/\($folder)/\(.)"' "$MANIFEST")
           rm -f "$TMP"
-          echo "Seeded payload JSON blobs from ${MANIFEST} under tenants/${POC_SLUG}/configs/v1/payloads/"
+          echo "Seeded payload JSON blobs from ${MANIFEST} (containers: $(jq -r 'keys | join(", ")' "$MANIFEST"))"
 
       - name: Allow Key Vault access from all networks
         run: |
