@@ -13,13 +13,13 @@ on:
         required: true
         type: string
       location:
-        description: "Azure region"
-        required: false
+        description: "Azure region (e.g. eastus)"
+        required: true
         type: string
         default: "eastus"
       appChoice:
-        description: "App variant for init.sql (db/<appChoice>/init.sql)"
-        required: false
+        description: "App choice"
+        required: true
         type: choice
         options:
           - aifinance-next
@@ -27,12 +27,12 @@ on:
         default: "aifinance-next"
       frontendImage:
         description: "Frontend container image (e.g. DOCKER|creyaifinmain.azurecr.io/aifinance-frontend:latest)"
-        required: false
+        required: true
         type: string
         default: "DOCKER|creyaifinmain.azurecr.io/aifinance-frontend:latest"
       backendImage:
         description: "Backend container image (e.g. DOCKER|creyaifinmain.azurecr.io/aifinance-backend:latest)"
-        required: false
+        required: true
         type: string
         default: "DOCKER|creyaifinmain.azurecr.io/aifinance-backend:latest"
 
@@ -58,7 +58,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Checkout Repo
+      - name: Checkout infra repo
         uses: actions/checkout@v4
 
       - name: Azure login (OIDC)
@@ -75,7 +75,6 @@ jobs:
           POC_SLUG="${{ inputs.pocSlug }}"
           LOCATION="${{ inputs.location }}"
           MANIFEST="bicep/configs/blob_payloads.json"
-          # Top-level keys (e.g. tenants, chat) = blob container names for Bicep + seeding
           BLOB_CONTAINERS=$(jq -c 'keys' "$MANIFEST")
 
           az deployment sub create \
@@ -256,6 +255,32 @@ jobs:
             -f "${INIT_SQL}"
 
           echo "Database initialization completed successfully."
+
+      # Inserts into public.tenant — table and columns must match ey-ai-finance init.sql (id, name, storage_path, created_at, updated_at, is_active, metadata).
+      - name: Insert POC tenant row
+        env:
+          PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+          POC_SLUG: ${{ inputs.pocSlug }}
+        run: |
+          set -euo pipefail
+          PG_HOST="${{ needs.deploy-main-resources.outputs.postgresHost }}"
+          PG_DB="${{ needs.deploy-main-resources.outputs.postgresDatabaseName }}"
+          # Escape single quotes in pocSlug for SQL string literals ('' in PostgreSQL)
+          POC_SQL_ESC=$(printf '%s' "$POC_SLUG" | sed "s/'/''/g")
+
+          echo "Inserting tenant row for pocSlug=${POC_SLUG} (name and storage_path)"
+
+          psql "host=${PG_HOST} port=5432 dbname=${PG_DB} user=citus sslmode=require" \
+            -v ON_ERROR_STOP=1 <<SQL
+          INSERT INTO tenant (id, name, storage_path, created_at, updated_at, is_active, metadata)
+          SELECT s.next_id, '${POC_SQL_ESC}', '${POC_SQL_ESC}', t.ts, t.ts, true, NULL
+          FROM (SELECT COALESCE(MAX(id), 0) + 1 AS next_id FROM tenant) AS s
+          CROSS JOIN (
+            SELECT date_trunc('microsecond', clock_timestamp())::timestamp(6) AS ts
+          ) AS t;
+          SQL
+
+          echo "POC tenant row inserted successfully."
 
   deploy-app-services:
     runs-on: ubuntu-latest
