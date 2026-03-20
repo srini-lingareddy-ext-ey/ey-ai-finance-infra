@@ -17,7 +17,8 @@
             "commercial.json",
             "professional_services.json",
             "residential.json",
-            "software_products.json"
+            "software_products.json",
+            "test.json"
           ]
         }
       }

@@ -41,9 +41,10 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2025-01-01' = {
   }
 }
 
-// Blob soft-delete + container soft-delete. Explicit restorePolicy avoids ARM update failures:
-// when point-in-time restore is enabled, deleteRetentionPolicy.days must be > restorePolicy.days;
-// omitting restorePolicy on redeploy can produce InvalidValuesForRequestParameters for deleteRetentionPolicy.days.
+// Blob soft-delete + container soft-delete.
+// Azure requires blob deleteRetentionPolicy.days > restorePolicy.days when PITR is on (strict >).
+// Defaults often use 7d for both → "Blob Delete Retention policy days should be longer than Point In Time Restore policy days".
+// We disable PITR and use 14d blob soft-delete so redeploys succeed even if the account retained PITR at 6–7d.
 resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2025-01-01' = {
   parent: storageAccount
   name: 'default'
@@ -57,7 +58,7 @@ resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2025-01-01'
     }
     deleteRetentionPolicy: {
       enabled: true
-      days: 7
+      days: 14
       allowPermanentDelete: false
     }
   }
