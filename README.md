@@ -62,6 +62,7 @@ When it finishes, the POC resource group contains the full stack and the apps pu
 - **ACR pull:** User-assigned managed identity **acr-managed-identity** in **rg-eyaifin-acr** has **AcrPull** on the registry. App Services use this identity (and **Key Vault Secrets User** on each POC Key Vault).
 - **App Configuration:** If you deploy App Configuration (via workflow or Bicep) and get a **Forbidden** error, ensure the identity has **App Configuration Data Owner** on the resource group (or the App Configuration store), and **Contributor** to create the store.
 - **Blob storage “blocked by network rules”:** The workflow runs `az storage account update` to set **public network access = Enabled** and **default network action = Allow** before uploading seed blobs (GitHub-hosted runners need this). If **Azure Policy** (or manual changes) forces **Deny** or **public access disabled**, the update or upload can still fail. Fix: add a policy exception for POC storage accounts, use a **self-hosted runner** in a network that is allowed, or seed blobs manually from the Azure portal / Storage Explorer while your IP is allowed.
+- **Redeploy same `pocSlug`:** `main.bicep` may fail on **`blobStorage`** with **`deleteRetentionPolicy.days`** invalid. Storage ARM validates soft-delete vs **point-in-time restore**; **`bicep/modules/blobStorage.bicep`** sets **`restorePolicy.enabled: false`** explicitly to keep updates consistent. If deployment still fails, inspect **Data protection** on the storage account in the Azure portal.
 
 ---
 
