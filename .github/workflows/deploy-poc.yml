@@ -1,10 +1,14 @@
 # Deploy main.bicep: resource group + Key Vault, App Configuration, OpenAI, Postgres, Blob Storage; run init.sql on Postgres; then deploy App Services.
 # Trigger manually and pass pocSlug (and optionally location, frontend/backend images, appChoice). Password and pipeline principal from GitHub secrets.
 # Required secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, POSTGRES_ADMIN_PASSWORD, MONGO_ADMIN_PASSWORD.
-# Optional (Microsoft Entra sign-in for the app): MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID and optionally
-# MICROSOFT_PROVIDER_AUTHENTICATION_SECRET. Tenant ID for those app settings is taken from AZURE_POC_TENANT_ID (same as Azure login).
-# When app ID, tenant, and public base URL are all non-empty, Bicep sets auth-related app settings on the frontend Web App (see
-# bicep/modules/appService.bicep). Register redirect URIs in the app registration for your stack (e.g. https://eyaifinance-<pocSlug>.azurewebsites.net/...).
+# Optional (Microsoft Entra): MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID and MICROSOFT_PROVIDER_AUTHENTICATION_SECRET (repo secrets).
+# Tenant from AZURE_POC_TENANT_ID. With APP_ID + secret + base URL, Bicep enables Easy Auth (authsettingsV2); client ID and issuer are
+# stored there — only the client secret is added as an app setting (MICROSOFT_PROVIDER_CLIENT_SECRET). If APP_ID is set but the secret
+# is omitted, Bicep adds MICROSOFT_PROVIDER_* + WEBAPP_PUBLIC_BASE_URL for app-managed auth instead (no Authentication blade). Register:
+#   https://eyaifinance-<pocSlug>.azurewebsites.net/.auth/login/aad/callback
+#   https://eyaifinance-backend-<pocSlug>.azurewebsites.net/.auth/login/aad/callback
+# If APP_ID is set but the client secret is missing, only app settings are applied — Easy Auth is not enabled. Use repository secrets
+# (this job has no environment:).
 #
 # OIDC note: GitHub’s ID token (client assertion for federated login) is only valid for a few minutes. This job logs in once, then runs
 # azure/login again immediately after the subscription ARM deployment so later `az` calls do not fail with AADSTS700024 (assertion expired).
@@ -417,6 +421,14 @@ jobs:
           APP_CFG="${{ needs.deploy-main-resources.outputs.appConfigEndpoint }}"
           POC_SLUG="${{ inputs.pocSlug }}"
           FRONTEND_BASE="https://eyaifinance-${POC_SLUG}.azurewebsites.net"
+
+          if [[ -z "${MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID:-}" ]]; then
+            echo "::notice title=Microsoft Entra skipped::MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID is not set — no auth app settings and no Easy Auth."
+          elif [[ -z "${MICROSOFT_PROVIDER_AUTHENTICATION_SECRET:-}" ]]; then
+            echo "::notice title=App-managed auth env vars::Secret empty — deploying MICROSOFT_PROVIDER_* + WEBAPP_PUBLIC_BASE_URL only (no Easy Auth). Add MICROSOFT_PROVIDER_AUTHENTICATION_SECRET to enable the portal Authentication blade."
+          else
+            echo "Microsoft Entra: Easy Auth on frontend + backend; only MICROSOFT_PROVIDER_CLIENT_SECRET is added as an app setting (plus shared App Config / Key Vault settings)."
+          fi
 
           az deployment group create \
             --resource-group "$RG" \
