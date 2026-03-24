@@ -116,6 +116,24 @@ jobs:
           RG="${{ steps.core-outputs.outputs.resourceGroupName }}"
           SA="${{ steps.core-outputs.outputs.storageAccountName }}"
           POC_SLUG="${{ inputs.pocSlug }}"
+          MAX_TOTAL_SLEEP=300
+          TOTAL_SLEEP=0
+
+          sleep_with_budget() {
+            local requested="$1"
+            local remaining=$((MAX_TOTAL_SLEEP - TOTAL_SLEEP))
+            if (( remaining <= 0 )); then
+              echo "Sleep budget exhausted (${MAX_TOTAL_SLEEP}s). Aborting."
+              return 1
+            fi
+            local actual="$requested"
+            if (( actual > remaining )); then
+              actual="$remaining"
+            fi
+            echo "Sleeping ${actual}s (budget used: ${TOTAL_SLEEP}s/${MAX_TOTAL_SLEEP}s)"
+            sleep "$actual"
+            TOTAL_SLEEP=$((TOTAL_SLEEP + actual))
+          }
 
           az storage account update \
             --resource-group "$RG" \
@@ -124,10 +142,37 @@ jobs:
             --default-action Allow \
             --bypass AzureServices
 
-          echo "Waiting 15s for storage network settings to propagate..."
-          sleep 15
+          echo "Waiting for storage network settings to propagate..."
+          for i in {1..20}; do
+            DEFAULT_ACTION=$(az storage account show --resource-group "$RG" --name "$SA" --query "networkRuleSet.defaultAction" -o tsv || true)
+            PUBLIC_ACCESS=$(az storage account show --resource-group "$RG" --name "$SA" --query "publicNetworkAccess" -o tsv || true)
+            echo "Attempt ${i}/20: defaultAction=${DEFAULT_ACTION}, publicNetworkAccess=${PUBLIC_ACCESS}"
+            if [[ "$DEFAULT_ACTION" == "Allow" && "$PUBLIC_ACCESS" == "Enabled" ]]; then
+              break
+            fi
+            if [[ "$i" -eq 20 ]]; then
+              echo "Storage network settings did not converge in time."
+              exit 1
+            fi
+            sleep_with_budget 15 || exit 1
+          done
 
           CONN=$(az storage account show-connection-string --name "$SA" --resource-group "$RG" --query connectionString -o tsv)
+          # Validate data-plane reachability before uploading many blobs.
+          for i in {1..10}; do
+            if az storage container list --connection-string "$CONN" --num-results 1 --output none; then
+              echo "Storage data-plane connectivity is ready."
+              break
+            fi
+            if [[ "$i" -eq 10 ]]; then
+              echo "Storage data-plane connectivity failed after retries."
+              exit 1
+            fi
+            WAIT=$((i * 10))
+            echo "Data-plane not ready yet; retrying in ${WAIT}s..."
+            sleep_with_budget "$WAIT" || exit 1
+          done
+
           MANIFEST="bicep/configs/blob_payloads.json"
           TMP=$(mktemp)
           printf '{}' > "$TMP"
@@ -137,15 +182,29 @@ jobs:
             [ -z "$CONTAINER" ] && continue
             [ -z "$template" ] && continue
             path="${template//\{pocSlug\}/$POC_SLUG}"
-            az storage blob upload \
-              --connection-string "$CONN" \
-              --container-name "$CONTAINER" \
-              --name "$path" \
-              --content-type "application/json" \
-              --file "$TMP" \
-              --overwrite
+            uploaded=false
+            for i in {1..8}; do
+              if az storage blob upload \
+                --connection-string "$CONN" \
+                --container-name "$CONTAINER" \
+                --name "$path" \
+                --content-type "application/json" \
+                --file "$TMP" \
+                --overwrite; then
+                uploaded=true
+                break
+              fi
+              WAIT=$((i * 10))
+              echo "Upload failed for ${CONTAINER}/${path} (attempt ${i}/8). Retrying in ${WAIT}s..."
+              sleep_with_budget "$WAIT" || exit 1
+            done
+            if [[ "$uploaded" != true ]]; then
+              echo "Upload failed for ${CONTAINER}/${path} after retries."
+              exit 1
+            fi
           done < <(jq -r 'to_entries[] | .key as $container | .value | to_entries[] | .key as $root | .value | to_entries[] | .key as $ver | .value | to_entries[] | .key as $segment | .value | to_entries[] | .key as $folder | .value[] | "\($container)\t{pocSlug}/\($root)/\($ver)/\($segment)/\($folder)/\(.)"' "$MANIFEST")
           rm -f "$TMP"
+          echo "Total sleep used in blob seeding step: ${TOTAL_SLEEP}s/${MAX_TOTAL_SLEEP}s"
           echo "Seeded payload JSON blobs from ${MANIFEST} (containers: $(jq -r 'keys | join(", ")' "$MANIFEST"))"
 
       - name: Allow Key Vault access from all networks
