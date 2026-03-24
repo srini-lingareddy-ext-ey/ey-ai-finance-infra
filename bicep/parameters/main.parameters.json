@@ -13,7 +13,7 @@
       "value": [
         {
           "key": "Backend:Url",
-          "value": "https://backend-mypoc.azurewebsites.net",
+          "value": "https://eyaifinance-backend-mypoc.azurewebsites.net",
           "contentType": "text/plain"
         },
         { "key": "App:Name", "value": "mypoc", "contentType": "text/plain" }

@@ -129,7 +129,7 @@ Standalone module for RG only: **bicep/modules/resourceGroup.bicep** (subscripti
   - **Length:** 1–90 characters → with `rg-` and `-poc`, use **`pocSlug` ≤ 83** characters.
   - **Allowed in the RG name:** letters, digits, `_`, `-`, `.`, `(`, `)` — avoid spaces, `@`, `/`, and other symbols in `pocSlug` so the composed name stays valid.
   - **Must not end with** a period (`.`); the `-poc` suffix normally satisfies this.
-- **Resources in the RG:** `<resource-name>-<pocSlug>-poc` (e.g. `appconfig-mypoc-poc`, `kv-mypoc-poc`, `pg-mypoc-poc`). App Services: the **frontend** Linux Web App is named **`pocSlug`** so its default URL is **`https://<pocSlug>.azurewebsites.net`**; the **backend** app stays **`backend-<pocSlug>`** (`https://backend-<pocSlug>.azurewebsites.net`). Storage account: `st<slug>poc<unique>` (globally unique; lowercase, no hyphens). Web app names are **globally** unique; choose `pocSlug` accordingly. Each resource type may impose **additional** constraints beyond the resource group rules.
+- **Resources in the RG:** `<resource-name>-<pocSlug>-poc` (e.g. `appconfig-mypoc-poc`, `kv-mypoc-poc`, `pg-mypoc-poc`). App Services: **frontend** **`eyaifinance-<pocSlug>`** → **`https://eyaifinance-<pocSlug>.azurewebsites.net`** (user-facing site); **backend** **`eyaifinance-backend-<pocSlug>`** → **`https://eyaifinance-backend-<pocSlug>.azurewebsites.net`** (**not** for end users to open directly — the frontend calls the backend). Storage account: `st<slug>poc<unique>` (globally unique; lowercase, no hyphens). Web app names are **globally** unique; choose `pocSlug` accordingly. Each resource type may impose **additional** constraints beyond the resource group rules.
 
 ---
 
@@ -175,7 +175,7 @@ Optional Postgres overrides (e.g. coordinatorVCores, nodeCount, postgresqlVersio
 
 ### Phase 3 (appservices-stack.bicep)
 
-- **frontendAppName**, **backendAppName** — Web App resource names (`pocSlug` and `backend-<pocSlug>`).
+- **frontendAppName**, **backendAppName** — Web App resource names (`eyaifinance-<pocSlug>` and `eyaifinance-backend-<pocSlug>`).
 
 ---
 

@@ -1,6 +1,10 @@
 # Deploy main.bicep: resource group + Key Vault, App Configuration, OpenAI, Postgres, Blob Storage; run init.sql on Postgres; then deploy App Services.
 # Trigger manually and pass pocSlug (and optionally location, frontend/backend images, appChoice). Password and pipeline principal from GitHub secrets.
 # Required secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, POSTGRES_ADMIN_PASSWORD, MONGO_ADMIN_PASSWORD.
+# Optional (Microsoft Entra sign-in for the app): MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID and optionally
+# MICROSOFT_PROVIDER_AUTHENTICATION_SECRET. Tenant ID for those app settings is taken from AZURE_POC_TENANT_ID (same as Azure login).
+# When app ID, tenant, and public base URL are all non-empty, Bicep sets auth-related app settings on the frontend Web App (see
+# bicep/modules/appService.bicep). Register redirect URIs in the app registration for your stack (e.g. https://eyaifinance-<pocSlug>.azurewebsites.net/...).
 #
 # OIDC note: GitHub’s ID token (client assertion for federated login) is only valid for a few minutes. This job logs in once, then runs
 # azure/login again immediately after the subscription ARM deployment so later `az` calls do not fail with AADSTS700024 (assertion expired).
@@ -403,10 +407,17 @@ jobs:
           subscription-id: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
 
       - name: Deploy app services
+        env:
+          MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID: ${{ secrets.MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID }}
+          MICROSOFT_PROVIDER_AUTHENTICATION_SECRET: ${{ secrets.MICROSOFT_PROVIDER_AUTHENTICATION_SECRET }}
         run: |
+          set -euo pipefail
           RG="${{ needs.deploy-main-resources.outputs.resourceGroupName }}"
           KV="${{ needs.deploy-main-resources.outputs.keyVaultName }}"
           APP_CFG="${{ needs.deploy-main-resources.outputs.appConfigEndpoint }}"
+          POC_SLUG="${{ inputs.pocSlug }}"
+          FRONTEND_BASE="https://eyaifinance-${POC_SLUG}.azurewebsites.net"
+
           az deployment group create \
             --resource-group "$RG" \
             --template-file bicep/appservices-stack.bicep \
@@ -417,4 +428,8 @@ jobs:
               appConfigEndpoint="$APP_CFG" \
               frontendImage='${{ inputs.frontendImage }}' \
               backendImage='${{ inputs.backendImage }}' \
-              acrManagedIdentityClientId='${{ secrets.ACR_MANAGED_IDENTITY_CLIENT_ID }}'
+              acrManagedIdentityClientId='${{ secrets.ACR_MANAGED_IDENTITY_CLIENT_ID }}' \
+              microsoftIdentityClientId="${MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID:-}" \
+              microsoftIdentityTenantId='${{ secrets.AZURE_POC_TENANT_ID }}' \
+              microsoftIdentityClientSecret="${MICROSOFT_PROVIDER_AUTHENTICATION_SECRET:-}" \
+              frontendPublicBaseUrl="$FRONTEND_BASE"

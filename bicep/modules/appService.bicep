@@ -10,10 +10,47 @@ param frontendImage string
 param backendImage string
 param sku string = 'P1v3'
 
+@description('Microsoft Entra (Azure AD) app registration — application (client) ID for end-user sign-in in the frontend. Leave empty to skip auth-related app settings.')
+param microsoftIdentityClientId string = ''
+
+@description('Microsoft Entra tenant ID (directory) for that app registration.')
+param microsoftIdentityTenantId string = ''
+
+@description('Optional client secret for confidential-client flows (e.g. server-side token exchange). Leave empty for public SPA-only config.')
+@secure()
+param microsoftIdentityClientSecret string = ''
+
+@description('Public base URL of the frontend (e.g. https://eyaifinance-mypoc.azurewebsites.net). Used for OAuth redirect URI registration hints and app configuration.')
+param frontendPublicBaseUrl string = ''
+
 var appServicePlanName = 'asp-${pocSlug}'
-var frontendName = pocSlug
-var backendName = 'backend-${pocSlug}'
+// Default hostnames: https://eyaifinance-<pocSlug>.azurewebsites.net and https://eyaifinance-backend-<pocSlug>.azurewebsites.net
+var frontendName = 'eyaifinance-${pocSlug}'
+var backendName = 'eyaifinance-backend-${pocSlug}'
 var sharedAppSettings = [ { name: 'AZURE_APP_CONFIGURATION_CONNECTION', value: appConfigEndpoint }, { name: 'KEY_VAULT_URI', value: keyVaultUri } ]
+
+var microsoftAuthEnabled = !empty(microsoftIdentityClientId) && !empty(microsoftIdentityTenantId) && !empty(frontendPublicBaseUrl)
+// Use cloud-specific login root (public Azure → Microsoft Entra sign-in endpoint).
+var entraLoginRoot = endsWith(environment().authentication.loginEndpoint, '/')
+  ? substring(environment().authentication.loginEndpoint, 0, length(environment().authentication.loginEndpoint) - 1)
+  : environment().authentication.loginEndpoint
+var microsoftAuthority = '${entraLoginRoot}/${microsoftIdentityTenantId}/v2.0'
+var frontendMicrosoftAuthSettings = microsoftAuthEnabled ? concat(
+  [
+    { name: 'MICROSOFT_PROVIDER_CLIENT_ID', value: microsoftIdentityClientId }
+    { name: 'MICROSOFT_PROVIDER_TENANT_ID', value: microsoftIdentityTenantId }
+    { name: 'MICROSOFT_PROVIDER_AUTHORITY', value: microsoftAuthority }
+    { name: 'WEBAPP_PUBLIC_BASE_URL', value: frontendPublicBaseUrl }
+    // No NEXT_PUBLIC_* here: this stack uses container images; Next (and similar) inlines public env at image
+    // build time. Runtime App Service settings are for server-side / non-bundled code — pass build args in CI for client bundles.
+  ],
+  !empty(microsoftIdentityClientSecret)
+    ? [
+        { name: 'MICROSOFT_PROVIDER_CLIENT_SECRET', value: microsoftIdentityClientSecret }
+      ]
+    : []
+) : []
+var frontendAppSettings = concat(sharedAppSettings, frontendMicrosoftAuthSettings)
 
 resource appServicePlan 'Microsoft.Web/serverfarms@2024-11-01' = {
   name: appServicePlanName
@@ -40,7 +77,7 @@ resource appServiceFrontend 'Microsoft.Web/sites@2024-11-01' = {
       minTlsVersion: '1.3'
       acrUseManagedIdentityCreds: true
       acrUserManagedIdentityID: acrManagedIdentityClientId
-      appSettings: sharedAppSettings
+      appSettings: frontendAppSettings
       healthCheckPath: '/api/health'
     }
     clientCertEnabled: false
