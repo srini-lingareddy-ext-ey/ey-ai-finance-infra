@@ -11,7 +11,7 @@ param backendImage string
 param sku string = 'P1v3'
 
 var appServicePlanName = 'asp-${pocSlug}'
-var frontendName = 'frontend-${pocSlug}'
+var frontendName = pocSlug
 var backendName = 'backend-${pocSlug}'
 var sharedAppSettings = [ { name: 'AZURE_APP_CONFIGURATION_CONNECTION', value: appConfigEndpoint }, { name: 'KEY_VAULT_URI', value: keyVaultUri } ]
 
