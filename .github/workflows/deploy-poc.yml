@@ -1,6 +1,9 @@
 # Deploy main.bicep: resource group + Key Vault, App Configuration, OpenAI, Postgres, Blob Storage; run init.sql on Postgres; then deploy App Services.
 # Trigger manually and pass pocSlug (and optionally location, frontend/backend images, appChoice). Password and pipeline principal from GitHub secrets.
 # Required secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, POSTGRES_ADMIN_PASSWORD.
+#
+# OIDC note: GitHub’s ID token (client assertion for federated login) is only valid for a few minutes. Re-run azure/login after long ARM
+# deploys and before long storage/sync phases so later `az` calls do not fail with AADSTS700024 (assertion expired).
 # For init.sql: EY_AI_FINANCE_REPO_TOKEN (to checkout ey-ai-finance repo). For app services image pull: ACR_MANAGED_IDENTITY_CLIENT_ID.
 
 name: Deploy POC
@@ -89,6 +92,13 @@ jobs:
               pocAppConfigKeyValues='[]' \
               blobContainerNames="$BLOB_CONTAINERS"
 
+      - name: Azure login (OIDC) — refresh after ARM deployment
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_POC_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_POC_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
+
       - name: Capture Deployment Outputs
         id: core-outputs
         run: |
@@ -108,6 +118,13 @@ jobs:
 
       - name: Wait for RBAC Propagation
         run: echo "Waiting 30s for RBAC (contributor / Key Vault Data Access Administrator) to propagate..." && sleep 30
+
+      - name: Azure login (OIDC) — refresh before storage and remaining steps
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_POC_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_POC_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
 
       # Storage may be locked down by policy after create; relax networking so the runner can reach the blob endpoint.
       - name: Create blob payload files (from blob_payloads.json)
