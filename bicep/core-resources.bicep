@@ -3,6 +3,8 @@
 
 @secure()
 param administratorLoginPassword string
+@secure()
+param mongoAdministratorLoginPassword string
 param pocSlug string
 param location string = 'eastus'
 param openAIDeployments array = []
@@ -74,6 +76,15 @@ module postgres 'modules/postgres.bicep' = {
   }
 }
 
+module mongo 'modules/mongo.bicep' = {
+  name: 'mongo'
+  params: {
+    pocSlug: pocSlug
+    location: location
+    administratorLoginPassword: mongoAdministratorLoginPassword
+  }
+}
+
 module blobStorage 'modules/blobStorage.bicep' = {
   name: 'blobStorage'
   params: {
@@ -91,5 +102,7 @@ output appConfigEndpoint string = appConfiguration.outputs.endpoint
 output appConfigStoreName string = appConfiguration.outputs.storeName
 output postgresHost string = postgres.outputs.host
 output postgresDatabaseName string = postgres.outputs.databaseName
+output mongoHost string = mongo.outputs.host
+output mongoClusterName string = mongo.outputs.clusterName
+output mongoAdministratorLogin string = mongo.outputs.administratorLogin
 output storageAccountName string = blobStorage.outputs.storageAccountName
-output storageResourceId string = blobStorage.outputs.storageResourceId

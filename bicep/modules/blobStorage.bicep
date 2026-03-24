@@ -73,4 +73,3 @@ resource containers 'Microsoft.Storage/storageAccounts/blobServices/containers@2
 }]
 
 output storageAccountName string = storageAccount.name
-output storageResourceId string = storageAccount.id

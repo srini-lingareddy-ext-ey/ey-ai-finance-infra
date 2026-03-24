@@ -56,7 +56,9 @@ jobs:
       postgresDatabaseName: ${{ steps.core-outputs.outputs.postgresDatabaseName }}
       openaiName: ${{ steps.core-outputs.outputs.openaiName }}
       storageAccountName: ${{ steps.core-outputs.outputs.storageAccountName }}
-      storageResourceId: ${{ steps.core-outputs.outputs.storageResourceId }}
+      mongoHost: ${{ steps.core-outputs.outputs.mongoHost }}
+      mongoClusterName: ${{ steps.core-outputs.outputs.mongoClusterName }}
+      mongoAdministratorLogin: ${{ steps.core-outputs.outputs.mongoAdministratorLogin }}
     permissions:
       id-token: write
       contents: read
@@ -74,11 +76,13 @@ jobs:
       - name: Deploy main.bicep (ResourceGroup + Key Vault, App Config, OpenAI, Postgres, Blob Storage)
         env:
           PG_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+          MONGO_PASSWORD: ${{ secrets.MONGO_ADMIN_PASSWORD }}
         run: |
           POC_SLUG="${{ inputs.pocSlug }}"
           LOCATION="${{ inputs.location }}"
           MANIFEST="bicep/configs/blob_payloads.json"
           BLOB_CONTAINERS=$(jq -c 'keys' "$MANIFEST")
+          MONGO_PW="${MONGO_PASSWORD:-$PG_PASSWORD}"
 
           az deployment sub create \
             --location "$LOCATION" \
@@ -88,6 +92,7 @@ jobs:
               pocSlug="$POC_SLUG" \
               location="$LOCATION" \
               administratorLoginPassword="$PG_PASSWORD" \
+              mongoAdministratorLoginPassword="$MONGO_PW" \
               openAIDeployments='[]' \
               pocAppConfigKeyValues='[]' \
               blobContainerNames="$BLOB_CONTAINERS"
@@ -114,7 +119,9 @@ jobs:
           echo "postgresDatabaseName=$(jq -r '.postgresDatabaseName.value' core-outputs.json)" >> $GITHUB_OUTPUT
           echo "openaiName=$(jq -r '.openaiName.value' core-outputs.json)" >> $GITHUB_OUTPUT
           echo "storageAccountName=$(jq -r '.storageAccountName.value' core-outputs.json)" >> $GITHUB_OUTPUT
-          echo "storageResourceId=$(jq -r '.storageResourceId.value' core-outputs.json)" >> $GITHUB_OUTPUT
+          echo "mongoHost=$(jq -r '.mongoHost.value' core-outputs.json)" >> $GITHUB_OUTPUT
+          echo "mongoClusterName=$(jq -r '.mongoClusterName.value' core-outputs.json)" >> $GITHUB_OUTPUT
+          echo "mongoAdministratorLogin=$(jq -r '.mongoAdministratorLogin.value' core-outputs.json)" >> $GITHUB_OUTPUT
 
       - name: Wait for RBAC Propagation
         run: echo "Waiting 30s for RBAC (contributor / Key Vault Data Access Administrator) to propagate..." && sleep 30
@@ -234,17 +241,26 @@ jobs:
       - name: Populate Key Vault with Secrets
         env:
           PG_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+          MONGO_PASSWORD: ${{ secrets.MONGO_ADMIN_PASSWORD }}
         run: |
           RG="${{ steps.core-outputs.outputs.resourceGroupName }}"
           KV="${{ steps.core-outputs.outputs.keyVaultName }}"
           PG_HOST="${{ steps.core-outputs.outputs.postgresHost }}"
           PG_DB="${{ steps.core-outputs.outputs.postgresDatabaseName }}"
           OPENAI_NAME="${{ steps.core-outputs.outputs.openaiName }}"
+          MONGO_HOST="${{ steps.core-outputs.outputs.mongoHost }}"
+          MONGO_USER="${{ steps.core-outputs.outputs.mongoAdministratorLogin }}"
+          MONGO_PW="${MONGO_PASSWORD:-$PG_PASSWORD}"
 
           # Postgres connection string (Citus admin user is 'citus')
           PG_CONN="postgresql://citus:${PG_PASSWORD}@${PG_HOST}:5432/${PG_DB}?sslmode=require"
           az keyvault secret set --vault-name "$KV" --name "PostgresConnectionString" --value "$PG_CONN" --output none
           echo "Set PostgresConnectionString in $KV"
+
+          MONGO_PW_ENC=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$MONGO_PW")
+          MONGO_CONN="mongodb+srv://${MONGO_USER}:${MONGO_PW_ENC}@${MONGO_HOST}/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000"
+          az keyvault secret set --vault-name "$KV" --name "MongoConnectionString" --value "$MONGO_CONN" --output none
+          echo "Set MongoConnectionString in $KV"
 
           OPENAI_KEY=$(az cognitiveservices account keys list --name "$OPENAI_NAME" --resource-group "$RG" --query key1 -o tsv)
           az keyvault secret set --vault-name "$KV" --name "OpenAIApiKey" --value "$OPENAI_KEY" --output none
@@ -282,7 +298,9 @@ jobs:
           echo "postgresDatabaseName=${{ steps.core-outputs.outputs.postgresDatabaseName }}"
           echo "openaiName=${{ steps.core-outputs.outputs.openaiName }}"
           echo "storageAccountName=${{ steps.core-outputs.outputs.storageAccountName }}"
-          echo "storageResourceId=${{ steps.core-outputs.outputs.storageResourceId }}"
+          echo "mongoHost=${{ steps.core-outputs.outputs.mongoHost }}"
+          echo "mongoClusterName=${{ steps.core-outputs.outputs.mongoClusterName }}"
+          echo "mongoAdministratorLogin=${{ steps.core-outputs.outputs.mongoAdministratorLogin }}"
 
   init-postgres:
     runs-on: ubuntu-latest

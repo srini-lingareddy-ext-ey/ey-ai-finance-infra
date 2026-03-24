@@ -6,6 +6,8 @@ targetScope = 'subscription'
 
 @secure()
 param administratorLoginPassword string
+@secure()
+param mongoAdministratorLoginPassword string
 param pocSlug string
 param location string = 'eastus'
 param openAIDeployments array = []
@@ -57,6 +59,7 @@ module mainResources 'core-resources.bicep' = {
     postgresqlVersion: postgresqlVersion
     citusVersion: citusVersion
     blobContainerNames: blobContainerNames
+    mongoAdministratorLoginPassword: mongoAdministratorLoginPassword
   }
 }
 
@@ -71,4 +74,6 @@ output appConfigStoreName string = mainResources.outputs.appConfigStoreName
 output postgresHost string = mainResources.outputs.postgresHost
 output postgresDatabaseName string = mainResources.outputs.postgresDatabaseName
 output storageAccountName string = mainResources.outputs.storageAccountName
-output storageResourceId string = mainResources.outputs.storageResourceId
+output mongoHost string = mainResources.outputs.mongoHost
+output mongoClusterName string = mainResources.outputs.mongoClusterName
+output mongoAdministratorLogin string = mainResources.outputs.mongoAdministratorLogin

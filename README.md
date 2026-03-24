@@ -44,22 +44,22 @@ Omit **EY_AI_FINANCE_REPO_TOKEN** only if you skip or replace the init step.
 
 GitHub’s OIDC token used by **azure/login** is short-lived. This job calls **azure/login** after **main.bicep** finishes and again before blob seeding so long ARM deploys and storage retries do not hit **AADSTS700024** (expired client assertion). See the [Deploy POC Workflow](https://github.com/ey-org/ey-ai-finance-infra/wiki/05.-Deploy-POC-Workflow) wiki page for the full step list and troubleshooting.
 
-| Step | What happens |
-| ---- | ----------------------------------------------------------------------------- |
-| 1    | Checks out this repo. |
-| 2    | **Azure login (OIDC)** using repository secrets. |
-| 3    | Deploys **main.bicep** at subscription scope: creates `rg-<pocSlug>-poc` and core resources (Key Vault, App Configuration, OpenAI, Postgres, Blob Storage). |
-| 4    | **Azure login (OIDC)** — refresh after the ARM deployment. |
-| 5    | Captures deployment outputs (resource group name, Key Vault name, App Config endpoint, Postgres host/DB, OpenAI name, storage account name/ID). |
-| 6    | Waits 30s for RBAC propagation. |
-| 7    | **Azure login (OIDC)** — refresh before storage and remaining CLI work. |
+| Step | What happens                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1    | Checks out this repo.                                                                                                                                                                                                                                                                                                                                                                                                                |
+| 2    | **Azure login (OIDC)** using repository secrets.                                                                                                                                                                                                                                                                                                                                                                                     |
+| 3    | Deploys **main.bicep** at subscription scope: creates `rg-<pocSlug>-poc` and core resources (Key Vault, App Configuration, OpenAI, Postgres, Blob Storage).                                                                                                                                                                                                                                                                          |
+| 4    | **Azure login (OIDC)** — refresh after the ARM deployment.                                                                                                                                                                                                                                                                                                                                                                           |
+| 5    | Captures deployment outputs (resource group name, Key Vault name, App Config endpoint, Postgres host/DB, OpenAI name, storage account name/ID).                                                                                                                                                                                                                                                                                      |
+| 6    | Waits 30s for RBAC propagation.                                                                                                                                                                                                                                                                                                                                                                                                      |
+| 7    | **Azure login (OIDC)** — refresh before storage and remaining CLI work.                                                                                                                                                                                                                                                                                                                                                              |
 | 8    | **Blob payload seeding:** relaxes storage networking (`az storage account update`: public access **Enabled**, default action **Allow**, bypass **AzureServices**), then polls until control plane shows **Allow** + **Enabled**, probes the **data plane** with `az storage container list` (retries with backoff), and uploads `{}` JSON blobs from `bicep/configs/blob_payloads.json` (quiet uploads; see **Blob storage** below). |
-| 9    | Sets Key Vault network default action to **Allow** so the runner can write secrets. |
-| 10   | Populates the POC Key Vault with **PostgresConnectionString** and **OpenAIApiKey**. |
-| 11   | Lists secret names in the vault (verify only; no values). |
-| 12   | Syncs App Configuration from `bicep/configs/backend_configs.yml` (label = `pocSlug`). |
-| 13   | Syncs blob payload path references into App Configuration via `scripts/sync_blob_payload_refs_to_appconfig.py`. |
-| 14   | Prints deployment outputs to the log. |
+| 9    | Sets Key Vault network default action to **Allow** so the runner can write secrets.                                                                                                                                                                                                                                                                                                                                                  |
+| 10   | Populates the POC Key Vault with **PostgresConnectionString** and **OpenAIApiKey**.                                                                                                                                                                                                                                                                                                                                                  |
+| 11   | Lists secret names in the vault (verify only; no values).                                                                                                                                                                                                                                                                                                                                                                            |
+| 12   | Syncs App Configuration from `bicep/configs/backend_configs.yml` (label = `pocSlug`).                                                                                                                                                                                                                                                                                                                                                |
+| 13   | Syncs blob payload path references into App Configuration via `scripts/sync_blob_payload_refs_to_appconfig.py`.                                                                                                                                                                                                                                                                                                                      |
+| 14   | Prints deployment outputs to the log.                                                                                                                                                                                                                                                                                                                                                                                                |
 
 **Job `init-postgres`:** checks out **ey-ai-finance** and runs `db/<appChoice>/init.sql`, then inserts a **tenant** row for `pocSlug`.
 
@@ -171,7 +171,7 @@ Optional Postgres overrides (e.g. coordinatorVCores, nodeCount, postgresqlVersio
 - **appConfigEndpoint**, **appConfigStoreName** — App Configuration (pass appConfigEndpoint to phase 3).
 - **postgresHost**, **postgresDatabaseName** — PostgreSQL.
 - **openaiEndpoint**, **openaiName** — Azure OpenAI.
-- **storageAccountName**, **storageResourceId** — Blob Storage account (optional containers via `blobContainerNames`).
+- **storageAccountName** — Blob Storage account name.
 
 ### Phase 3 (appservices-stack.bicep)
 
