@@ -1,9 +1,9 @@
 # Deploy main.bicep: resource group + Key Vault, App Configuration, OpenAI, Postgres, Blob Storage; run init.sql on Postgres; then deploy App Services.
 # Trigger manually and pass pocSlug (and optionally location, frontend/backend images, appChoice). Password and pipeline principal from GitHub secrets.
-# Required secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, POSTGRES_ADMIN_PASSWORD.
+# Required secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, POSTGRES_ADMIN_PASSWORD, MONGO_ADMIN_PASSWORD.
 #
-# OIDC note: GitHub’s ID token (client assertion for federated login) is only valid for a few minutes. Re-run azure/login after long ARM
-# deploys and before long storage/sync phases so later `az` calls do not fail with AADSTS700024 (assertion expired).
+# OIDC note: GitHub’s ID token (client assertion for federated login) is only valid for a few minutes. This job logs in once, then runs
+# azure/login again immediately after the subscription ARM deployment so later `az` calls do not fail with AADSTS700024 (assertion expired).
 # For init.sql: EY_AI_FINANCE_REPO_TOKEN (to checkout ey-ai-finance repo). For app services image pull: ACR_MANAGED_IDENTITY_CLIENT_ID.
 
 name: Deploy POC
@@ -82,7 +82,11 @@ jobs:
           LOCATION="${{ inputs.location }}"
           MANIFEST="bicep/configs/blob_payloads.json"
           BLOB_CONTAINERS=$(jq -c 'keys' "$MANIFEST")
-          MONGO_PW="${MONGO_PASSWORD:-$PG_PASSWORD}"
+
+          if [[ -z "${MONGO_PASSWORD}" ]]; then
+            echo "::error::MONGO_ADMIN_PASSWORD repository secret is not set. Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
 
           az deployment sub create \
             --location "$LOCATION" \
@@ -92,7 +96,7 @@ jobs:
               pocSlug="$POC_SLUG" \
               location="$LOCATION" \
               administratorLoginPassword="$PG_PASSWORD" \
-              mongoAdministratorLoginPassword="$MONGO_PW" \
+              mongoAdministratorLoginPassword="$MONGO_PASSWORD" \
               openAIDeployments='[]' \
               pocAppConfigKeyValues='[]' \
               blobContainerNames="$BLOB_CONTAINERS"
@@ -126,14 +130,81 @@ jobs:
       - name: Wait for RBAC Propagation
         run: echo "Waiting 30s for RBAC (contributor / Key Vault Data Access Administrator) to propagate..." && sleep 30
 
-      - name: Azure login (OIDC) — refresh before storage and remaining steps
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_POC_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_POC_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
+      - name: Allow Key Vault access from all networks
+        run: |
+          RG="${{ steps.core-outputs.outputs.resourceGroupName }}"
+          KV="${{ steps.core-outputs.outputs.keyVaultName }}"
+          az keyvault update --name "$KV" --resource-group "$RG" --default-action Allow
+          echo "Key Vault $KV: default-action set to Allow"
+
+      - name: Populate Key Vault with Secrets
+        env:
+          PG_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+          MONGO_PASSWORD: ${{ secrets.MONGO_ADMIN_PASSWORD }}
+        run: |
+          RG="${{ steps.core-outputs.outputs.resourceGroupName }}"
+          KV="${{ steps.core-outputs.outputs.keyVaultName }}"
+          PG_HOST="${{ steps.core-outputs.outputs.postgresHost }}"
+          PG_DB="${{ steps.core-outputs.outputs.postgresDatabaseName }}"
+          OPENAI_NAME="${{ steps.core-outputs.outputs.openaiName }}"
+          MONGO_HOST="${{ steps.core-outputs.outputs.mongoHost }}"
+          MONGO_USER="${{ steps.core-outputs.outputs.mongoAdministratorLogin }}"
+
+          if [[ -z "${MONGO_PASSWORD}" ]]; then
+            echo "::error::MONGO_ADMIN_PASSWORD repository secret is not set."
+            exit 1
+          fi
+
+          # Postgres connection string (Citus admin user is 'citus')
+          PG_CONN="postgresql://citus:${PG_PASSWORD}@${PG_HOST}:5432/${PG_DB}?sslmode=require"
+          az keyvault secret set --vault-name "$KV" --name "PostgresConnectionString" --value "$PG_CONN" --output none
+          echo "Set PostgresConnectionString in $KV"
+
+          MONGO_PW_ENC=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$MONGO_PASSWORD")
+          MONGO_CONN="mongodb+srv://${MONGO_USER}:${MONGO_PW_ENC}@${MONGO_HOST}/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000"
+          az keyvault secret set --vault-name "$KV" --name "MongoConnectionString" --value "$MONGO_CONN" --output none
+          echo "Set MongoConnectionString in $KV"
+
+          OPENAI_KEY=$(az cognitiveservices account keys list --name "$OPENAI_NAME" --resource-group "$RG" --query key1 -o tsv)
+          az keyvault secret set --vault-name "$KV" --name "OpenAIApiKey" --value "$OPENAI_KEY" --output none
+          echo "Set OpenAIApiKey in $KV"
+
+      - name: Verify Key Vault Secrets (Names Only)
+        run: |
+          KV="${{ steps.core-outputs.outputs.keyVaultName }}"
+          echo "Secret names in $KV:"
+          az keyvault secret list --vault-name "$KV" --query "[].name" -o tsv | tr '\t' '\n' | sed 's/^/  - /'
 
       # Storage may be locked down by policy after create; relax networking so the runner can reach the blob endpoint.
+      - name: Allow Blob Storage access from all networks
+        run: |
+          set -euo pipefail
+          RG="${{ steps.core-outputs.outputs.resourceGroupName }}"
+          SA="${{ steps.core-outputs.outputs.storageAccountName }}"
+
+          az storage account update \
+            --resource-group "$RG" \
+            --name "$SA" \
+            --public-network-access Enabled \
+            --default-action Allow \
+            --bypass AzureServices
+
+          echo "Waiting for storage network settings to propagate..."
+          for i in {1..20}; do
+            DEFAULT_ACTION=$(az storage account show --resource-group "$RG" --name "$SA" --query "networkRuleSet.defaultAction" -o tsv || true)
+            PUBLIC_ACCESS=$(az storage account show --resource-group "$RG" --name "$SA" --query "publicNetworkAccess" -o tsv || true)
+            if [[ "$DEFAULT_ACTION" == "Allow" && "$PUBLIC_ACCESS" == "Enabled" ]]; then
+              echo "Storage account $SA: public access Enabled, default network action Allow"
+              exit 0
+            fi
+            if [[ "$i" -eq 20 ]]; then
+              echo "Storage network settings did not converge in time."
+              exit 1
+            fi
+            echo "Sleeping 15s (network poll $i/20)..."
+            sleep 15
+          done
+
       - name: Create blob payload files (from blob_payloads.json)
         run: |
           set -euo pipefail
@@ -158,27 +229,6 @@ jobs:
             sleep "$actual"
             TOTAL_SLEEP=$((TOTAL_SLEEP + actual))
           }
-
-          az storage account update \
-            --resource-group "$RG" \
-            --name "$SA" \
-            --public-network-access Enabled \
-            --default-action Allow \
-            --bypass AzureServices
-
-          echo "Waiting for storage network settings to propagate..."
-          for i in {1..20}; do
-            DEFAULT_ACTION=$(az storage account show --resource-group "$RG" --name "$SA" --query "networkRuleSet.defaultAction" -o tsv || true)
-            PUBLIC_ACCESS=$(az storage account show --resource-group "$RG" --name "$SA" --query "publicNetworkAccess" -o tsv || true)
-            if [[ "$DEFAULT_ACTION" == "Allow" && "$PUBLIC_ACCESS" == "Enabled" ]]; then
-              break
-            fi
-            if [[ "$i" -eq 20 ]]; then
-              echo "Storage network settings did not converge in time."
-              exit 1
-            fi
-            sleep_with_budget 15 || exit 1
-          done
 
           CONN=$(az storage account show-connection-string --name "$SA" --resource-group "$RG" --query connectionString -o tsv)
           # Validate data-plane reachability before uploading many blobs.
@@ -230,47 +280,6 @@ jobs:
           done < <(jq -r 'to_entries[] | .key as $container | .value | to_entries[] | .key as $root | .value | to_entries[] | .key as $ver | .value | to_entries[] | .key as $segment | .value | to_entries[] | .key as $folder | .value[] | "\($container)\t{pocSlug}/\($root)/\($ver)/\($segment)/\($folder)/\(.)"' "$MANIFEST")
           rm -f "$TMP"
           echo "Seeded payload JSON blobs from ${MANIFEST} (containers: $(jq -r 'keys | join(", ")' "$MANIFEST"))"
-
-      - name: Allow Key Vault access from all networks
-        run: |
-          RG="${{ steps.core-outputs.outputs.resourceGroupName }}"
-          KV="${{ steps.core-outputs.outputs.keyVaultName }}"
-          az keyvault update --name "$KV" --resource-group "$RG" --default-action Allow
-          echo "Key Vault $KV: default-action set to Allow"
-
-      - name: Populate Key Vault with Secrets
-        env:
-          PG_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
-          MONGO_PASSWORD: ${{ secrets.MONGO_ADMIN_PASSWORD }}
-        run: |
-          RG="${{ steps.core-outputs.outputs.resourceGroupName }}"
-          KV="${{ steps.core-outputs.outputs.keyVaultName }}"
-          PG_HOST="${{ steps.core-outputs.outputs.postgresHost }}"
-          PG_DB="${{ steps.core-outputs.outputs.postgresDatabaseName }}"
-          OPENAI_NAME="${{ steps.core-outputs.outputs.openaiName }}"
-          MONGO_HOST="${{ steps.core-outputs.outputs.mongoHost }}"
-          MONGO_USER="${{ steps.core-outputs.outputs.mongoAdministratorLogin }}"
-          MONGO_PW="${MONGO_PASSWORD:-$PG_PASSWORD}"
-
-          # Postgres connection string (Citus admin user is 'citus')
-          PG_CONN="postgresql://citus:${PG_PASSWORD}@${PG_HOST}:5432/${PG_DB}?sslmode=require"
-          az keyvault secret set --vault-name "$KV" --name "PostgresConnectionString" --value "$PG_CONN" --output none
-          echo "Set PostgresConnectionString in $KV"
-
-          MONGO_PW_ENC=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$MONGO_PW")
-          MONGO_CONN="mongodb+srv://${MONGO_USER}:${MONGO_PW_ENC}@${MONGO_HOST}/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000"
-          az keyvault secret set --vault-name "$KV" --name "MongoConnectionString" --value "$MONGO_CONN" --output none
-          echo "Set MongoConnectionString in $KV"
-
-          OPENAI_KEY=$(az cognitiveservices account keys list --name "$OPENAI_NAME" --resource-group "$RG" --query key1 -o tsv)
-          az keyvault secret set --vault-name "$KV" --name "OpenAIApiKey" --value "$OPENAI_KEY" --output none
-          echo "Set OpenAIApiKey in $KV"
-
-      - name: Verify Key Vault Secrets (Names Only)
-        run: |
-          KV="${{ steps.core-outputs.outputs.keyVaultName }}"
-          echo "Secret names in $KV:"
-          az keyvault secret list --vault-name "$KV" --query "[].name" -o tsv | tr '\t' '\n' | sed 's/^/  - /'
 
       - name: Sync App Configuration from backend_configs.yml
         run: |
