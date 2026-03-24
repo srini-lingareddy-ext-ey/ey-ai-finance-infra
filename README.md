@@ -6,7 +6,9 @@ Azure infrastructure for EY AI Finance POC environments. Bicep templates deploy 
 
 ## How to run the workflow
 
-The **Deploy POC** workflow runs all phases in one go (core → Key Vault population → App Configuration sync → **Postgres init (init.sql)** → App Services). Run it manually from the GitHub Actions tab.
+The **Deploy POC** workflow runs all phases in one go (core deploy → **blob payload seeding** → Key Vault population → App Configuration sync → **Postgres init (init.sql)** → App Services). Run it manually from the GitHub Actions tab.
+
+**One-time run per `pocSlug`:** Intended as a **single bootstrap** for each new POC id. Re-running with the **same** `pocSlug` can conflict with existing resources, re-run `init.sql`, and overwrite blobs and App Config for that environment. Use a **new** `pocSlug` for a new stack; update existing POCs with deliberate, scoped changes instead of repeating the full workflow.
 
 ### 1. Prerequisites
 
@@ -30,7 +32,7 @@ Omit **EY_AI_FINANCE_REPO_TOKEN** only if you skip or replace the init step.
 2. Select **Deploy POC** in the left sidebar.
 3. Click **Run workflow**.
 4. Fill in the inputs:
-   - **pocSlug** (required): POC identifier, e.g. `test-main1`. The resource group will be `rg-<pocSlug>-poc`.
+   - **pocSlug** (required): POC identifier, e.g. `test-main1`. The resource group will be `rg-<pocSlug>-poc`. Must yield a valid Azure resource group name: **≤ 83 characters** (so total length ≤ 90), **unique in the subscription**, only allowed characters (letters, digits, `_-.()`), **no trailing `.`** on the full name. See **Naming** below.
    - **location** (optional): Azure region; default `eastus`.
    - **appChoice** (optional): App variant for init.sql; chooses `db/<appChoice>/init.sql` from the ey-ai-finance repo (`aifinance-next` or `aifinance`; default `aifinance-next`).
    - **frontendImage** / **backendImage** (optional): Container images for the web apps; defaults point at `creyaifinmain.azurecr.io`.
@@ -38,19 +40,24 @@ Omit **EY_AI_FINANCE_REPO_TOKEN** only if you skip or replace the init step.
 
 ### 3. What the workflow does
 
-| Step | What happens                                                                                                                                                                                                                                                                                                                 |
-| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1    | Deploys **main.bicep** at subscription scope: creates `rg-<pocSlug>-poc` and core resources (Key Vault, App Configuration, OpenAI, Postgres, Blob Storage).                                                                                                                                                                  |
-| 2    | Captures deployment outputs (resource group name, Key Vault name, App Config endpoint, Postgres host/DB, OpenAI name, storage account name/ID).                                                                                                                                                                              |
-| 3    | Waits 30s for RBAC propagation.                                                                                                                                                                                                                                                                                              |
-| 4    | Ensures the storage account allows public blob access (network rules), then seeds empty JSON payload blobs from [`bicep/configs/blob_payloads.json`](bicep/configs/blob_payloads.json) (top-level keys = **blob container** names; second level may be **`configs`**, **`data`**, etc. → versions → segments → `kpi`/`pnl`). |
-| 5    | Sets Key Vault default action to Allow.                                                                                                                                                                                                                                                                                      |
-| 6    | Populates the POC Key Vault with **PostgresConnectionString** and **OpenAIApiKey**.                                                                                                                                                                                                                                          |
-| 7    | Syncs App Configuration from `bicep/configs/backend_configs.yml` into the App Config store.                                                                                                                                                                                                                                  |
-| 8    | Syncs **blob payload path** keys to App Config for the **`tenants`** container (keys = `payloads:` + path after `/payloads/` with the last segment sans `.json`, e.g. `payloads:kpi:all` → `<pocSlug>/configs/v1/payloads/kpi/all.json`); see [`scripts/sync_blob_payload_refs_to_appconfig.py`](scripts/sync_blob_payload_refs_to_appconfig.py). |
-| 9    | Runs **init.sql** on the new Postgres: checks out the **ey-ai-finance** repo and executes `db/<appChoice>/init.sql` (creates schema/tables).                                                                                                                                                                                 |
-| 10   | Inserts a row into **`tenant`** for this POC: **`id`** = next after `MAX(id)`, **`name`** and **`storage_path`** = **`pocSlug`**, **`created_at`** / **`updated_at`** = current timestamp (microsecond precision, `timestamp without time zone`), **`is_active`** = true, **`metadata`** = NULL. Requires a **`tenant`** table from **init.sql**. |
-| 11   | Deploys **appservices-stack.bicep** into the resource group (frontend and backend App Services).                                                                                                                                                                                                                             |
+**Job `deploy-main-resources`** (single runner; order matches the workflow file):
+
+| Step | What happens |
+| ---- | ----------------------------------------------------------------------------- |
+| 1    | Deploys **main.bicep** at subscription scope: creates `rg-<pocSlug>-poc` and core resources (Key Vault, App Configuration, OpenAI, Postgres, Blob Storage). |
+| 2    | Captures deployment outputs (resource group name, Key Vault name, App Config endpoint, Postgres host/DB, OpenAI name, storage account name/ID). |
+| 3    | Waits 30s for RBAC propagation. |
+| 4    | **Blob payload seeding:** relaxes storage networking (`az storage account update`: public access **Enabled**, default action **Allow**, bypass **AzureServices**), then polls until control plane shows **Allow** + **Enabled**, probes the **data plane** with `az storage container list` (retries with backoff), and uploads `{}` JSON blobs from `bicep/configs/blob_payloads.json` (quiet uploads; see **Blob storage** below). |
+| 5    | Sets Key Vault network default action to **Allow** so the runner can write secrets. |
+| 6    | Populates the POC Key Vault with **PostgresConnectionString** and **OpenAIApiKey**. |
+| 7    | Lists secret names in the vault (verify only; no values). |
+| 8    | Syncs App Configuration from `bicep/configs/backend_configs.yml` (label = `pocSlug`). |
+| 9    | Syncs blob payload path references into App Configuration via `scripts/sync_blob_payload_refs_to_appconfig.py`. |
+| 10   | Prints deployment outputs to the log. |
+
+**Job `init-postgres`:** checks out **ey-ai-finance** and runs `db/<appChoice>/init.sql`, then inserts a **tenant** row for `pocSlug`.
+
+**Job `deploy-app-services`:** deploys **appservices-stack.bicep** (frontend and backend App Services).
 
 When it finishes, the POC resource group contains the full stack and the apps pull images from the central ACR using **acr-managed-identity**.
 
@@ -61,7 +68,7 @@ When it finishes, the POC resource group contains the full stack and the apps pu
 - **Central ACR:** Registry **creyaifinmain** in resource group **rg-eyaifin-acr** (resource IDs are hardcoded in the templates).
 - **ACR pull:** User-assigned managed identity **acr-managed-identity** in **rg-eyaifin-acr** has **AcrPull** on the registry. App Services use this identity (and **Key Vault Secrets User** on each POC Key Vault).
 - **App Configuration:** If you deploy App Configuration (via workflow or Bicep) and get a **Forbidden** error, ensure the identity has **App Configuration Data Owner** on the resource group (or the App Configuration store), and **Contributor** to create the store.
-- **Blob storage “blocked by network rules”:** The workflow runs `az storage account update` to set **public network access = Enabled** and **default network action = Allow** before uploading seed blobs (GitHub-hosted runners need this). If **Azure Policy** (or manual changes) forces **Deny** or **public access disabled**, the update or upload can still fail. Fix: add a policy exception for POC storage accounts, use a **self-hosted runner** in a network that is allowed, or seed blobs manually from the Azure portal / Storage Explorer while your IP is allowed.
+- **Blob storage “blocked by network rules”:** The workflow runs `az storage account update` to set **public network access = Enabled** and **default network action = Allow**, then **polls** the account until those settings are visible, **retries** data-plane checks and per-blob uploads with increasing delays. **Total sleep** for those waits (network propagation, data-plane probe, upload retries) is **capped at 5 minutes (300s)**; if the budget is exhausted you will see `Sleep budget exhausted (300s). Aborting.` If **Azure Policy** (or manual changes) keeps forcing **Deny** or **public access disabled**, the step can still fail after retries. Fix: policy exception for POC storage accounts, align firewall rules, or use a **self-hosted runner** in an allowed network. **Logs:** expect lines such as `Waiting for storage network settings to propagate...`, optional Azure `ERROR:` text when the data plane is still blocked, `Data-plane not ready yet; retrying in …`, `Sleeping … (budget used: …/300s)`, then `Storage data-plane connectivity is ready.` Individual blob uploads are **silent**; on success you should see one summary line: `Seeded payload JSON blobs from bicep/configs/blob_payloads.json (containers: …)`.
 - **Redeploy same `pocSlug` / `blobStorage` error:** If deployment fails with **“Blob Delete Retention policy days should be longer than Point In Time Restore policy days”**, Azure requires **blob soft-delete retention to be strictly longer than PITR days** (e.g. both set to 7 is invalid). **`blobStorage.bicep`** turns **PITR off** and sets **blob soft-delete to 14 days** so updates pass. If it still fails, check **Data protection** on the storage account in the portal.
 
 ---
@@ -75,24 +82,10 @@ If you prefer to run Bicep locally or in your own pipeline:
 ```bash
 az deployment sub create \
   --location eastus \
-  --template-file bicep/main.bicep \
-  --parameters bicep/parameters/main.parameters.json
+  --template-file bicep/main.bicep
 ```
 
-Or pass parameters inline (workflow-style, no Key Vault/App Config key-values):
-
-```bash
-az deployment sub create \
-  --location eastus \
-  --template-file bicep/main.bicep \
-  --parameters \
-    pocSlug=mypoc \
-    location=eastus \
-    administratorLoginPassword='YOUR_SECURE_PASSWORD' \
-    openAIDeployments='[]' \
-    pocAppConfigKeyValues='[]' \
-    blobContainerNames='[]'
-```
+The CLI will prompt for template parameters as needed. You can also pass a parameters JSON file with `--parameters`, for example `--parameters @bicep/parameters/main.parameters.json`, or supply individual values with `--parameters key=value` (see [Parameters (summary)](#parameters-summary) for `main.bicep`).
 
 Resource group name will be **rg-<pocSlug>-poc** (e.g. `rg-mypoc-poc`).
 
@@ -119,14 +112,18 @@ Set `keyVaultName` and `appConfigEndpoint` in the parameters file (or override o
 - **core-resources.bicep** — Resource group scope: invoked by main.bicep; deploys the five core modules. Not run standalone in the normal flow.
 - **appservices-stack.bicep** — Resource group scope: deploys the App Service plan and frontend/backend web apps; call after core is deployed and Key Vault is populated.
 
-Standalone module for RG only: **bicep/modules/resourceGroup.bicep** (subscription scope, creates only `rg-<pocSlug>-poc`). For per-module docs and commands, see the wiki (e.g. **stack_template.md**, **bicep_templates.md**).
+Standalone module for RG only: **bicep/modules/resourceGroup.bicep** (subscription scope, creates only `rg-<pocSlug>-poc`). For per-module docs, stack composition, and the Deploy POC workflow, see the repository **wiki** (e.g. [Quick start: Deploy POC](https://github.com/ey-org/ey-ai-finance-infra/wiki/02.-Quick-Start-%E2%80%90-Deploy-POC), [Bicep Templates](https://github.com/ey-org/ey-ai-finance-infra/wiki/03.-Bicep-Templates), [Stack Bicep Templates](https://github.com/ey-org/ey-ai-finance-infra/wiki/04.-Stack-Bicep-Templates)).
 
 ---
 
 ## Naming
 
-- **Resource group:** `rg-<pocSlug>-poc` (e.g. `rg-mypoc-poc`).
-- **Resources in the RG:** `<resource-name>-<pocSlug>-poc` (e.g. `appconfig-mypoc-poc`, `kv-mypoc-poc`, `pg-mypoc-poc`). App Services: `frontend-<pocSlug>`, `backend-<pocSlug>`. Storage account: `st<slug>poc<unique>` (globally unique; lowercase, no hyphens).
+- **Resource group:** `rg-<pocSlug>-poc` (e.g. `rg-mypoc-poc`). Azure rules for that **full** name:
+  - **Unique within the subscription only** (not globally unique).
+  - **Length:** 1–90 characters → with `rg-` and `-poc`, use **`pocSlug` ≤ 83** characters.
+  - **Allowed in the RG name:** letters, digits, `_`, `-`, `.`, `(`, `)` — avoid spaces, `@`, `/`, and other symbols in `pocSlug` so the composed name stays valid.
+  - **Must not end with** a period (`.`); the `-poc` suffix normally satisfies this.
+- **Resources in the RG:** `<resource-name>-<pocSlug>-poc` (e.g. `appconfig-mypoc-poc`, `kv-mypoc-poc`, `pg-mypoc-poc`). App Services: `frontend-<pocSlug>`, `backend-<pocSlug>`. Storage account: `st<slug>poc<unique>` (globally unique; lowercase, no hyphens). Each resource type may impose **additional** constraints beyond the resource group rules.
 
 ---
 

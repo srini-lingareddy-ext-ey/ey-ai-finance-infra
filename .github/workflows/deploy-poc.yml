@@ -146,7 +146,6 @@ jobs:
           for i in {1..20}; do
             DEFAULT_ACTION=$(az storage account show --resource-group "$RG" --name "$SA" --query "networkRuleSet.defaultAction" -o tsv || true)
             PUBLIC_ACCESS=$(az storage account show --resource-group "$RG" --name "$SA" --query "publicNetworkAccess" -o tsv || true)
-            echo "Attempt ${i}/20: defaultAction=${DEFAULT_ACTION}, publicNetworkAccess=${PUBLIC_ACCESS}"
             if [[ "$DEFAULT_ACTION" == "Allow" && "$PUBLIC_ACCESS" == "Enabled" ]]; then
               break
             fi
@@ -190,12 +189,14 @@ jobs:
                 --name "$path" \
                 --content-type "application/json" \
                 --file "$TMP" \
-                --overwrite; then
+                --overwrite \
+                --no-progress \
+                --output none \
+                >/dev/null 2>&1; then
                 uploaded=true
                 break
               fi
               WAIT=$((i * 10))
-              echo "Upload failed for ${CONTAINER}/${path} (attempt ${i}/8). Retrying in ${WAIT}s..."
               sleep_with_budget "$WAIT" || exit 1
             done
             if [[ "$uploaded" != true ]]; then
@@ -204,7 +205,6 @@ jobs:
             fi
           done < <(jq -r 'to_entries[] | .key as $container | .value | to_entries[] | .key as $root | .value | to_entries[] | .key as $ver | .value | to_entries[] | .key as $segment | .value | to_entries[] | .key as $folder | .value[] | "\($container)\t{pocSlug}/\($root)/\($ver)/\($segment)/\($folder)/\(.)"' "$MANIFEST")
           rm -f "$TMP"
-          echo "Total sleep used in blob seeding step: ${TOTAL_SLEEP}s/${MAX_TOTAL_SLEEP}s"
           echo "Seeded payload JSON blobs from ${MANIFEST} (containers: $(jq -r 'keys | join(", ")' "$MANIFEST"))"
 
       - name: Allow Key Vault access from all networks
