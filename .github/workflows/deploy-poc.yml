@@ -47,7 +47,7 @@ on:
         type: string
         default: "DOCKER|creyaifinmain.azurecr.io/aifinance-backend:latest"
       enableMicrosoftEntraAuthentication:
-        description: "If true, configure Microsoft Entra on frontend/backend App Services using MICROSOFT_PROVIDER_* secrets (requires APP_ID + tenant). If false, deploy with no Entra app settings or Easy Auth regardless of secrets."
+        description: "If true, configure EY Microsoft Entra on frontend/backend App Services. If false, deploy with no Entra app settings or Easy Auth."
         required: true
         type: boolean
         default: true
@@ -350,6 +350,7 @@ jobs:
           INIT_SQL="ey-ai-finance/db/${{ inputs.appChoice }}/init.sql"
           PG_HOST="${{ needs.deploy-main-resources.outputs.postgresHost }}"
           PG_DB="${{ needs.deploy-main-resources.outputs.postgresDatabaseName }}"
+          SCHEMA_SRC="${GITHUB_WORKSPACE}/ey-ai-finance/schemas"
 
           echo "Connecting to: ${PG_HOST}"
           echo "Database: ${PG_DB}"
@@ -359,6 +360,15 @@ jobs:
           if [[ ! -f "${INIT_SQL}" ]]; then
             echo "Error: ${INIT_SQL} not found"
             exit 1
+          fi
+
+          # init.sql may use \\i /schemas/... (absolute paths). psql resolves those on the runner filesystem, not inside the repo.
+          # Symlink /schemas -> checkout so those includes work without changing ey-ai-finance.
+          if [[ -d "${SCHEMA_SRC}" ]]; then
+            sudo ln -sfn "${SCHEMA_SRC}" /schemas
+            echo "Linked /schemas -> ${SCHEMA_SRC}"
+          else
+            echo "::notice title=No ey-ai-finance/schemas::${SCHEMA_SRC} missing — if init.sql uses \\i /schemas/..., that step will fail. Add schemas/ to ey-ai-finance or use repo-relative \\i paths."
           fi
 
           psql "host=${PG_HOST} port=5432 dbname=${PG_DB} user=citus sslmode=require" \
