@@ -191,4 +191,5 @@ Optional Postgres overrides (e.g. coordinatorVCores, nodeCount, postgresqlVersio
 
 - App Services pull images from **creyaifinmain** using the shared managed identity **acr-managed-identity**.
 - The workflow (or your pipeline) populates Key Vault in phase 2; App Services read secrets at runtime from Key Vault.
+- **Frontend → backend URL:** The frontend Web App sets **`BACKEND_ENDPOINT_BASE`** to the default backend URL; **`RUNNING_IN_DOCKER`** comes from the **`aifinance-next` frontend Dockerfile** so `env-manager.ts` uses that base for **`/api/*`** proxy (e.g. **`/api/health`** → backend **`/health`**).
 - **Health checks:** Frontend probe path **`/api/health`**; backend **`/health`**. Azure sends **`GET`** on that path **with no `Authorization` header** — each app must return HTTP **2xx** without requiring auth on the probe route (e.g. exempt it in FastAPI). Otherwise the platform may mark instances unhealthy.
