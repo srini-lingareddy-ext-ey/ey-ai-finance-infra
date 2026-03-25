@@ -1,0 +1,98 @@
+{
+  "tenant": {
+    "id": 2,
+    "key": "mighty_devs",
+    "slug": "mighty-devs",
+    "name": "Mighty Devs",
+    "mockDate": "2025-06-01"
+  },
+  "branding": {
+    "logo": "/logos/mighty-devs.png",
+    "theme": "mighty-devs"
+  },
+  "filters": {
+    "available": [
+      "year",
+      "period",
+      "businessUnit",
+      "productGroup",
+      "geography"
+    ],
+    "periodType": "quarters",
+    "entities": [
+      {
+        "id": "businessUnit",
+        "label": "Segment",
+        "level": 1,
+        "includeRoot": true
+      },
+      {
+        "id": "productGroup",
+        "label": "Product Group",
+        "level": 2,
+        "includeRoot": false
+      }
+    ]
+  },
+  "pages": {
+    "financialOverview": {
+      "filters": {
+        "show": [
+          "year",
+          "period",
+          "businessUnit",
+          "geography"
+        ]
+      },
+      "components": {
+        "kpiBar": {
+          "enabled": true
+        }
+      },
+      "layout": {
+        "type": "twoColumn",
+        "columns": {
+          "leftSpan": 8,
+          "rightSpan": 4
+        }
+      },
+      "cards": [
+        {
+          "id": "pnlVariances",
+          "type": "varianceCard",
+          "column": "left",
+          "config": {
+            "title": "Volume & Revenue Variances"
+          }
+        },
+        {
+          "id": "financialForecasting",
+          "type": "forecastCard",
+          "column": "left",
+          "config": {
+            "title": "Financial Forecasting"
+          }
+        },
+        {
+          "id": "financialReport",
+          "type": "reportCard",
+          "column": "right",
+          "config": {
+            "lineItemCode": "net_revenue",
+            "timeGranularity": "quarter",
+            "breakdownBy": "entity",
+            "versionCode": "Actual"
+          }
+        },
+        {
+          "id": "scenarioPlanning",
+          "type": "scenarioCard",
+          "column": "right",
+          "config": {
+            "title": "Scenario Planning"
+          }
+        }
+      ]
+    }
+  }
+}
