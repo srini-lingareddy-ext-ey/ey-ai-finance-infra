@@ -350,11 +350,12 @@ jobs:
           INIT_SQL="ey-ai-finance/db/${{ inputs.appChoice }}/init.sql"
           PG_HOST="${{ needs.deploy-main-resources.outputs.postgresHost }}"
           PG_DB="${{ needs.deploy-main-resources.outputs.postgresDatabaseName }}"
-          SCHEMA_SRC="${GITHUB_WORKSPACE}/ey-ai-finance/schemas"
+          WS="${GITHUB_WORKSPACE}"
+          APP_CHOICE="${{ inputs.appChoice }}"
 
           echo "Connecting to: ${PG_HOST}"
           echo "Database: ${PG_DB}"
-          echo "Schema: ${{ inputs.appChoice }}"
+          echo "Schema: ${APP_CHOICE}"
           echo "Script: ${INIT_SQL}"
 
           if [[ ! -f "${INIT_SQL}" ]]; then
@@ -362,13 +363,30 @@ jobs:
             exit 1
           fi
 
-          # init.sql may use \\i /schemas/... (absolute paths). psql resolves those on the runner filesystem, not inside the repo.
-          # Symlink /schemas -> checkout so those includes work without changing ey-ai-finance.
-          if [[ -d "${SCHEMA_SRC}" ]]; then
+          # init.sql may use \\i /schemas/... — paths are on the runner. Symlink /schemas -> directory that contains forecasts/, llm/, etc.
+          SCHEMA_SRC=""
+          for d in \
+            "${WS}/ey-ai-finance/schemas" \
+            "${WS}/ey-ai-finance/db/${APP_CHOICE}/schemas" \
+            "${WS}/ey-ai-finance/db/schemas"
+          do
+            if [[ -d "${d}/forecasts" ]]; then
+              SCHEMA_SRC="${d}"
+              break
+            fi
+          done
+          if [[ -z "${SCHEMA_SRC}" ]]; then
+            FOUND=$(find "${WS}/ey-ai-finance" -type f -path '*/forecasts/create_schema.sql' 2>/dev/null | head -1 || true)
+            if [[ -n "${FOUND}" ]]; then
+              SCHEMA_SRC="$(dirname "$(dirname "${FOUND}")")"
+            fi
+          fi
+          if [[ -n "${SCHEMA_SRC}" ]]; then
             sudo ln -sfn "${SCHEMA_SRC}" /schemas
             echo "Linked /schemas -> ${SCHEMA_SRC}"
           else
-            echo "::notice title=No ey-ai-finance/schemas::${SCHEMA_SRC} missing — if init.sql uses \\i /schemas/..., that step will fail. Add schemas/ to ey-ai-finance or use repo-relative \\i paths."
+            echo "::error::Could not find schema SQL layout for \\i /schemas/... — expected a directory containing forecasts/ (e.g. ey-ai-finance/schemas or ey-ai-finance/db/${APP_CHOICE}/schemas) with forecasts/create_schema.sql. Commit those files in ey-ai-finance or change \\i to repo-relative paths."
+            exit 1
           fi
 
           psql "host=${PG_HOST} port=5432 dbname=${PG_DB} user=citus sslmode=require" \
