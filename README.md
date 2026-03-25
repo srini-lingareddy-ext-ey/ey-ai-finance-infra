@@ -36,6 +36,7 @@ Omit **EY_AI_FINANCE_REPO_TOKEN** only if you skip or replace the init step.
    - **location** (optional): Azure region; default `eastus`.
    - **appChoice** (optional): App variant for init.sql; chooses `db/<appChoice>/init.sql` from the ey-ai-finance repo (`aifinance-next` or `aifinance`; default `aifinance-next`).
    - **frontendImage** / **backendImage** (optional): Container images for the web apps; defaults point at `creyaifinmain.azurecr.io`.
+   - **enableMicrosoftEntraAuthentication** (optional, default **true**): When **false**, App Services deploy **without** Microsoft Entra app settings or Easy Auth (ignores `MICROSOFT_PROVIDER_*` for that run). When **true**, requires **`MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID`** (and tenant); see the [Deploy POC Workflow](https://github.com/ey-org/ey-ai-finance-infra/wiki/05.-Deploy-POC-Workflow) wiki.
 5. Click **Run workflow** (green button).
 
 ### 3. What the workflow does
@@ -63,7 +64,7 @@ GitHub’s OIDC token used by **azure/login** is short-lived. This job calls **a
 
 **Job `init-postgres`:** checks out **ey-ai-finance** and runs `db/<appChoice>/init.sql`, then inserts a **tenant** row for `pocSlug`.
 
-**Job `deploy-app-services`:** deploys **appservices-stack.bicep** (frontend and backend App Services).
+**Job `deploy-app-services`:** deploys **appservices-stack.bicep** (frontend and backend App Services). Microsoft Entra on the Web Apps runs only when **`enableMicrosoftEntraAuthentication`** is **true** (workflow input).
 
 When it finishes, the POC resource group contains the full stack and the apps pull images from the central ACR using **acr-managed-identity**.
 
@@ -190,4 +191,4 @@ Optional Postgres overrides (e.g. coordinatorVCores, nodeCount, postgresqlVersio
 
 - App Services pull images from **creyaifinmain** using the shared managed identity **acr-managed-identity**.
 - The workflow (or your pipeline) populates Key Vault in phase 2; App Services read secrets at runtime from Key Vault.
-- **Health checks:** Both frontend and backend web apps have App Service health checks enabled with probe path **`/api/health`**. Each app must expose a `GET /api/health` endpoint that returns HTTP 2xx when healthy; otherwise the platform may mark instances unhealthy and avoid routing traffic to them.
+- **Health checks:** Both frontend and backend web apps use probe path **`/api/health`**. Azure sends **`GET /api/health` with no `Authorization` header** — implement that route in each app so it returns HTTP **2xx** without requiring auth (e.g. exempt it from FastAPI JWT middleware). Otherwise the platform may mark instances unhealthy.

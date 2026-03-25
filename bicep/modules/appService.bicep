@@ -26,7 +26,7 @@ param frontendPublicBaseUrl string = ''
 @description('Azure HTTP health probe path for the frontend. Default /api/health; use / if the app has no API health route.')
 param frontendHealthCheckPath string = '/api/health'
 
-@description('Azure HTTP health probe path for the backend. Azure sends GET with no headers — if your API (e.g. FastAPI) requires Authorization on all routes, either exempt /api/health in code or pass empty string "" to disable the platform probe.')
+@description('Azure HTTP health probe path for the backend. The probe sends GET with no Authorization header — the API must allow anonymous GET on this path (e.g. exempt /api/health in FastAPI). Pass empty string only to omit the platform probe (manual/az override).')
 param backendHealthCheckPath string = '/api/health'
 
 var appServicePlanName = 'asp-${pocSlug}'

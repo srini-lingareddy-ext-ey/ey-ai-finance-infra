@@ -1,14 +1,14 @@
 # Deploy main.bicep: resource group + Key Vault, App Configuration, OpenAI, Postgres, Blob Storage; run init.sql on Postgres; then deploy App Services.
 # Trigger manually and pass pocSlug (and optionally location, frontend/backend images, appChoice). Password and pipeline principal from GitHub secrets.
 # Required secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, POSTGRES_ADMIN_PASSWORD, MONGO_ADMIN_PASSWORD.
-# Optional (Microsoft Entra): MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID and MICROSOFT_PROVIDER_AUTHENTICATION_SECRET (repo secrets).
-# Tenant from AZURE_POC_TENANT_ID. With APP_ID + secret + base URL, Bicep enables Easy Auth (authsettingsV2); client ID and issuer are
-# stored there — only the client secret is added as an app setting (MICROSOFT_PROVIDER_CLIENT_SECRET). If APP_ID is set but the secret
-# is omitted, Bicep adds MICROSOFT_PROVIDER_* + WEBAPP_PUBLIC_BASE_URL for app-managed auth instead (no Authentication blade). Register:
+# Microsoft Entra on App Services is controlled by workflow input **enableMicrosoftEntraAuthentication** (not by “are secrets set?”).
+# When false: no Entra app settings and no Easy Auth, even if MICROSOFT_PROVIDER_* secrets exist.
+# When true: requires MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID and AZURE_POC_TENANT_ID. Optional MICROSOFT_PROVIDER_AUTHENTICATION_SECRET —
+# with secret + base URL, Bicep enables Easy Auth (authsettingsV2); without secret, app-managed MICROSOFT_PROVIDER_* + WEBAPP_PUBLIC_BASE_URL only.
+# Register redirect URIs:
 #   https://eyaifinance-<pocSlug>.azurewebsites.net/.auth/login/aad/callback
 #   https://eyaifinance-backend-<pocSlug>.azurewebsites.net/.auth/login/aad/callback
-# If APP_ID is set but the client secret is missing, only app settings are applied — Easy Auth is not enabled. Use repository secrets
-# (this job has no environment:).
+# Repository secrets only; this job has no environment:.
 #
 # OIDC note: GitHub’s ID token (client assertion for federated login) is only valid for a few minutes. This job logs in once, then runs
 # azure/login again immediately after the subscription ARM deployment so later `az` calls do not fail with AADSTS700024 (assertion expired).
@@ -46,11 +46,11 @@ on:
         required: true
         type: string
         default: "DOCKER|creyaifinmain.azurecr.io/aifinance-backend:latest"
-      disableBackendHealthProbe:
-        description: "If true, disables Azure HTTP health check on the backend (e.g. FastAPI returns Missing Authorization on /api/health — probe cannot send headers). Prefer fixing the API to allow anonymous GET /api/health."
+      enableMicrosoftEntraAuthentication:
+        description: "If true, configure Microsoft Entra on frontend/backend App Services using MICROSOFT_PROVIDER_* secrets (requires APP_ID + tenant). If false, deploy with no Entra app settings or Easy Auth regardless of secrets."
         required: true
         type: boolean
-        default: false
+        default: true
 
 env:
   AZURE_CLIENT_ID: ${{ secrets.AZURE_POC_CLIENT_ID }}
@@ -77,7 +77,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout infra repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Azure login (OIDC)
         uses: azure/login@v2
@@ -331,7 +331,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout ey-ai-finance repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: ${{ github.repository_owner }}/ey-ai-finance
           path: ey-ai-finance
@@ -406,7 +406,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Azure login (OIDC)
         uses: azure/login@v2
@@ -419,6 +419,7 @@ jobs:
         env:
           MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID: ${{ secrets.MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID }}
           MICROSOFT_PROVIDER_AUTHENTICATION_SECRET: ${{ secrets.MICROSOFT_PROVIDER_AUTHENTICATION_SECRET }}
+          AZURE_POC_TENANT_ID: ${{ secrets.AZURE_POC_TENANT_ID }}
         run: |
           set -euo pipefail
           RG="${{ needs.deploy-main-resources.outputs.resourceGroupName }}"
@@ -426,20 +427,33 @@ jobs:
           APP_CFG="${{ needs.deploy-main-resources.outputs.appConfigEndpoint }}"
           POC_SLUG="${{ inputs.pocSlug }}"
           FRONTEND_BASE="https://eyaifinance-${POC_SLUG}.azurewebsites.net"
+          ENTRA_ON="${{ inputs.enableMicrosoftEntraAuthentication }}"
 
-          if [[ -z "${MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID:-}" ]]; then
-            echo "::notice title=Microsoft Entra skipped::MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID is not set — no auth app settings and no Easy Auth."
-          elif [[ -z "${MICROSOFT_PROVIDER_AUTHENTICATION_SECRET:-}" ]]; then
-            echo "::notice title=App-managed auth env vars::Secret empty — deploying MICROSOFT_PROVIDER_* + WEBAPP_PUBLIC_BASE_URL only (no Easy Auth). Add MICROSOFT_PROVIDER_AUTHENTICATION_SECRET to enable the portal Authentication blade."
-          else
-            echo "Microsoft Entra: Easy Auth on frontend + backend; only MICROSOFT_PROVIDER_CLIENT_SECRET is added as an app setting (plus shared App Config / Key Vault settings)."
-          fi
+          MS_APP_ID=""
+          MS_SECRET=""
+          MS_TENANT=""
+          FRONTEND_AUTH_BASE=""
 
-          if [[ "${{ inputs.disableBackendHealthProbe }}" == "true" ]]; then
-            BACKEND_HEALTH_PATH=""
-            echo "Backend Azure HTTP health probe disabled (disableBackendHealthProbe=true). Prefer allowing anonymous GET /api/health in the API."
+          if [[ "$ENTRA_ON" == "false" ]]; then
+            echo "::notice title=Microsoft Entra off::enableMicrosoftEntraAuthentication is false — no Entra app settings or Easy Auth (MICROSOFT_PROVIDER_* secrets are ignored for this deploy)."
           else
-            BACKEND_HEALTH_PATH="/api/health"
+            if [[ -z "${MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID:-}" ]]; then
+              echo "::error::enableMicrosoftEntraAuthentication is true but MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID is not set. Add the repository secret or run with enableMicrosoftEntraAuthentication false."
+              exit 1
+            fi
+            if [[ -z "${AZURE_POC_TENANT_ID:-}" ]]; then
+              echo "::error::enableMicrosoftEntraAuthentication is true but AZURE_POC_TENANT_ID is not set."
+              exit 1
+            fi
+            MS_APP_ID="${MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID}"
+            MS_TENANT="${AZURE_POC_TENANT_ID}"
+            MS_SECRET="${MICROSOFT_PROVIDER_AUTHENTICATION_SECRET:-}"
+            FRONTEND_AUTH_BASE="$FRONTEND_BASE"
+            if [[ -z "${MICROSOFT_PROVIDER_AUTHENTICATION_SECRET:-}" ]]; then
+              echo "::notice title=App-managed auth::MICROSOFT_PROVIDER_AUTHENTICATION_SECRET empty — MICROSOFT_PROVIDER_* + WEBAPP_PUBLIC_BASE_URL only (no Easy Auth). Add the secret for authsettingsV2."
+            else
+              echo "Microsoft Entra: Easy Auth on frontend + backend (MICROSOFT_PROVIDER_CLIENT_SECRET app setting plus shared App Config / Key Vault)."
+            fi
           fi
 
           az deployment group create \
@@ -453,9 +467,9 @@ jobs:
               frontendImage='${{ inputs.frontendImage }}' \
               backendImage='${{ inputs.backendImage }}' \
               acrManagedIdentityClientId='${{ secrets.ACR_MANAGED_IDENTITY_CLIENT_ID }}' \
-              microsoftIdentityClientId="${MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID:-}" \
-              microsoftIdentityTenantId='${{ secrets.AZURE_POC_TENANT_ID }}' \
-              microsoftIdentityClientSecret="${MICROSOFT_PROVIDER_AUTHENTICATION_SECRET:-}" \
-              frontendPublicBaseUrl="$FRONTEND_BASE" \
+              microsoftIdentityClientId="$MS_APP_ID" \
+              microsoftIdentityTenantId="$MS_TENANT" \
+              microsoftIdentityClientSecret="$MS_SECRET" \
+              frontendPublicBaseUrl="$FRONTEND_AUTH_BASE" \
               frontendHealthCheckPath='/api/health' \
-              backendHealthCheckPath="$BACKEND_HEALTH_PATH"
+              backendHealthCheckPath='/api/health'

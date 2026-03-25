@@ -39,7 +39,7 @@ param frontendPublicBaseUrl string = ''
 @description('Frontend Web App health probe path (default /api/health; requires that route in the frontend app).')
 param frontendHealthCheckPath string = '/api/health'
 
-@description('Backend Web App health probe path. Use empty string to disable the probe when the API requires Authorization on all routes (FastAPI, etc.).')
+@description('Backend Web App health probe path. Default /api/health — backend must respond with HTTP 2xx without Authorization (fix the API). Empty string omits the probe (manual deployments only).')
 param backendHealthCheckPath string = '/api/health'
 
 // Central ACR identity (acr-managed-identity in rg-eyaifin-acr) — hardcoded for this subscription.
