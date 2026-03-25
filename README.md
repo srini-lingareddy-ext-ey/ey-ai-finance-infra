@@ -191,4 +191,4 @@ Optional Postgres overrides (e.g. coordinatorVCores, nodeCount, postgresqlVersio
 
 - App Services pull images from **creyaifinmain** using the shared managed identity **acr-managed-identity**.
 - The workflow (or your pipeline) populates Key Vault in phase 2; App Services read secrets at runtime from Key Vault.
-- **Health checks:** Both frontend and backend web apps use probe path **`/api/health`**. Azure sends **`GET /api/health` with no `Authorization` header** — implement that route in each app so it returns HTTP **2xx** without requiring auth (e.g. exempt it from FastAPI JWT middleware). Otherwise the platform may mark instances unhealthy.
+- **Health checks:** Frontend probe path **`/api/health`**; backend **`/health`**. Azure sends **`GET`** on that path **with no `Authorization` header** — each app must return HTTP **2xx** without requiring auth on the probe route (e.g. exempt it in FastAPI). Otherwise the platform may mark instances unhealthy.

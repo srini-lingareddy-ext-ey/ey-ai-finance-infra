@@ -26,8 +26,8 @@ param frontendPublicBaseUrl string = ''
 @description('Azure HTTP health probe path for the frontend. Default /api/health; use / if the app has no API health route.')
 param frontendHealthCheckPath string = '/api/health'
 
-@description('Azure HTTP health probe path for the backend. The probe sends GET with no Authorization header — the API must allow anonymous GET on this path (e.g. exempt /api/health in FastAPI). Pass empty string only to omit the platform probe (manual/az override).')
-param backendHealthCheckPath string = '/api/health'
+@description('Azure HTTP health probe path for the backend. Default /health — probe sends GET with no Authorization header; allow anonymous GET on this path in the API. Pass empty string only to omit the platform probe (manual/az override).')
+param backendHealthCheckPath string = '/health'
 
 var appServicePlanName = 'asp-${pocSlug}'
 // Default hostnames: https://eyaifinance-<pocSlug>.azurewebsites.net and https://eyaifinance-backend-<pocSlug>.azurewebsites.net
@@ -194,6 +194,8 @@ resource backendAuthSettingsV2 'Microsoft.Web/sites/config@2024-11-01' = if (eas
       requireAuthentication: false
       unauthenticatedClientAction: 'AllowAnonymous'
       excludedPaths: [
+        '/health'
+        '/health/'
         '/api/health'
         '/api/health/'
       ]
