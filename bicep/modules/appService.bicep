@@ -47,10 +47,6 @@ var microsoftAuthority = '${entraLoginRoot}/${microsoftIdentityTenantId}/v2.0'
 // Issuer URL expected by App Service Easy Auth / Entra v2 (same tenant segment as authority).
 var entraOpenIdIssuer = microsoftAuthority
 var backendPublicBaseUrl = 'https://${backendName}.azurewebsites.net'
-// Frontend Next.js server (SSR / route handlers) often requires a public API base URL at runtime.
-var frontendServiceAppSettings = [
-  { name: 'BACKEND_URL', value: backendPublicBaseUrl }
-]
 // Easy Auth: client ID + issuer live in authsettingsV2 only. Azure still requires the client secret as an app setting (see clientSecretSettingName).
 // If you use app-managed auth instead (no secret / no Easy Auth), expose id + tenant + authority + public URL to the container here.
 var microsoftAuthCoreAppSettings = [
@@ -83,7 +79,7 @@ var microsoftIdentityBackendAppSettings = easyAuthEnabled
           ]
         )
       : [])
-var frontendAppSettings = concat(sharedAppSettings, frontendServiceAppSettings, microsoftIdentityFrontendAppSettings)
+var frontendAppSettings = concat(sharedAppSettings, microsoftIdentityFrontendAppSettings)
 var backendAppSettings = concat(sharedAppSettings, microsoftIdentityBackendAppSettings)
 
 // Omit healthCheckPath when empty so Azure does not probe (JWT-only APIs often return 401 without Authorization).
@@ -163,8 +159,8 @@ resource frontendAuthSettingsV2 'Microsoft.Web/sites/config@2024-11-01' = if (ea
       unauthenticatedClientAction: 'RedirectToLoginPage'
       redirectToProvider: 'azureActiveDirectory'
       excludedPaths: [
-        '/'
         '/api/health'
+        '/api/health/'
       ]
     }
     httpSettings: {
