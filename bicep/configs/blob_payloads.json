@@ -1,11 +1,23 @@
 {
   "tenants": {
-    "configs": {
-      "v1": {
+    "tenant_1": {
+      "configs": {
         "payloads": {
           "kpi": ["all.json"],
           "pnl": ["all.json"]
-        }
+        },
+        "lighthouse": ["tenant_1_lh-v2.yml"],
+        "chat": ["tenant_1_chat.yml"]
+      }
+    },
+    "tenant_2": {
+      "configs": {
+        "payloads": {
+          "kpi": ["all.json"],
+          "pnl": ["all.json"]
+        },
+        "lighthouse": ["tenant_2_lh-v2.yml"],
+        "chat": ["tenant_2_chat.yml"]
       }
     }
   }

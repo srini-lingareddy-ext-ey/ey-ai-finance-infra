@@ -1,0 +1,622 @@
+### Config File for Scenario Planning
+## Used to define scenario planning parameters throughout the system
+
+### THIS FILE IS A TEMPLATE FOR CONFIGURING TENANT 2 LIGHTHOUSE ###
+### Update the account mappings below to align with your specific data ###
+
+# Mapping for FDM driver and model selection tool call
+account_mapping:
+  PG:Project Services|BU:Professional Services:
+    [hours_billed, net_revenue, avg_bill_rate]
+  PG:Managed Support|BU:Professional Services:
+    [net_revenue, arpu, paid_subscribers]
+  PG:Compute|BU:Cloud Services: [paid_subscribers, net_revenue, arpu]
+  PG:Storage|BU:Cloud Services: [paid_subscribers, net_revenue, arpu]
+  PG:Developer Licenses|BU:Software Products:
+    [paid_subscribers, net_revenue, arpu]
+  PG:Productivity Licenses|BU:Software Products:
+    [paid_subscribers, net_revenue, arpu]
+
+# Model Information for LLM-assisted model selection
+model_information:
+  linear_regression:
+    model_name: "linear_regression"
+    description: "Simple linear regression that fits a straight line to the data. Best for data with clear linear trends and no seasonality. Does NOT use exogenous drivers."
+
+  # lr_drivers:
+  #     model_name: 'lr_drivers'
+  #     description: 'Linear regression with exogenous drivers as features. Best when account values have strong linear relationships with external drivers. REQUIRES exogenous drivers.'
+
+  random_forest:
+    model_name: "random_forest"
+    description: "Ensemble of decision trees that captures non-linear patterns and feature interactions. Robust to outliers and handles complex relationships well. REQUIRES exogenous drivers as features."
+
+  xgboost:
+    model_name: "xgboost"
+    description: "Gradient boosting algorithm that builds an ensemble of decision trees for fast and accurate predictions. Excels at capturing complex non-linear patterns and driver interactions. REQUIRES exogenous drivers as features."
+
+  ridge:
+    model_name: "ridge"
+    description: "Linear regression with L2 regularization to prevent overfitting. Best when drivers are correlated (multicollinearity) and you want stable coefficient estimates. REQUIRES exogenous drivers."
+
+  lasso:
+    model_name: "lasso"
+    description: "Linear regression with L1 regularization that performs automatic feature selection by shrinking some coefficients to zero. Best when you suspect only a subset of drivers are relevant. REQUIRES exogenous drivers."
+
+  hyperlasso:
+    model_name: "hyperlasso"
+    description: "Lasso regression with cross-validated alpha selection for optimal regularization strength. Automatically tunes the sparsity level. REQUIRES exogenous drivers."
+
+  # sarimax:
+  #     model_name: 'sarimax'
+  #     description: 'Seasonal ARIMA with exogenous variables. Captures autoregressive patterns, trends, and seasonality while incorporating external drivers. Best for time series with clear seasonal patterns. CAN use exogenous drivers.'
+
+  moving_average:
+    model_name: "moving_average"
+    description: "Forecasts based on the average of recent observations. Simple and interpretable, best for stable data without strong trends or seasonality. Does NOT use exogenous drivers."
+
+  exponential_smoothing:
+    model_name: "exponential_smoothing"
+    description: "Weights recent observations more heavily than older ones. Can capture trend and seasonality (Holt-Winters). Best for data with consistent patterns. Does NOT use exogenous drivers."
+
+  prophet:
+    model_name: "prophet"
+    description: "Developed by Meta for business forecasting. Handles seasonality, holidays, and missing data well. Robust to outliers and trend changes. CAN use exogenous drivers as additional regressors."
+
+# If true, all parameters will be set to default,
+# independent of their values in this config file
+use_default: false
+
+# If true, all params will be set to default except
+# accounts, segment, region, and general_params
+use_default_params: true
+
+# Accounts to forecast
+accounts: []
+
+# Segments to forecast
+segment:
+
+# Regions to forecast
+region:
+
+# General Scenario Planning Params:
+general_params:
+  # Dates in DD-MM-YYYY format
+
+  # Start and end dates for training data
+  training_start_date: "2020-01-01" # default: '01-01-2020'
+  training_end_date: "2024-06-01" # default: '01-12-2023
+
+  # Start and end dates for validation data
+  validation_start_date: "2024-07-01" # default: '01-01-2024'
+  validation_end_date: "2025-06-01" # default: '01-12-2024'
+
+  # Start and end dates for testing data
+  testing_start_date: "2025-07-01" # default: '01-01-2025'
+  testing_end_date: "2025-12-01" # default: '01-12-2025'
+
+  # Number of months to forecast the accounts in the future
+  #n_forecast_horizon: 6 # default: 6
+
+  # Whether to retrain models after model validation and selection
+  # Allows for model selection and model testing to be done in
+  # different python instances
+  #b_retrain_models: true # default: true
+
+  # Whether to retrain models with training and validation data after
+  # model validation and selection
+  #b_retrain_with_validation: false # default: false
+
+# Data Loading Params:
+load_data_params:
+  # Selected data loading method
+  selected_method: polars # default: old_csv
+
+# Driver Analysis Params:
+driver_analysis_params:
+  # Number of Final  Drivers per Classification
+  n_final_drivers_per_classification: 5 # default: 3
+
+  # Whether to use PCA to for entirety of driver analysis
+  use_full_pca: false # default: false
+
+  # Full PCA Params:
+  full_pca_params:
+    # method for selecting pca components to use
+    dim_method: account # default: account
+
+  # Driver Lagging Params:
+  lag_params:
+    # Whether to optimize driver lags
+    b_lag: true # default: true
+
+    # Maximum lag to test
+    n_max_lag: 12 # default: 12
+
+    # Number of highest ranked lags to pick the lowest lag from
+    n_top_considered: 3 # default: 4
+
+    # Allows you to modify driver ranking methods used
+    # in lag optimization
+    ranking_methods:
+      # Allows you to remove driver ranking methods from being
+      # used from the base list of all of the methods
+      b_remove: false # default: false
+
+      # Specific methods to be removed in list format, only works if b_remove is true
+      methods_removed: [rfe, boruta]
+      # default: [rfe, boruta]
+
+      # Allows you to select driver ranking methods from scratch
+      b_selected: true # default: true
+
+      # Specific methods to be used, only works if b_selected is true
+      methods_selected: [spearman_correlation, slr, ridge]
+      # default: [spearman_correlation, slr, ridge]
+
+  # Driver Ranking Params:
+  ranking_params:
+    methods:
+      # Allows you to remove driver ranking methods from being
+      # used from the base list of all of the methods
+      b_remove: true # default: true
+
+      # Specific methods to be removed in list format, only works if b_remove is true
+      methods_removed: [rfe, boruta, ridge]
+      # default: [rfe, boruta, ridge]
+
+      # Allows you to select driver ranking methods from scratch
+      b_selected: false # default: false
+
+      # Specific methods to be used, only works if b_selected is true
+      methods_selected: [spearman_correlation, slr, ridge]
+      # default: []
+
+    llm_ranking_params:
+      # Select ranking metrics to be sent to LLM for ranking
+      # total_rank is always included as a metric
+      llm_metrics: [avg_rank, pearson_correlation]
+
+    # Specific Parameters for Moving Average Ranking
+    ma_ranking_params:
+      # Length of the moving average window tail,
+      # not used when doing exponential moving average
+      tail_len: 6 # default: 6
+
+      # Type of moving average to use
+      ma_type: exponential # default: exponential
+
+      # Alpha parameter for exponential moving average,
+      # only used if using exponential moving average
+      a: 0.5 # default: 0.5
+
+    # Specific Parameters for PCA Ranking
+    pca_ranking_params:
+      # method for selecting pca components to use
+      dim_method: account # default: account
+
+    # Specific Parameters for RFE Ranking
+    rfe_ranking_params:
+      # number of iterations to do feature elimination over
+      n_iter: 50 # default: 50
+
+      # number of estimators used in each iteration to ensure robustness
+      n_estimators: 100 # default: 100
+
+    # Specific Parameters for Lasso Ranking
+    lasso_ranking_params:
+      # number of different models trained using lasso regression
+      n_iter: 400 # default: 400
+
+      # maximum number of iterations for the underlying lasso solver
+      max_iter: 50 # default: 50
+
+      # alpha parameter for lasso regression
+      alpha: 0.5 # default: 0.5
+
+    ridge_ranking_params:
+      # number of different models trained using ridge regression
+      n_iter: 80 # default: 80
+
+      # alpha parameter for ridge regression
+      alpha: 1.0 # default: 1.0
+
+    xgboost_ranking_params:
+      # number of different models trained using xgboost regression
+      n_iter: 10 # default: 10
+
+      #'n_estimators' for the underlying XGBoostRegressor
+      n_estimators: 60 # default: 60
+
+      # maximum depth of the underlying XGBoostRegressor
+      max_depth: 3 # default: 3
+
+      # learning rate for the underlying XGBoostRegressor
+      learning_rate: 0.1 # default: 0.1
+
+      # subsample ratio of the training instances
+      subsample: 0.8 # default: 0.8
+
+      # subsample ratio of columns when constructing each tree
+      colsample_bytree: 0.8 # default: 0.8
+
+    boruta_ranking_params:
+      # number of different models trained using boruta feature selection
+      max_iter: 100 # default: 100
+
+      #'n_estimators' for the underlying RandomForestRegressor
+      n_estimators: 100 # default: 100
+
+      # percentage of features to sample at each iteration
+      perc: 100 # default: 100
+
+      # significance level to use when evaluating feature importance
+      alpha: 0.05 # default: 0.05
+
+      # maximum depth of the underlying RandomForestRegressor
+      max_depth: 5 # default: 5
+
+    mrmr_ranking_params:
+      # number of features to select using mRMR
+      n_features: 10 # default: 10
+
+      # number of bins to use when discretizing continuous variables
+      n_bins: 10 # default: 10
+
+  # Collinearity Removal Params:
+  collinearity_params:
+    # Allows you to remove collinearity removal methods from
+    # being used from the base list of all of the methods
+    b_remove: false # default: false
+
+    # Specific methods to be removed in list format, only works if b_remove is true
+    methods_removed: [] # default: []
+
+    # Allows you to select collinearity removal methods from scratch
+    b_selected: false # default: false
+
+    # Specific methods to be used, only works if b_selected is true
+    methods_selected: [] # default: []
+
+    # Specific Parameters for Corrleation Collinearity Removal
+    correlation_collinearity_params:
+      # weight of pearson correlation in the correlation collinearity removal method
+      pearson_weight: 0.3 # default: 0.3
+
+      # weight of spearman correlation in the correlation collinearity removal method
+      spearman_weight: 0.3 # default: 0.3
+
+      # weight of kendall correlation in the correlation collinearity removal method
+      kendall_weight: 0.3 # default: 0.3
+
+    # Specific Parameters for KMeans Collinearity Removal
+    kmeans_collinearity_params:
+      # number of iterations of kmeans clustering
+      n_seeds: 40 # default: 40
+
+# Driver Forecasting Params:
+driver_forecast_params:
+  # Selected driver forcasting method
+  selected_method: xgboost # default: xgboost
+
+  # Specific Parameters for EMA Driver Forecasting
+  moving_average_params:
+    # Number of periods to use in moving average
+    window_size: 3 # default: 3
+
+  # Specific Parameters for ARIMA Driver Forecasting
+  arima_params:
+    # Order of the ARIMA model
+    order: [1, 1, 1] # default: [1, 1, 1]
+    # Seasonal order of the ARIMA model
+    seasonal_order: null # default: null
+    # Whether to automatically detect seasonality
+    auto_seasonality: true # default: true
+    # Threashold to determine if seasonality is present
+    seasonality_threashold: 0.1 # default: 0.1
+    # Seasonal period to use if seasonality is detected
+    seasonal_period: 12 # default: 12
+
+  # Specific Parameters for AutoARIMA Driver Forecasting
+  auto_arima_params:
+    # Whether to seasonal differencing should be considered
+    seasonal: true # default: true
+    # Seasonal period to use if seasonality is detected
+    m: 12 # default: 12
+    # Maximum p parameter to consider
+    max_p: 3 # default: 3
+    # Maximum d parameter to consider
+    max_d: 2 # default: 2
+    # Maximum q parameter to consider
+    max_q: 3 # default: 3
+    # Maximum P parameter to consider
+    max_P: 2 # default: 2
+    # Maximum D parameter to consider
+    max_D: 1 # default: 1
+    # Maximum Q parameter to consider
+    max_Q: 2 # default: 2
+    # Whether to use stepwise algorithm to optimize parameters
+    stepwise: true # default: true
+    # Whether to suppress warnings during model fitting
+    suppress_warnings: true # default: true
+
+  # Specific Parameters for XGBoost Driver Forecasting
+  xgboost_params:
+    # Number of lagged values to use as features
+    n_lags: 12 # default: 12
+    # Maximum depth of the underlying XGBoostRegressor
+    max_depth: 3 # default: 3
+    # Learning rate for the underlying XGBoostRegressor
+    learning_rate: 0.1 # default: 0.1
+    # Number of estimators for the underlying XGBoostRegressor
+    n_estimators: 100 # default: 100
+
+  # Specific Parameters for TBATS Driver Forecasting
+  tbats_params:
+    # Whether to use Box-Cox transformation
+    use_box_cox: null # default: null
+    # Whether to include trend component
+    use_trend: null # default: null
+    # Whether to use damped trend component
+    use_damped_trend: null # default: null
+    # List of seasonal periods to consider
+    seasonal_periods: [12] # default: [12]
+    # Whether to use ARMA errors
+    use_arma_errors: true # default: true
+
+  # Specific Parameters for Croston Driver Forecasting
+  croston_params:
+    # Smoothing parameter for Croston's method
+    alpha: 0.1 # default: 0.1
+    # Croston variant to use
+    variant: classic # default: classic
+
+  # Specific Parameters for Croston TSB Driver Forecasting
+  croston_tsb_params:
+    # Smoothing parameter for demand
+    alpha_demand: 0.1 # default: 0.1
+    # Smoothing parameter for intervals
+    alpha_interval: 0.1 # default: 0.1
+
+  # Specific Parameters for VARIMA Driver Forecasting
+  varima_params:
+    # Order of the VARIMA model
+    order: [1, 1] # default: [1, 1]
+    # Whether to automatically detect seasonality
+    trend: ct # default: ct
+
+  # Specific Parameters for Exponential Smoothing Driver Forecasting
+  exponential_smoothing_params:
+    # Trend type: 'add', 'mul', or None (None = auto-detect)
+    trend: null # default: null
+    # Seasonal type: 'add', 'mul', or None (None = auto-detect)
+    seasonal: null # default: null
+    # Seasonal periods to use if seasonality is detected
+    seasonal_periods: 12 # default: 12
+    # Whether to automatically detect trend and seasonality
+    auto_detect: true # default: true
+    # Threshold to determine if seasonality is present
+    seasonality_threshold: 0.1 # default: 0.1
+
+  prophet_params:
+    # Seasonality mode for the Prophet model
+    seasonality_mode: additive # default: additive
+    # Yearly seasonality setting (auto, True, False, or int)
+    yearly_seasonality: auto # default: auto
+    # Whether to include weekly seasonality
+    weekly_seasonality: false # default: false
+    # Whether to include daily seasonality
+    daily_seasonality: false # default: false
+    # Changepoint prior scale for the Prophet model
+    changepoint_prior_scale: 0.05 # default: 0.05
+    # Seasonality prior scale for the Prophet model
+    seasonality_prior_scale: 10.0 # default: 10.0
+
+# Account Forecasting Params:
+account_forecast_params:
+  # Selected account forcasting methods
+  methods:
+    # Allows you to remove account forecasting methods from
+    # being used from the base list of all of the methods
+    b_remove: true # default: true
+
+    # Specific methods to be removed in list format, only works if b_remove is true
+    methods_removed: [lr_drivers, sarimax] # default: [lr_drivers, sarimax]
+
+    # Allows you to select collinearity removal methods from scratch
+    b_selected: false # default: false
+
+    # Specific methods to be used, only works if b_selected is true
+    methods_selected: [] # default: [prophet]
+
+  # Params for LLM selection of account forecasting models
+  llm_validation_params:
+    # Select validation metrics to be sent to LLM for evaluation
+    llm_metrics: [MSE%, RMSE%, MAPE]
+
+  # Specific Parameters for Hyperparameter Optimization
+  hyperparam_opt_params:
+    # Whether to perform hyperparameter optimization
+    b_optimize: true # default: false
+    # Hyperparameter optimization  method to use
+    # Options: random, grid, bayesian
+    method: bayesian # default: bayesian
+    # List of account forecasting methods to disable hyperparameter optimization for
+    disabled_methods: [prophet] # default: [prophet]
+    # Number of options per hyperparameter to test
+    n_options_per_param: 3 # default: 3
+    # Bayesian optimization trial multiplier (total trials = n_options * n_params * multiplier)
+    bayesian_trial_multiplier: 5 # default: 5
+
+  # Specific Parameters for Random Forest Account Forecasting
+  random_forest_params:
+    # Number of trees in the forest
+    n_estimators: 100 # default: 100
+    # Maximum depth of the tree
+    max_depth: null # default: null
+    # Minimum number of samples required to split an internal node
+    min_samples_split: 2 # default: 2
+    # Minimum number of samples required to be at a leaf node
+    min_samples_leaf: 1 # default: 1
+    # Random state for reproducibility
+    random_state: 42 # default: 42
+    # Number of parallel threads to use
+    n_jobs: 1 # default: 1
+
+  # Specific Parameters for XGBoost Account Forecasting
+  xgboost_params:
+    # Number of estimators for the underlying XGBoostRegressor
+    n_estimators: 100 # default: 100
+    # Maximum depth of the underlying XGBoostRegressor
+    max_depth: 3 # default: 3
+    # Learning rate for the underlying XGBoostRegressor
+    learning_rate: 0.1 # default: 0.1
+    # Subsample ratio of the training instances
+    subsample: 0.8 # default: 0.8
+    # Subsample ratio of columns when constructing each tree
+    colsample_bytree: 0.8 # default: 0.8
+    # L1 regularization term on weights
+    reg_alpha: 0.0 # default: 0.0
+    # L2 regularization term on weights
+    reg_lambda: 1.0 # default: 1.0
+    # Random state for reproducibility
+    random_state: 42 # default: 42
+    # Number of parallel threads to use
+    n_jobs: 1 # default: 1
+
+  # Specific Parameters for Ridge Account Forecasting
+  ridge_params:
+    # Regularization strength
+    alpha: 1.0 # default: 1.0
+    # Whether to fit the intercept term
+    fit_intercept: true # default: true
+    # Solver to use in the computational routines
+    solver: auto # default: auto
+    # Random state for reproducibility
+    random_state: 42 # default: 42
+
+  # Specific Parameters for Lasso Account Forecasting
+  lasso_params:
+    # Regularization strength
+    alpha: 1.0 # default: 1.0
+    # Whether to fit the intercept term
+    fit_intercept: true # default: true
+    # Maximum number of iterations
+    max_iter: 1000 # default: 1000
+    # Tolerance for the optimization
+    tol: 0.0001 # default: 0.0001
+    # Selection method for coordinate descent
+    selection: cyclic # default: cyclic
+    # Random state for reproducibility
+    random_state: 42 # default: 42
+
+  # Specific Parameters for HyperLasso Account Forecasting
+  hyperlasso_params:
+    # List of alphas to consider for hyperlasso
+    alphas: 100 # default: 100
+    # Number of cross-validation folds
+    cv: 5 # default: 5
+    # Whether to fit the intercept term
+    fit_intercept: true # default: true
+    # Maximum number of iterations
+    max_iter: 1000 # default: 1000
+    # Tolerance for the optimization
+    tol: 0.0001 # default: 0.0001
+    # Number of parallel threads to use
+    n_jobs: 1 # default: 1
+    # Random state for reproducibility
+    random_state: 42 # default: 42
+
+  # Specific Parameters for SARIMAX Account Forecasting
+  sarimax_params:
+    # Whether to seasonal differencing should be considered
+    seasonal: true # default: true
+    # Wether to automatically optimize parameters
+    auto_params: true # default: true
+    # Default order of the SARIMAX model
+    default_params: [1, 1, 1, 0, 0, 0, 12] # default: [1, 1, 1, 0, 0, 0, 12]
+    # Maximum parameters to consider when optimizing
+    max_params: [2, 1, 2, 1, 1, 1, 12] # default: [2, 1, 2, 1, 1, 1, 12]
+
+  # Specific Parameters for Prophet Account Forecasting
+  prophet_params:
+    # Seasonality mode for the Prophet model
+    seasonality_mode: additive # default: additive
+    # Yearly seasonality setting (auto, True, False, or int)
+    yearly_seasonality: auto # default: auto
+    # Whether to include weekly seasonality
+    weekly_seasonality: false # default: false
+    # Whether to include daily seasonality
+    daily_seasonality: false # default: false
+    # Changepoint prior scale for the Prophet model
+    changepoint_prior_scale: 0.05 # default: 0.05
+    # Seasonality prior scale for the Prophet model
+    seasonality_prior_scale: 10.0 # default: 10.0
+
+## Args for file outputs
+output_params:
+  # Whether to create the data required to complete the driver analysis file
+  # this includes doing driver analysis at the product group and total level
+  # The additional data will only be created if a driver analysis file is created
+  b_finish_driver_analysis_file: true # default: true
+  # Whether to fit the account forecasts to a base forecast
+  b_use_fit_forecasts: false # default: true
+  # Type of file to output account forecasts in
+  account_file_format: csv # default: parquet
+  # Delimiter for csv's to use when outputting data
+  csv_delimiter: "," # default: ","
+  # Whether to split driver up in the output files with each one having its own column
+  # # of columns changes with n_final_drivers
+  b_split_drivers: false # default: false
+  # Whether or not to make output file saving paths as the set testing path for
+  # each of the possible file outputs
+  b_test_outputs: false # default: false
+
+## Defines logging levels across the package
+## If use_default true, set to logging.WARNING
+logging:
+  # General logging level
+  general: INFO # Default: WARNING
+
+  # Logging level for config parsing
+  params: INFO # Default: WARNING
+
+  # Logging levels for I/O operations
+  io:
+    # General logging level for I/O operations
+    general: INFO # Default: WARNING
+
+    # Logging level for Data Loading
+    data_loading: INFO # Default: WARNING
+
+  # Logging levels for Driver Analysis
+  driver_analysis:
+    # General logging level for Driver Analysis
+    general: INFO # Default: WARNING
+
+    # Logging level for Lag Handling
+    lag_handling: INFO # Default: WARNING
+
+    # Logging level for Driver Ranking
+    driver_ranking: INFO # Default: WARNING
+
+    # Logging level for Collinearity Removal
+    collinearity_removal: INFO # Default: WARNING
+
+  forecasting:
+    # Logging levels for Forecasting
+    # General logging level for Forecasting
+    general: INFO # Default: WARNING
+
+    # Logging level for Driver Forecasting
+    driver_forecasting: INFO # Default: WARNING
+
+    # Logging level for Model Training
+    model_training: INFO # Default: WARNING
+
+    # Logging level for Hyperparameter Optimization
+    hyperparam_opt: INFO # Default: WARNING
+
+    # Logging level for Account Forecasting
+    account_forecasting: INFO # Default: WARNING
