@@ -46,6 +46,11 @@ on:
         required: true
         type: string
         default: "DOCKER|creyaifinmain.azurecr.io/aifinance-backend:latest"
+      disableBackendHealthProbe:
+        description: "If true, disables Azure HTTP health check on the backend (e.g. FastAPI returns Missing Authorization on /api/health — probe cannot send headers). Prefer fixing the API to allow anonymous GET /api/health."
+        required: true
+        type: boolean
+        default: false
 
 env:
   AZURE_CLIENT_ID: ${{ secrets.AZURE_POC_CLIENT_ID }}
@@ -430,6 +435,13 @@ jobs:
             echo "Microsoft Entra: Easy Auth on frontend + backend; only MICROSOFT_PROVIDER_CLIENT_SECRET is added as an app setting (plus shared App Config / Key Vault settings)."
           fi
 
+          if [[ "${{ inputs.disableBackendHealthProbe }}" == "true" ]]; then
+            BACKEND_HEALTH_PATH=""
+            echo "Backend Azure HTTP health probe disabled (disableBackendHealthProbe=true). Prefer allowing anonymous GET /api/health in the API."
+          else
+            BACKEND_HEALTH_PATH="/api/health"
+          fi
+
           az deployment group create \
             --resource-group "$RG" \
             --template-file bicep/appservices-stack.bicep \
@@ -444,4 +456,6 @@ jobs:
               microsoftIdentityClientId="${MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID:-}" \
               microsoftIdentityTenantId='${{ secrets.AZURE_POC_TENANT_ID }}' \
               microsoftIdentityClientSecret="${MICROSOFT_PROVIDER_AUTHENTICATION_SECRET:-}" \
-              frontendPublicBaseUrl="$FRONTEND_BASE"
+              frontendPublicBaseUrl="$FRONTEND_BASE" \
+              frontendHealthCheckPath='/api/health' \
+              backendHealthCheckPath="$BACKEND_HEALTH_PATH"

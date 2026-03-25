@@ -23,6 +23,12 @@ param microsoftIdentityClientSecret string = ''
 @description('Public base URL of the frontend (e.g. https://eyaifinance-mypoc.azurewebsites.net). Required with client ID + tenant to enable auth; used as WEBAPP_PUBLIC_BASE_URL only when Easy Auth is off (app-managed auth).')
 param frontendPublicBaseUrl string = ''
 
+@description('Azure HTTP health probe path for the frontend. Default /api/health; use / if the app has no API health route.')
+param frontendHealthCheckPath string = '/api/health'
+
+@description('Azure HTTP health probe path for the backend. Azure sends GET with no headers — if your API (e.g. FastAPI) requires Authorization on all routes, either exempt /api/health in code or pass empty string "" to disable the platform probe.')
+param backendHealthCheckPath string = '/api/health'
+
 var appServicePlanName = 'asp-${pocSlug}'
 // Default hostnames: https://eyaifinance-<pocSlug>.azurewebsites.net and https://eyaifinance-backend-<pocSlug>.azurewebsites.net
 var frontendName = 'eyaifinance-${pocSlug}'
@@ -41,6 +47,10 @@ var microsoftAuthority = '${entraLoginRoot}/${microsoftIdentityTenantId}/v2.0'
 // Issuer URL expected by App Service Easy Auth / Entra v2 (same tenant segment as authority).
 var entraOpenIdIssuer = microsoftAuthority
 var backendPublicBaseUrl = 'https://${backendName}.azurewebsites.net'
+// Frontend Next.js server (SSR / route handlers) often requires a public API base URL at runtime.
+var frontendServiceAppSettings = [
+  { name: 'BACKEND_URL', value: backendPublicBaseUrl }
+]
 // Easy Auth: client ID + issuer live in authsettingsV2 only. Azure still requires the client secret as an app setting (see clientSecretSettingName).
 // If you use app-managed auth instead (no secret / no Easy Auth), expose id + tenant + authority + public URL to the container here.
 var microsoftAuthCoreAppSettings = [
@@ -73,8 +83,21 @@ var microsoftIdentityBackendAppSettings = easyAuthEnabled
           ]
         )
       : [])
-var frontendAppSettings = concat(sharedAppSettings, microsoftIdentityFrontendAppSettings)
+var frontendAppSettings = concat(sharedAppSettings, frontendServiceAppSettings, microsoftIdentityFrontendAppSettings)
 var backendAppSettings = concat(sharedAppSettings, microsoftIdentityBackendAppSettings)
+
+// Omit healthCheckPath when empty so Azure does not probe (JWT-only APIs often return 401 without Authorization).
+var backendSiteConfigBase = {
+  linuxFxVersion: backendImage
+  http20Enabled: true
+  minTlsVersion: '1.3'
+  acrUseManagedIdentityCreds: true
+  acrUserManagedIdentityID: acrManagedIdentityClientId
+  appSettings: backendAppSettings
+}
+var backendSiteConfig = !empty(backendHealthCheckPath)
+  ? union(backendSiteConfigBase, { healthCheckPath: backendHealthCheckPath })
+  : backendSiteConfigBase
 
 resource appServicePlan 'Microsoft.Web/serverfarms@2024-11-01' = {
   name: appServicePlanName
@@ -102,7 +125,7 @@ resource appServiceFrontend 'Microsoft.Web/sites@2024-11-01' = {
       acrUseManagedIdentityCreds: true
       acrUserManagedIdentityID: acrManagedIdentityClientId
       appSettings: frontendAppSettings
-      healthCheckPath: '/api/health'
+      healthCheckPath: frontendHealthCheckPath
     }
     clientCertEnabled: false
     clientCertMode: 'Optional'
@@ -120,15 +143,7 @@ resource appServiceBackend 'Microsoft.Web/sites@2024-11-01' = {
   }
   properties: {
     serverFarmId: appServicePlan.id
-    siteConfig: {
-      linuxFxVersion: backendImage
-      http20Enabled: true
-      minTlsVersion: '1.3'
-      acrUseManagedIdentityCreds: true
-      acrUserManagedIdentityID: acrManagedIdentityClientId
-      appSettings: backendAppSettings
-      healthCheckPath: '/api/health'
-    }
+    siteConfig: backendSiteConfig
     clientCertEnabled: false
     clientCertMode: 'Optional'
   }
@@ -144,10 +159,11 @@ resource frontendAuthSettingsV2 'Microsoft.Web/sites/config@2024-11-01' = if (ea
       enabled: true
     }
     globalValidation: {
-      requireAuthentication: true
+      requireAuthentication: false
       unauthenticatedClientAction: 'RedirectToLoginPage'
       redirectToProvider: 'azureActiveDirectory'
       excludedPaths: [
+        '/'
         '/api/health'
       ]
     }
@@ -179,6 +195,7 @@ resource backendAuthSettingsV2 'Microsoft.Web/sites/config@2024-11-01' = if (eas
       unauthenticatedClientAction: 'AllowAnonymous'
       excludedPaths: [
         '/api/health'
+        '/api/health/'
       ]
     }
     httpSettings: {

@@ -36,6 +36,12 @@ param microsoftIdentityClientSecret string = ''
 @description('Frontend public HTTPS base URL (no trailing slash), e.g. https://eyaifinance-mypoc.azurewebsites.net')
 param frontendPublicBaseUrl string = ''
 
+@description('Frontend Web App health probe path (default /api/health; requires that route in the frontend app).')
+param frontendHealthCheckPath string = '/api/health'
+
+@description('Backend Web App health probe path. Use empty string to disable the probe when the API requires Authorization on all routes (FastAPI, etc.).')
+param backendHealthCheckPath string = '/api/health'
+
 // Central ACR identity (acr-managed-identity in rg-eyaifin-acr) — hardcoded for this subscription.
 var acrManagedIdentityResourceIdFinal = '/subscriptions/08d343af-2a3c-4f13-86a5-d9bde4948ae8/resourceGroups/rg-eyaifin-acr/providers/Microsoft.ManagedIdentity/userAssignedIdentities/acr-managed-identity'
 var keyVaultUri = 'https://${keyVaultName}${environment().suffixes.keyvaultDns}/'
@@ -55,6 +61,8 @@ module appService 'modules/appService.bicep' = {
     microsoftIdentityTenantId: microsoftIdentityTenantId
     microsoftIdentityClientSecret: microsoftIdentityClientSecret
     frontendPublicBaseUrl: frontendPublicBaseUrl
+    frontendHealthCheckPath: frontendHealthCheckPath
+    backendHealthCheckPath: backendHealthCheckPath
   }
 }
 
