@@ -1,10 +1,10 @@
-# Build and push frontend image to ACR from ey-ai-finance (disk cleanup, registry cache, provenance/sbom off).
+# Build and push frontend image to ACR (manual runs only).
+# Deploy POC inlines these steps in job build-frontend-image — reusable workflow_call cannot use OIDC id-token on nested jobs in this repo/org.
+#
 # Inputs: app_choice (aifinance-next | aifinance), poc_slug.
-# Image: creyaifinmain.azurecr.io/aifinance-next-frontend:<poc_slug> or aifinance-frontend:<poc_slug> (ACR fixed)
+# Image: creyaifinmain.azurecr.io/aifinance-next-frontend:<poc_slug> or aifinance-frontend:<poc_slug>
 # NEXT_PUBLIC_BACKEND_ENDPOINT_BASE=https://eyaifinance-backend-<poc_slug>.azurewebsites.net
 #
-# Triggers: workflow_dispatch | workflow_call (e.g. Deploy POC).
-# Checkout: github.repository_owner/ey-ai-finance (same org/user as the repo that runs this workflow).
 # Secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, EY_AI_FINANCE_REPO_TOKEN
 
 name: Build Push Image
@@ -24,29 +24,14 @@ on:
           - aifinance-next
           - aifinance
 
-  workflow_call:
-    inputs:
-      poc_slug:
-        required: true
-        type: string
-      app_choice:
-        required: true
-        type: string
-    outputs:
-      image_tag:
-        description: "Image tag (same as poc_slug)"
-        value: ${{ jobs.build-push.outputs.image_tag }}
-      frontend_image_docker:
-        description: "DOCKER|registry/repo:tag for App Service / Bicep"
-        value: ${{ jobs.build-push.outputs.frontend_image_docker }}
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   build-push:
     name: Build and push frontend image
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
     env:
       REGISTRY: creyaifinmain.azurecr.io
     outputs:
@@ -135,7 +120,7 @@ jobs:
           provenance: false
           sbom: false
 
-      - name: Expose image for workflow_call/outputs
+      - name: Expose image ref
         id: bicep_image
         env:
           INAME: ${{ steps.meta.outputs.image_name }}
