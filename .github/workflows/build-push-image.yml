@@ -107,31 +107,36 @@ jobs:
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
       - name: Build and push
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
-        with:
-          context: ey-ai-finance
-          file: ${{ steps.meta.outputs.dockerfile }}
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ steps.meta.outputs.image_name }}:${{ inputs.poc_slug }}
-          build-args: |
-            NEXT_PUBLIC_BACKEND_ENDPOINT_BASE=${{ steps.ctx.outputs.backend_base }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/cache:${{ steps.meta.outputs.image_name }}
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/cache:${{ steps.meta.outputs.image_name }},mode=max
-          provenance: false
-          sbom: false
+        env:
+          DOCKERFILE: ${{ steps.meta.outputs.dockerfile }}
+          IMAGE_NAME: ${{ steps.meta.outputs.image_name }}
+          POC_SLUG: ${{ inputs.poc_slug }}
+          BACKEND_BASE: ${{ steps.ctx.outputs.backend_base }}
+        run: |
+          set -euo pipefail
+          TAG="${REGISTRY}/${IMAGE_NAME}:${POC_SLUG}"
+          CACHE_REF="${REGISTRY}/cache:${IMAGE_NAME}"
+          docker buildx build \
+            --file "${DOCKERFILE}" \
+            --tag "${TAG}" \
+            --push \
+            --build-arg "NEXT_PUBLIC_BACKEND_ENDPOINT_BASE=${BACKEND_BASE}" \
+            --cache-from "type=registry,ref=${CACHE_REF}" \
+            --cache-to "type=registry,ref=${CACHE_REF},mode=max" \
+            --provenance=false \
+            --sbom=false \
+            ey-ai-finance
 
       - name: Expose image ref
         id: bicep_image
         env:
           INAME: ${{ steps.meta.outputs.image_name }}
           POC_TAG: ${{ inputs.poc_slug }}
-        run: echo "value=DOCKER|${REGISTRY}/${INAME}:${POC_TAG}" >> "${GITHUB_OUTPUT}"
+        run: |
+          echo "value=DOCKER|${REGISTRY}/${INAME}:${POC_TAG}" >> "${GITHUB_OUTPUT}"
+          echo "Pushed ${REGISTRY}/${INAME}:${POC_TAG}"
+          echo "NEXT_PUBLIC_BACKEND_ENDPOINT_BASE=${{ steps.ctx.outputs.backend_base }}"
 
       - name: Azure logout
         if: always()
         run: az logout || true
-
-      - name: Summary
-        run: |
-          echo "Pushed ${REGISTRY}/${{ steps.meta.outputs.image_name }}:${{ inputs.poc_slug }}"
-          echo "NEXT_PUBLIC_BACKEND_ENDPOINT_BASE=${{ steps.ctx.outputs.backend_base }}"
