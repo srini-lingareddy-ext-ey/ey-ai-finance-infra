@@ -20,7 +20,7 @@ The **Deploy POC** workflow runs all phases in one go (core deploy → Key Vault
 | **AZURE_POC_CLIENT_ID**            | Managed identity's client (application) ID for Azure login.                                                                                                                                             |
 | **AZURE_POC_TENANT_ID**            | Azure AD tenant ID.                                                                                                                                                                                     |
 | **AZURE_POC_SUBSCRIPTION_ID**      | Target subscription ID.                                                                                                                                                                                 |
-| **POSTGRES_ADMIN_PASSWORD**        | PostgreSQL admin password (used by Bicep, Key Vault, and the app).                                                                                                                                      |
+| **POSTGRES_ADMIN_PASSWORD**        | PostgreSQL admin password: **`main.bicep`**, Key Vault **`PostgresConnectionString`**, **`init-postgres`**, and (Deploy POC) backend app setting **`POSTGRES_PASSWORD`**.                                                                                              |
 | **ACR_MANAGED_IDENTITY_CLIENT_ID** | Client ID of **acr-managed-identity** (in rg-eyaifin-acr) for App Services image pull. Get with: `az identity show --resource-group rg-eyaifin-acr --name acr-managed-identity --query clientId -o tsv` |
 | **EY_AI_FINANCE_REPO_TOKEN**       | PAT to checkout the **ey-ai-finance** repo; required for the init step (run init.sql on the new Postgres).                                                                                              |
 
@@ -49,7 +49,7 @@ GitHub’s OIDC token used by **azure/login** is short-lived. This job calls **a
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1    | Checks out this repo.                                                                                                                                                                                                                                                                                        |
 | 2    | **Azure login (OIDC)** using repository secrets.                                                                                                                                                                                                                                                             |
-| 3    | Deploys **main.bicep** at subscription scope: creates `rg-<pocSlug>-poc` and core resources (Key Vault, App Configuration, OpenAI, Postgres, Blob Storage).                                                                                                                                                  |
+| 3    | Deploys **main.bicep** at subscription scope: creates `rg-<pocSlug>-poc` and core resources (Key Vault, App Configuration, OpenAI—including model deployments from **`bicep/configs/openai_default_deployments.json`**—Postgres, Blob Storage).                                                                                                                                 |
 | 4    | **Azure login (OIDC)** — refresh after the ARM deployment.                                                                                                                                                                                                                                                   |
 | 5    | Captures deployment outputs (resource group name, Key Vault name, App Config endpoint, Postgres host/DB, OpenAI name, storage account name).                                                                                                                                                                 |
 | 6    | Waits 30s for RBAC propagation.                                                                                                                                                                                                                                                                              |
@@ -64,7 +64,7 @@ GitHub’s OIDC token used by **azure/login** is short-lived. This job calls **a
 
 **Job `init-postgres`:** checks out **ey-ai-finance** and runs `db/<appChoice>/init.sql`, then inserts a **tenant** row for `pocSlug`.
 
-**Job `deploy-app-services`:** deploys **appservices-stack.bicep** (frontend and backend App Services). Microsoft Entra on the Web Apps runs only when **`enableMicrosoftEntraAuthentication`** is **true** (workflow input).
+**Job `deploy-app-services`:** deploys **appservices-stack.bicep** (frontend and backend App Services). Passes **`POSTGRES_ADMIN_PASSWORD`** into Bicep as secure **`postgresPassword`** so the backend gets **`POSTGRES_HOST`**, **`POSTGRES_DB`**, **`POSTGRES_USER`**, **`POSTGRES_PORT`**, and plain **`POSTGRES_PASSWORD`** app settings (Key Vault **`PostgresConnectionString`** is unchanged). Microsoft Entra on the Web Apps runs only when **`enableMicrosoftEntraAuthentication`** is **true** (workflow input).
 
 When it finishes, the POC resource group contains the full stack and the apps pull images from the central ACR using **acr-managed-identity**.
 
@@ -73,7 +73,7 @@ When it finishes, the POC resource group contains the full stack and the apps pu
 ## Prerequisites (infrastructure)
 
 - **Central ACR:** Registry **creyaifinmain** in resource group **rg-eyaifin-acr** (resource IDs are hardcoded in the templates).
-- **ACR pull:** User-assigned managed identity **acr-managed-identity** in **rg-eyaifin-acr** has **AcrPull** on the registry. App Services use this identity (and **Key Vault Secrets User** on each POC Key Vault).
+- **ACR pull:** User-assigned managed identity **acr-managed-identity** in **rg-eyaifin-acr** has **AcrPull** on the registry. App Services use this identity. Grant **Key Vault Secrets User** on each POC Key Vault if the apps use **Key Vault references** or runtime access to secrets via **`KEY_VAULT_URI`**; backend **`POSTGRES_PASSWORD`** is set directly on the web app by the workflow and does not require a Key Vault reference for Postgres.
 - **App Configuration:** If you deploy App Configuration (via workflow or Bicep) and get a **Forbidden** error, ensure the identity has **App Configuration Data Owner** on the resource group (or the App Configuration store), and **Contributor** to create the store.
 - **Blob storage “blocked by network rules”:** The workflow uses a dedicated step **Allow Blob Storage access from all networks** (`az storage account update`, then polling until **Enabled** + **Allow** are visible—up to ~5 minutes of 15s sleeps). A following step **Create blob payload files** uses a **separate** sleep budget (**300s** total) for data-plane probes and per-blob upload retries; if that budget is exhausted you will see `Sleep budget exhausted (300s). Aborting.` If **Azure Policy** (or manual changes) keeps forcing **Deny** or **public access disabled**, either step can still fail after retries. Fix: policy exception for POC storage accounts, align firewall rules, or use a **self-hosted runner** in an allowed network. **Logs:** expect `Waiting for storage network settings to propagate...`, then `Storage data-plane connectivity is ready.`, `Sleeping … (budget used: …/300s)` during uploads, and a summary line `Seeded payload JSON blobs from bicep/configs/blob_payloads.json (containers: …)`.
 - **Redeploy same `pocSlug` / `blobStorage` error:** If deployment fails with **“Blob Delete Retention policy days should be longer than Point In Time Restore policy days”**, Azure requires **blob soft-delete retention to be strictly longer than PITR days** (e.g. both set to 7 is invalid). **`blobStorage.bicep`** turns **PITR off** and sets **blob soft-delete to 14 days** so updates pass. If it still fails, check **Data protection** on the storage account in the portal.
@@ -109,7 +109,7 @@ az deployment group create \
   --parameters bicep/parameters/main-appservices.parameters.json
 ```
 
-Set `keyVaultName` and `appConfigEndpoint` in the parameters file (or override on the command line) to the values from phase 1 outputs.
+Set `keyVaultName` and `appConfigEndpoint` in the parameters file (or override on the command line) to the values from phase 1 outputs. To mirror the workflow’s backend Postgres env vars, pass **`postgresHost`**, **`postgresDatabaseName`**, **`postgresUser`**, **`postgresPort`**, and secure **`postgresPassword`** (use a Key Vault parameters reference or `--parameters postgresPassword=...` from a secure input—do not commit secrets).
 
 ---
 
@@ -143,7 +143,7 @@ Standalone module for RG only: **bicep/modules/resourceGroup.bicep** (subscripti
 | pocSlug                    | Yes      | POC identifier. Resource group will be `rg-<pocSlug>-poc`.          |
 | location                   | No       | Azure region (default: eastus).                                     |
 | administratorLoginPassword | Yes      | PostgreSQL administrator password (secure).                         |
-| openAIDeployments          | No       | Array of { name, model, version, capacity } for OpenAI deployments. |
+| openAIDeployments          | No       | Array of { name, model, version, capacity } for OpenAI deployments. **Deploy POC** reads defaults from **`bicep/configs/openai_default_deployments.json`**. |
 | pocAppConfigKeyValues      | No       | Array of { key, value, contentType? } for App Configuration.        |
 | blobContainerNames         | No       | Array of blob container names to create (default: []).              |
 
@@ -160,6 +160,8 @@ Optional Postgres overrides (e.g. coordinatorVCores, nodeCount, postgresqlVersio
 | frontendImage              | Yes      | Container image for frontend (e.g. DOCKER\|creyaifinmain.azurecr.io/…). |
 | backendImage               | Yes      | Container image for backend.                                            |
 | acrManagedIdentityClientId | Yes      | Client ID of **acr-managed-identity** (for ACR image pull).             |
+| postgresHost, postgresDatabaseName, postgresUser, postgresPort | No | Backend **`POSTGRES_*`** app settings; omit or leave password empty to skip. |
+| postgresPassword           | No       | Secure. Plain **`POSTGRES_PASSWORD`** on backend when set with host/db/user. |
 
 ---
 

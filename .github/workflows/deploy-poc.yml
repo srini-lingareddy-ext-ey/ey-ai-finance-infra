@@ -1,4 +1,4 @@
-# Deploy main.bicep: resource group + Key Vault, App Configuration, OpenAI, Postgres, Blob Storage; run init.sql on Postgres; then deploy App Services.
+# Deploy main.bicep: resource group + Key Vault, App Configuration, OpenAI (model deployments from bicep/configs/openai_default_deployments.json), Postgres, Blob Storage; run init.sql on Postgres; then deploy App Services.
 # Trigger manually and pass pocSlug (and optionally location, frontend/backend images, appChoice). Password and pipeline principal from GitHub secrets.
 # Required secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, POSTGRES_ADMIN_PASSWORD, MONGO_ADMIN_PASSWORD.
 # Microsoft Entra on App Services is controlled by workflow input **enableMicrosoftEntraAuthentication** (not by “are secrets set?”).
@@ -12,7 +12,7 @@
 #
 # OIDC note: GitHub’s ID token (client assertion for federated login) is only valid for a few minutes. This job logs in once, then runs
 # azure/login again immediately after the subscription ARM deployment so later `az` calls do not fail with AADSTS700024 (assertion expired).
-# For init.sql: EY_AI_FINANCE_REPO_TOKEN (to checkout ey-ai-finance repo). For app services image pull: ACR_MANAGED_IDENTITY_CLIENT_ID.
+# For init.sql: EY_AI_FINANCE_REPO_TOKEN (to checkout ey-ai-finance repo). For app services: ACR_MANAGED_IDENTITY_CLIENT_ID; POSTGRES_ADMIN_PASSWORD also sets backend POSTGRES_PASSWORD app setting.
 
 name: Deploy POC
 
@@ -96,6 +96,14 @@ jobs:
           MANIFEST="bicep/configs/blob_payloads.json"
           BLOB_CONTAINERS=$(jq -c 'keys' "$MANIFEST")
 
+          OPENAI_MANIFEST="bicep/configs/openai_default_deployments.json"
+          if [[ ! -f "$OPENAI_MANIFEST" ]]; then
+            echo "::error::Missing $OPENAI_MANIFEST"
+            exit 1
+          fi
+          OPENAI_DEPS=$(jq -c '.' "$OPENAI_MANIFEST")
+          echo "openAIDeployments: $(jq 'length' "$OPENAI_MANIFEST") deployment(s) from $OPENAI_MANIFEST"
+
           if [[ -z "${MONGO_PASSWORD}" ]]; then
             echo "::error::MONGO_ADMIN_PASSWORD repository secret is not set. Add it under Settings → Secrets and variables → Actions."
             exit 1
@@ -110,7 +118,7 @@ jobs:
               location="$LOCATION" \
               administratorLoginPassword="$PG_PASSWORD" \
               mongoAdministratorLoginPassword="$MONGO_PASSWORD" \
-              openAIDeployments='[]' \
+              openAIDeployments="$OPENAI_DEPS" \
               pocAppConfigKeyValues='[]' \
               blobContainerNames="$BLOB_CONTAINERS"
 
@@ -448,6 +456,7 @@ jobs:
           MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID: ${{ secrets.MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID }}
           MICROSOFT_PROVIDER_AUTHENTICATION_SECRET: ${{ secrets.MICROSOFT_PROVIDER_AUTHENTICATION_SECRET }}
           AZURE_POC_TENANT_ID: ${{ secrets.AZURE_POC_TENANT_ID }}
+          POSTGRES_ADMIN_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
         run: |
           set -euo pipefail
           RG="${{ needs.deploy-main-resources.outputs.resourceGroupName }}"
@@ -484,6 +493,14 @@ jobs:
             fi
           fi
 
+          PG_HOST="${{ needs.deploy-main-resources.outputs.postgresHost }}"
+          PG_DB="${{ needs.deploy-main-resources.outputs.postgresDatabaseName }}"
+
+          if [[ -z "${POSTGRES_ADMIN_PASSWORD:-}" ]]; then
+            echo "::error::POSTGRES_ADMIN_PASSWORD repository secret is not set (required for backend POSTGRES_PASSWORD app setting)."
+            exit 1
+          fi
+
           az deployment group create \
             --resource-group "$RG" \
             --template-file bicep/appservices-stack.bicep \
@@ -500,4 +517,9 @@ jobs:
               microsoftIdentityClientSecret="$MS_SECRET" \
               frontendPublicBaseUrl="$FRONTEND_AUTH_BASE" \
               frontendHealthCheckPath='/api/health' \
-              backendHealthCheckPath='/health'
+              backendHealthCheckPath='/health' \
+              postgresHost="$PG_HOST" \
+              postgresDatabaseName="$PG_DB" \
+              postgresUser='citus' \
+              postgresPort='5432' \
+              postgresPassword="$POSTGRES_ADMIN_PASSWORD"

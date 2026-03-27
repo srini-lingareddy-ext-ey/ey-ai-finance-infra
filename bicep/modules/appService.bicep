@@ -29,6 +29,22 @@ param frontendHealthCheckPath string = '/api/health'
 @description('Azure HTTP health probe path for the backend. Default /health — probe sends GET with no Authorization header; allow anonymous GET on this path in the API. Pass empty string only to omit the platform probe (manual/az override).')
 param backendHealthCheckPath string = '/health'
 
+@description('Backend-only: Postgres host FQDN. When host, database, user, and postgresPassword are all set, the backend gets POSTGRES_* app settings.')
+param postgresHost string = ''
+
+@description('Backend-only: Postgres database name.')
+param postgresDatabaseName string = ''
+
+@description('Backend-only: Postgres login user (Citus default is citus).')
+param postgresUser string = ''
+
+@description('Backend-only: Postgres port.')
+param postgresPort string = '5432'
+
+@description('Backend-only: Postgres password stored as plain app setting POSTGRES_PASSWORD (not a Key Vault reference). Empty = omit POSTGRES_* block.')
+@secure()
+param postgresPassword string = ''
+
 var appServicePlanName = 'asp-${pocSlug}'
 // Default hostnames: https://eyaifinance-<pocSlug>.azurewebsites.net and https://eyaifinance-backend-<pocSlug>.azurewebsites.net
 var frontendName = 'eyaifinance-${pocSlug}'
@@ -89,7 +105,18 @@ var microsoftIdentityBackendAppSettings = easyAuthEnabled
         )
       : [])
 var frontendAppSettings = concat(sharedAppSettings, frontendServiceAppSettings, microsoftIdentityFrontendAppSettings)
-var backendAppSettings = concat(sharedAppSettings, microsoftIdentityBackendAppSettings)
+
+var injectBackendPostgresSettings = !empty(postgresHost) && !empty(postgresDatabaseName) && !empty(postgresUser) && !empty(postgresPassword)
+var backendPostgresAppSettings = injectBackendPostgresSettings
+  ? [
+      { name: 'POSTGRES_HOST', value: postgresHost }
+      { name: 'POSTGRES_DB', value: postgresDatabaseName }
+      { name: 'POSTGRES_USER', value: postgresUser }
+      { name: 'POSTGRES_PORT', value: postgresPort }
+      { name: 'POSTGRES_PASSWORD', value: postgresPassword }
+    ]
+  : []
+var backendAppSettings = concat(sharedAppSettings, microsoftIdentityBackendAppSettings, backendPostgresAppSettings)
 
 // Omit healthCheckPath when empty so Azure does not probe (JWT-only APIs often return 401 without Authorization).
 var backendSiteConfigBase = {

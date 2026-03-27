@@ -42,6 +42,22 @@ param frontendHealthCheckPath string = '/api/health'
 @description('Backend Web App health probe path. Default /health — backend must return HTTP 2xx without Authorization. Empty string omits the probe (manual deployments only).')
 param backendHealthCheckPath string = '/health'
 
+@description('Backend-only: Postgres host. Empty = do not set POSTGRES_* app settings.')
+param postgresHost string = ''
+
+@description('Backend-only: Postgres database name.')
+param postgresDatabaseName string = ''
+
+@description('Backend-only: Postgres user (e.g. citus for Citus).')
+param postgresUser string = ''
+
+@description('Backend-only: Postgres port.')
+param postgresPort string = '5432'
+
+@description('Backend-only: Postgres password (POSTGRES_PASSWORD app setting). Empty = omit POSTGRES_* block.')
+@secure()
+param postgresPassword string = ''
+
 // Central ACR identity (acr-managed-identity in rg-eyaifin-acr) — hardcoded for this subscription.
 var acrManagedIdentityResourceIdFinal = '/subscriptions/08d343af-2a3c-4f13-86a5-d9bde4948ae8/resourceGroups/rg-eyaifin-acr/providers/Microsoft.ManagedIdentity/userAssignedIdentities/acr-managed-identity'
 var keyVaultUri = 'https://${keyVaultName}${environment().suffixes.keyvaultDns}/'
@@ -63,6 +79,11 @@ module appService 'modules/appService.bicep' = {
     frontendPublicBaseUrl: frontendPublicBaseUrl
     frontendHealthCheckPath: frontendHealthCheckPath
     backendHealthCheckPath: backendHealthCheckPath
+    postgresHost: postgresHost
+    postgresDatabaseName: postgresDatabaseName
+    postgresUser: postgresUser
+    postgresPort: postgresPort
+    postgresPassword: postgresPassword
   }
 }
 
