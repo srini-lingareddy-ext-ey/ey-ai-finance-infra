@@ -10,6 +10,8 @@ The **Deploy POC** workflow runs all phases in one go (core deploy → Key Vault
 
 **One-time run per `pocSlug`:** Intended as a **single bootstrap** for each new POC id. Re-running with the **same** `pocSlug` can conflict with existing resources, re-run `init.sql`, and overwrite blobs and App Config for that environment. Use a **new** `pocSlug` for a new stack; update existing POCs with deliberate, scoped changes instead of repeating the full workflow.
 
+**Build frontend image:** **Deploy POC** (default) calls reusable **`.github/workflows/build-push-image.yml`** when **`buildFrontendImage`** is **true**, using **`appChoice`** and **`pocSlug`**: pushes **`aifinance-next-frontend:<pocSlug>`** or **`aifinance-frontend:<pocSlug>`** and sets build-arg **`NEXT_PUBLIC_BACKEND_ENDPOINT_BASE=https://eyaifinance-backend-<pocSlug>.azurewebsites.net`**. **`deploy-app-services`** waits for **`build-frontend-image`** (or **skipped**) and deploys that image ref. Turn **`buildFrontendImage`** off to use **`frontendImage`**. **AcrPush** required. Standalone: **Actions → Build Push Image** — inputs **`poc_slug`** and **`app_choice`** (clones **ey-ai-finance** under the same GitHub org/user as this repo; images go to **creyaifinmain**).
+
 ### 1. Prerequisites
 
 - **Azure:** A user-assigned managed identity **id-aifinance-poc-deploy** in resource group **rg-eyaifin-pipeline**, with a federated credential for this repo (OIDC). Grant this identity **Contributor** at subscription scope.
@@ -35,7 +37,8 @@ Omit **EY_AI_FINANCE_REPO_TOKEN** only if you skip or replace the init step.
    - **pocSlug** (required): POC identifier, e.g. `test-main1`. The resource group will be `rg-<pocSlug>-poc`. Must yield a valid Azure resource group name: **≤ 83 characters** (so total length ≤ 90), **unique in the subscription**, only allowed characters (letters, digits, `_-.()`), **no trailing `.`** on the full name. See **Naming** below.
    - **location** (optional): Azure region; default `eastus`.
    - **appChoice** (optional): App variant for init.sql; chooses `db/<appChoice>/init.sql` from the ey-ai-finance repo (`aifinance-next` or `aifinance`; default `aifinance-next`).
-   - **frontendImage** / **backendImage** (optional): Container images for the web apps; defaults point at `creyaifinmain.azurecr.io`.
+   - **buildFrontendImage** (optional, default **true**): When **true**, build and push from **ey-ai-finance** to **creyaifinmain** using **appChoice** + **pocSlug** (`aifinance-next-frontend:<pocSlug>` or `aifinance-frontend:<pocSlug>`). When **false**, use **frontendImage**.
+   - **frontendImage** / **backendImage** (optional): Container images when not using the built **aifinance-next** frontend; defaults point at `creyaifinmain.azurecr.io`.
    - **enableMicrosoftEntraAuthentication** (optional, default **true**): When **false**, App Services deploy **without** Microsoft Entra app settings or Easy Auth (ignores `MICROSOFT_PROVIDER_*` for that run). When **true**, requires **`MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID`** (and tenant); see the [Deploy POC Workflow](https://github.com/ey-org/ey-ai-finance-infra/wiki/05.-Deploy-POC-Workflow) wiki.
 5. Click **Run workflow** (green button).
 
@@ -65,7 +68,9 @@ GitHub’s OIDC token used by **azure/login** is short-lived. This job calls **a
 
 **Job `init-postgres`:** checks out **ey-ai-finance** and runs `db/<appChoice>/init.sql`, then inserts a **tenant** row for `pocSlug`.
 
-**Job `deploy-app-services`:** deploys **appservices-stack.bicep** (frontend and backend App Services). Passes **`POSTGRES_ADMIN_PASSWORD`** into Bicep as secure **`postgresPassword`** so the backend gets **`POSTGRES_*`** app settings. Builds **`OPENAI_ACCOUNT_EUS2`** as a compact JSON array **`[openaiName, key1]`** from the POC Azure OpenAI account (Key Vault **`OpenAIApiKey`** unchanged). Microsoft Entra on the Web Apps runs only when **`enableMicrosoftEntraAuthentication`** is **true** (workflow input).
+**Job `build-frontend-image`:** runs when **`buildFrontendImage`** is **true**; calls reusable **`build-push-image.yml`** with **`appChoice`** and **`pocSlug`** (`secrets: inherit`).
+
+**Job `deploy-app-services`:** runs after core deploy + init (+ build job **success** or **skipped**); deploys **appservices-stack.bicep** using the built frontend image output or **`frontendImage`**. Passes **`POSTGRES_ADMIN_PASSWORD`** as **`postgresPassword`**; builds **`OPENAI_ACCOUNT_EUS2`** from the POC OpenAI account. Microsoft Entra on the frontend when **`enableMicrosoftEntraAuthentication`** is **true**.
 
 When it finishes, the POC resource group contains the full stack and the apps pull images from the central ACR using **acr-managed-identity**.
 

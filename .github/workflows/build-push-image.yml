@@ -1,0 +1,151 @@
+# Build and push frontend image to ACR from ey-ai-finance (disk cleanup, registry cache, provenance/sbom off).
+# Inputs: app_choice (aifinance-next | aifinance), poc_slug.
+# Image: creyaifinmain.azurecr.io/aifinance-next-frontend:<poc_slug> or aifinance-frontend:<poc_slug> (ACR fixed)
+# NEXT_PUBLIC_BACKEND_ENDPOINT_BASE=https://eyaifinance-backend-<poc_slug>.azurewebsites.net
+#
+# Triggers: workflow_dispatch | workflow_call (e.g. Deploy POC).
+# Checkout: github.repository_owner/ey-ai-finance (same org/user as the repo that runs this workflow).
+# Secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, EY_AI_FINANCE_REPO_TOKEN
+
+name: Build Push Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      poc_slug:
+        description: "POC Slug"
+        required: true
+        type: string
+      app_choice:
+        description: "App Choice"
+        required: true
+        type: choice
+        options:
+          - aifinance-next
+          - aifinance
+
+  workflow_call:
+    inputs:
+      poc_slug:
+        required: true
+        type: string
+      app_choice:
+        required: true
+        type: string
+    outputs:
+      image_tag:
+        description: "Image tag (same as poc_slug)"
+        value: ${{ jobs.build-push.outputs.image_tag }}
+      frontend_image_docker:
+        description: "DOCKER|registry/repo:tag for App Service / Bicep"
+        value: ${{ jobs.build-push.outputs.frontend_image_docker }}
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      REGISTRY: creyaifinmain.azurecr.io
+    outputs:
+      image_tag: ${{ inputs.poc_slug }}
+      frontend_image_docker: ${{ steps.bicep_image.outputs.value }}
+    steps:
+      - name: Resolve image name and Dockerfile
+        id: meta
+        env:
+          APP: ${{ inputs.app_choice }}
+        run: |
+          set -euo pipefail
+          case "${APP}" in
+            aifinance-next)
+              echo "image_name=aifinance-next-frontend" >> "${GITHUB_OUTPUT}"
+              echo "dockerfile=ey-ai-finance/apps/aifinance-next/frontend/Dockerfile" >> "${GITHUB_OUTPUT}"
+              ;;
+            aifinance)
+              echo "image_name=aifinance-frontend" >> "${GITHUB_OUTPUT}"
+              echo "dockerfile=ey-ai-finance/apps/aifinance/frontend/Dockerfile" >> "${GITHUB_OUTPUT}"
+              ;;
+            *)
+              echo "::error::Unknown app_choice: ${APP} (expected aifinance-next or aifinance)"
+              exit 1
+              ;;
+          esac
+
+      - name: Checkout ey-ai-finance (build context)
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: ${{ github.repository_owner }}/ey-ai-finance
+          path: ey-ai-finance
+          token: ${{ secrets.EY_AI_FINANCE_REPO_TOKEN }}
+
+      - name: Free up disk space
+        run: |
+          echo "Before cleanup:"
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/local/.ghcup
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf "${AGENT_TOOLSDIRECTORY}"
+          sudo apt-get clean
+          echo "After removing software:"
+          df -h
+          docker system prune -af --volumes || true
+          docker builder prune -af || true
+          echo "After Docker cleanup:"
+          df -h
+
+      - name: Set NEXT_PUBLIC_BACKEND_ENDPOINT_BASE
+        id: ctx
+        env:
+          POC_SLUG: ${{ inputs.poc_slug }}
+        run: |
+          set -euo pipefail
+          BASE="https://eyaifinance-backend-${POC_SLUG}.azurewebsites.net"
+          echo "backend_base=${BASE}" >> "${GITHUB_OUTPUT}"
+
+      - name: Azure login (OIDC)
+        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        with:
+          client-id: ${{ secrets.AZURE_POC_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_POC_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
+
+      - name: ACR login
+        run: az acr login --name "${REGISTRY%%.azurecr.io}"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+
+      - name: Build and push
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        with:
+          context: ey-ai-finance
+          file: ${{ steps.meta.outputs.dockerfile }}
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ steps.meta.outputs.image_name }}:${{ inputs.poc_slug }}
+          build-args: |
+            NEXT_PUBLIC_BACKEND_ENDPOINT_BASE=${{ steps.ctx.outputs.backend_base }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/cache:${{ steps.meta.outputs.image_name }}
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/cache:${{ steps.meta.outputs.image_name }},mode=max
+          provenance: false
+          sbom: false
+
+      - name: Expose image for workflow_call / outputs
+        id: bicep_image
+        env:
+          INAME: ${{ steps.meta.outputs.image_name }}
+          POC_TAG: ${{ inputs.poc_slug }}
+        run: echo "value=DOCKER|${REGISTRY}/${INAME}:${POC_TAG}" >> "${GITHUB_OUTPUT}"
+
+      - name: Azure logout
+        if: always()
+        run: az logout || true
+
+      - name: Summary
+        run: |
+          echo "Pushed ${REGISTRY}/${{ steps.meta.outputs.image_name }}:${{ inputs.poc_slug }}"
+          echo "NEXT_PUBLIC_BACKEND_ENDPOINT_BASE=${{ steps.ctx.outputs.backend_base }}"

@@ -11,7 +11,8 @@
 #
 # OIDC note: GitHub’s ID token (client assertion for federated login) is only valid for a few minutes. This job logs in once, then runs
 # azure/login again immediately after the subscription ARM deployment so later `az` calls do not fail with AADSTS700024 (assertion expired).
-# For init.sql: EY_AI_FINANCE_REPO_TOKEN (to checkout ey-ai-finance repo). For app services: ACR_MANAGED_IDENTITY_CLIENT_ID; POSTGRES_ADMIN_PASSWORD also sets backend POSTGRES_PASSWORD app setting.
+# For init.sql + optional frontend image build: EY_AI_FINANCE_REPO_TOKEN (checkout ey-ai-finance). For app services: ACR_MANAGED_IDENTITY_CLIENT_ID; POSTGRES_ADMIN_PASSWORD also sets backend POSTGRES_PASSWORD app setting.
+# When buildFrontendImage is true, job build-frontend-image calls .github/workflows/build-push-image.yml (appChoice + pocSlug → aifinance(-next)-frontend:<pocSlug>); deploy-app-services uses its output. OIDC identity needs AcrPush.
 
 name: Deploy POC
 
@@ -35,8 +36,13 @@ on:
           - aifinance-next
           - aifinance
         default: "aifinance-next"
+      buildFrontendImage:
+        description: "If true, build and push frontend from ey-ai-finance using appChoice + pocSlug (image aifinance-next-frontend:<pocSlug> or aifinance-frontend:<pocSlug>, NEXT_PUBLIC_BACKEND_ENDPOINT_BASE=https://eyaifinance-backend-<pocSlug>.azurewebsites.net)."
+        required: true
+        type: boolean
+        default: true
       frontendImage:
-        description: "Frontend container image (e.g. DOCKER|creyaifinmain.azurecr.io/aifinance-frontend:latest)"
+        description: "Frontend container image when buildFrontendImage is false (e.g. DOCKER|creyaifinmain.azurecr.io/aifinance-frontend:latest)"
         required: true
         type: string
         default: "DOCKER|creyaifinmain.azurecr.io/aifinance-frontend:latest"
@@ -46,7 +52,7 @@ on:
         type: string
         default: "DOCKER|creyaifinmain.azurecr.io/aifinance-backend:latest"
       enableMicrosoftEntraAuthentication:
-        description: "If true, configure EY Microsoft Entra on frontend/backend App Services. If false, deploy with no Entra app settings or Easy Auth."
+        description: "If true, configure EY Microsoft Entra on the frontend App Service. If false, deploy with no Entra app settings or Easy Auth."
         required: true
         type: boolean
         default: true
@@ -453,9 +459,19 @@ jobs:
 
           echo "Preapproved admin users upserted successfully."
 
+  build-frontend-image:
+    name: Build frontend image (ACR)
+    if: ${{ inputs.buildFrontendImage }}
+    uses: ./.github/workflows/build-push-image.yml
+    with:
+      poc_slug: ${{ inputs.pocSlug }}
+      app_choice: ${{ inputs.appChoice }}
+    secrets: inherit
+
   deploy-app-services:
     runs-on: ubuntu-latest
-    needs: [deploy-main-resources, init-postgres]
+    needs: [deploy-main-resources, init-postgres, build-frontend-image]
+    if: ${{ always() && needs.deploy-main-resources.result == 'success' && needs.init-postgres.result == 'success' && (needs.build-frontend-image.result == 'success' || needs.build-frontend-image.result == 'skipped') }}
     permissions:
       id-token: write
       contents: read
@@ -470,14 +486,30 @@ jobs:
           tenant-id: ${{ secrets.AZURE_POC_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
 
+      - name: Resolve FRONTEND_IMAGE for deploy
+        id: fe_deploy
+        env:
+          BUILD_JOB_RESULT: ${{ needs.build-frontend-image.result }}
+          FROM_BUILD: ${{ needs.build-frontend-image.outputs.frontend_image_docker }}
+          FALLBACK: ${{ inputs.frontendImage }}
+        run: |
+          set -euo pipefail
+          if [[ "${BUILD_JOB_RESULT}" == "success" ]]; then
+            echo "image=${FROM_BUILD}" >> "${GITHUB_OUTPUT}"
+          else
+            echo "image=${FALLBACK}" >> "${GITHUB_OUTPUT}"
+          fi
+
       - name: Deploy app services
         env:
+          FRONTEND_IMAGE: ${{ steps.fe_deploy.outputs.image }}
           MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID: ${{ secrets.MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID }}
           MICROSOFT_PROVIDER_AUTHENTICATION_SECRET: ${{ secrets.MICROSOFT_PROVIDER_AUTHENTICATION_SECRET }}
           AZURE_POC_TENANT_ID: ${{ secrets.AZURE_POC_TENANT_ID }}
           POSTGRES_ADMIN_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
         run: |
           set -euo pipefail
+          echo "Frontend container image: ${FRONTEND_IMAGE}"
           RG="${{ needs.deploy-main-resources.outputs.resourceGroupName }}"
           KV="${{ needs.deploy-main-resources.outputs.keyVaultName }}"
           APP_CFG="${{ needs.deploy-main-resources.outputs.appConfigEndpoint }}"
@@ -508,7 +540,7 @@ jobs:
             if [[ -z "${MICROSOFT_PROVIDER_AUTHENTICATION_SECRET:-}" ]]; then
               echo "::notice title=App-managed auth::MICROSOFT_PROVIDER_AUTHENTICATION_SECRET empty — MICROSOFT_PROVIDER_* + WEBAPP_PUBLIC_BASE_URL only (no Easy Auth). Add the secret for authsettingsV2."
             else
-              echo "Microsoft Entra: Easy Auth on frontend + backend (MICROSOFT_PROVIDER_CLIENT_SECRET app setting plus shared App Config / Key Vault)."
+              echo "Microsoft Entra: Easy Auth on frontend (MICROSOFT_PROVIDER_CLIENT_SECRET on frontend plus shared App Config / Key Vault)."
             fi
           fi
 
@@ -536,7 +568,7 @@ jobs:
               location=${{ inputs.location }} \
               keyVaultName="$KV" \
               appConfigEndpoint="$APP_CFG" \
-              frontendImage='${{ inputs.frontendImage }}' \
+              frontendImage="$FRONTEND_IMAGE" \
               backendImage='${{ inputs.backendImage }}' \
               acrManagedIdentityClientId='${{ secrets.ACR_MANAGED_IDENTITY_CLIENT_ID }}' \
               microsoftIdentityClientId="$MS_APP_ID" \
