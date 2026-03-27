@@ -440,8 +440,6 @@ jobs:
           SQL
 
           echo "POC tenant row inserted successfully."
-
-      # Requires public.preapproved_users from ey-ai-finance init.sql with at least (email, is_admin); unique constraint on email for ON CONFLICT.
       - name: Insert preapproved admin users
         env:
           PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
@@ -455,7 +453,11 @@ jobs:
           INSERT INTO preapproved_users (email, is_admin)
           VALUES
             ('Amy.Feng.Chen@ey.com', true),
-            ('Kayl.Murdough@ey.com', true)
+            ('Kayl.Murdough@ey.com', true),
+            ('Nicole.Belans@ey.com', true),
+            ('Lucas.Benson@ey.com', true),
+            ('Christian.J.Noordover@ey.com', true),
+            
           ON CONFLICT (email) DO UPDATE SET is_admin = EXCLUDED.is_admin;
           SQL
 
@@ -616,6 +618,7 @@ jobs:
           MICROSOFT_PROVIDER_AUTHENTICATION_SECRET: ${{ secrets.MICROSOFT_PROVIDER_AUTHENTICATION_SECRET }}
           AZURE_POC_TENANT_ID: ${{ secrets.AZURE_POC_TENANT_ID }}
           POSTGRES_ADMIN_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+          MONGO_PASSWORD: ${{ secrets.MONGO_ADMIN_PASSWORD }}
         run: |
           set -euo pipefail
           echo "Frontend container image: ${FRONTEND_IMAGE}"
@@ -661,13 +664,27 @@ jobs:
             exit 1
           fi
 
+          if [[ -z "${MONGO_PASSWORD:-}" ]]; then
+            echo "::error::MONGO_ADMIN_PASSWORD repository secret is not set (required for backend MONGO_CONN_STR app setting)."
+            exit 1
+          fi
+
+          MONGO_HOST="${{ needs.deploy-main-resources.outputs.mongoHost }}"
+          MONGO_USER="${{ needs.deploy-main-resources.outputs.mongoAdministratorLogin }}"
+          MONGO_PW_ENC=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$MONGO_PASSWORD")
+          MONGO_CONN="mongodb+srv://${MONGO_USER}:${MONGO_PW_ENC}@${MONGO_HOST}/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000"
+
           OPENAI_NAME="${{ needs.deploy-main-resources.outputs.openaiName }}"
           OAI_KEY=$(az cognitiveservices account keys list --name "$OPENAI_NAME" --resource-group "$RG" --query key1 -o tsv)
           OPENAI_ACCOUNT_EUS2_JSON=$(jq -cn --arg n "$OPENAI_NAME" --arg k "$OAI_KEY" '[$n,$k]')
           OPENAI_PARAM_FILE=$(mktemp)
           trap 'rm -f "$OPENAI_PARAM_FILE"' EXIT
-          jq -n --arg v "$OPENAI_ACCOUNT_EUS2_JSON" '{parameters: {openAiAccountEus2Json: {value: $v}}}' > "$OPENAI_PARAM_FILE"
+          jq -n \
+            --arg oai "$OPENAI_ACCOUNT_EUS2_JSON" \
+            --arg mongo "$MONGO_CONN" \
+            '{parameters: {openAiAccountEus2Json: {value: $oai}, mongoConnStr: {value: $mongo}}}' > "$OPENAI_PARAM_FILE"
           echo "Backend OPENAI_ACCOUNT_EUS2: account name from deployment ($OPENAI_NAME) + key (redacted)."
+          echo "Backend MONGO_CONN_STR: same URI shape as Key Vault MongoConnectionString (password redacted)."
 
           az deployment group create \
             --resource-group "$RG" \

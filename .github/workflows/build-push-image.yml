@@ -7,7 +7,7 @@
 #
 # Secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, EY_AI_FINANCE_REPO_TOKEN
 
-name: Build Push Image
+name: Build Push Frontend Image
 
 on:
   workflow_dispatch:

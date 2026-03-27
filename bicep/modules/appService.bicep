@@ -49,6 +49,10 @@ param postgresPassword string = ''
 @secure()
 param openAiAccountEus2Json string = ''
 
+@description('Backend-only: MongoDB connection string for app setting MONGO_CONN_STR. Empty = omit.')
+@secure()
+param mongoConnStr string = ''
+
 var appServicePlanName = 'asp-${pocSlug}'
 // Default hostnames: https://eyaifinance-<pocSlug>.azurewebsites.net and https://eyaifinance-backend-<pocSlug>.azurewebsites.net
 var frontendName = 'eyaifinance-${pocSlug}'
@@ -115,13 +119,18 @@ var backendOpenAiEus2AppSettings = !empty(openAiAccountEus2Json)
       { name: 'OPENAI_ACCOUNT_EUS2', value: openAiAccountEus2Json }
     ]
   : []
+var backendMongoAppSettings = !empty(mongoConnStr)
+  ? [
+      { name: 'MONGO_CONN_STR', value: mongoConnStr }
+    ]
+  : []
 var backendEntraAppSettings = !empty(microsoftIdentityClientId) && !empty(microsoftIdentityTenantId)
   ? [
       { name: 'AZURE_CLIENT_ID', value: microsoftIdentityClientId }
       { name: 'AZURE_TENANT_ID', value: microsoftIdentityTenantId }
     ]
   : []
-var backendAppSettings = concat(sharedAppSettings, backendPostgresAppSettings, backendOpenAiEus2AppSettings, backendEntraAppSettings)
+var backendAppSettings = concat(sharedAppSettings, backendPostgresAppSettings, backendMongoAppSettings, backendOpenAiEus2AppSettings, backendEntraAppSettings)
 
 // Omit healthCheckPath when empty so Azure does not probe (JWT-only APIs often return 401 without Authorization).
 var backendSiteConfigBase = {

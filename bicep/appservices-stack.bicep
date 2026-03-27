@@ -62,6 +62,10 @@ param postgresPassword string = ''
 @secure()
 param openAiAccountEus2Json string = ''
 
+@description('Backend-only: MongoDB connection string for MONGO_CONN_STR on the backend Web App. Empty = omit.')
+@secure()
+param mongoConnStr string = ''
+
 // Central ACR identity (acr-managed-identity in rg-eyaifin-acr) — hardcoded for this subscription.
 var acrManagedIdentityResourceIdFinal = '/subscriptions/08d343af-2a3c-4f13-86a5-d9bde4948ae8/resourceGroups/rg-eyaifin-acr/providers/Microsoft.ManagedIdentity/userAssignedIdentities/acr-managed-identity'
 var keyVaultUri = 'https://${keyVaultName}${environment().suffixes.keyvaultDns}/'
@@ -89,6 +93,7 @@ module appService 'modules/appService.bicep' = {
     postgresPort: postgresPort
     postgresPassword: postgresPassword
     openAiAccountEus2Json: openAiAccountEus2Json
+    mongoConnStr: mongoConnStr
   }
 }
 
