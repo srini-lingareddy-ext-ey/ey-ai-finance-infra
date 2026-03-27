@@ -462,6 +462,9 @@ jobs:
   build-frontend-image:
     name: Build frontend image (ACR)
     if: ${{ inputs.buildFrontendImage }}
+    permissions:
+      id-token: write
+      contents: read
     uses: ./.github/workflows/build-push-image.yml
     with:
       poc_slug: ${{ inputs.pocSlug }}
