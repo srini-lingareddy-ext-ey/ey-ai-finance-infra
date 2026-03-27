@@ -98,16 +98,6 @@ var microsoftIdentityFrontendAppSettings = easyAuthEnabled
           ]
         )
       : [])
-var microsoftIdentityBackendAppSettings = easyAuthEnabled
-  ? microsoftAuthSecretAppSettings
-  : (microsoftAuthEnabled
-      ? concat(
-          microsoftAuthCoreAppSettings,
-          [
-            { name: 'WEBAPP_PUBLIC_BASE_URL', value: backendPublicBaseUrl }
-          ]
-        )
-      : [])
 var frontendAppSettings = concat(sharedAppSettings, frontendServiceAppSettings, microsoftIdentityFrontendAppSettings)
 
 var injectBackendPostgresSettings = !empty(postgresHost) && !empty(postgresDatabaseName) && !empty(postgresUser) && !empty(postgresPassword)
@@ -125,7 +115,13 @@ var backendOpenAiEus2AppSettings = !empty(openAiAccountEus2Json)
       { name: 'OPENAI_ACCOUNT_EUS2', value: openAiAccountEus2Json }
     ]
   : []
-var backendAppSettings = concat(sharedAppSettings, microsoftIdentityBackendAppSettings, backendPostgresAppSettings, backendOpenAiEus2AppSettings)
+var backendEntraAppSettings = !empty(microsoftIdentityClientId) && !empty(microsoftIdentityTenantId)
+  ? [
+      { name: 'AZURE_CLIENT_ID', value: microsoftIdentityClientId }
+      { name: 'AZURE_TENANT_ID', value: microsoftIdentityTenantId }
+    ]
+  : []
+var backendAppSettings = concat(sharedAppSettings, backendPostgresAppSettings, backendOpenAiEus2AppSettings, backendEntraAppSettings)
 
 // Omit healthCheckPath when empty so Azure does not probe (JWT-only APIs often return 401 without Authorization).
 var backendSiteConfigBase = {
@@ -190,8 +186,8 @@ resource appServiceBackend 'Microsoft.Web/sites@2024-11-01' = {
   }
 }
 
-// App Service Authentication (Easy Auth) — Microsoft Entra ID. Register redirect URIs on the app registration:
-// https://<frontend-default-host>/.auth/login/aad/callback and https://<backend-default-host>/.auth/login/aad/callback
+// App Service Authentication (Easy Auth) — Microsoft Entra ID on the frontend only. Register redirect URI on the app registration:
+// https://<frontend-default-host>/.auth/login/aad/callback
 resource frontendAuthSettingsV2 'Microsoft.Web/sites/config@2024-11-01' = if (easyAuthEnabled) {
   parent: appServiceFrontend
   name: 'authsettingsV2'
@@ -224,35 +220,13 @@ resource frontendAuthSettingsV2 'Microsoft.Web/sites/config@2024-11-01' = if (ea
   }
 }
 
-resource backendAuthSettingsV2 'Microsoft.Web/sites/config@2024-11-01' = if (easyAuthEnabled) {
+// Keep App Service Authentication disabled on the backend (no Easy Auth / no Entra redirect on backend).
+resource backendAuthSettingsV2Off 'Microsoft.Web/sites/config@2024-11-01' = {
   parent: appServiceBackend
   name: 'authsettingsV2'
   properties: {
     platform: {
-      enabled: true
-    }
-    globalValidation: {
-      requireAuthentication: false
-      unauthenticatedClientAction: 'AllowAnonymous'
-      excludedPaths: [
-        '/health'
-        '/health/'
-        '/api/health'
-        '/api/health/'
-      ]
-    }
-    httpSettings: {
-      requireHttps: true
-    }
-    identityProviders: {
-      azureActiveDirectory: {
-        enabled: true
-        registration: {
-          clientId: microsoftIdentityClientId
-          clientSecretSettingName: entraClientSecretSettingName
-          openIdIssuer: entraOpenIdIssuer
-        }
-      }
+      enabled: false
     }
   }
 }

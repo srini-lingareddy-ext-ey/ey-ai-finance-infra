@@ -5,9 +5,8 @@
 # When false: no Entra app settings and no Easy Auth, even if MICROSOFT_PROVIDER_* secrets exist.
 # When true: requires MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID and AZURE_POC_TENANT_ID. Optional MICROSOFT_PROVIDER_AUTHENTICATION_SECRET —
 # with secret + base URL, Bicep enables Easy Auth (authsettingsV2); without secret, app-managed MICROSOFT_PROVIDER_* + WEBAPP_PUBLIC_BASE_URL only.
-# Register redirect URIs:
+# Register redirect URI (frontend Easy Auth only):
 #   https://eyaifinance-<pocSlug>.azurewebsites.net/.auth/login/aad/callback
-#   https://eyaifinance-backend-<pocSlug>.azurewebsites.net/.auth/login/aad/callback
 # Repository secrets only; this job has no environment:.
 #
 # OIDC note: GitHub’s ID token (client assertion for federated login) is only valid for a few minutes. This job logs in once, then runs
@@ -433,6 +432,26 @@ jobs:
           SQL
 
           echo "POC tenant row inserted successfully."
+
+      # Requires public.preapproved_users from ey-ai-finance init.sql with at least (email, is_admin); unique constraint on email for ON CONFLICT.
+      - name: Insert preapproved admin users
+        env:
+          PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          PG_HOST="${{ needs.deploy-main-resources.outputs.postgresHost }}"
+          PG_DB="${{ needs.deploy-main-resources.outputs.postgresDatabaseName }}"
+
+          psql "host=${PG_HOST} port=5432 dbname=${PG_DB} user=citus sslmode=require" \
+            -v ON_ERROR_STOP=1 <<'SQL'
+          INSERT INTO preapproved_users (email, is_admin)
+          VALUES
+            ('Amy.Feng.Chen@ey.com', true),
+            ('Kayl.Murdough@ey.com', true)
+          ON CONFLICT (email) DO UPDATE SET is_admin = EXCLUDED.is_admin;
+          SQL
+
+          echo "Preapproved admin users upserted successfully."
 
   deploy-app-services:
     runs-on: ubuntu-latest
