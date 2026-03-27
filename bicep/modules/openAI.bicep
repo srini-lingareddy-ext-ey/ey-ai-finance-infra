@@ -38,7 +38,7 @@ resource deployments 'Microsoft.CognitiveServices/accounts/deployments@2025-06-0
   parent: openaiAccount
   name: dep.name
   sku: {
-    name: 'GlobalStandard'
+    name: dep.?skuName ?? 'GlobalStandard'
     capacity: dep.capacity
   }
   properties: {

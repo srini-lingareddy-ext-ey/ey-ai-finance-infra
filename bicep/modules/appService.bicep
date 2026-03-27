@@ -45,6 +45,10 @@ param postgresPort string = '5432'
 @secure()
 param postgresPassword string = ''
 
+@description('Backend-only: JSON array string for app setting OPENAI_ACCOUNT_EUS2, e.g. ["account-name","api-key"]. Empty = omit. Stored as a plain app setting (key visible in portal to authorized users).')
+@secure()
+param openAiAccountEus2Json string = ''
+
 var appServicePlanName = 'asp-${pocSlug}'
 // Default hostnames: https://eyaifinance-<pocSlug>.azurewebsites.net and https://eyaifinance-backend-<pocSlug>.azurewebsites.net
 var frontendName = 'eyaifinance-${pocSlug}'
@@ -116,7 +120,12 @@ var backendPostgresAppSettings = injectBackendPostgresSettings
       { name: 'POSTGRES_PASSWORD', value: postgresPassword }
     ]
   : []
-var backendAppSettings = concat(sharedAppSettings, microsoftIdentityBackendAppSettings, backendPostgresAppSettings)
+var backendOpenAiEus2AppSettings = !empty(openAiAccountEus2Json)
+  ? [
+      { name: 'OPENAI_ACCOUNT_EUS2', value: openAiAccountEus2Json }
+    ]
+  : []
+var backendAppSettings = concat(sharedAppSettings, microsoftIdentityBackendAppSettings, backendPostgresAppSettings, backendOpenAiEus2AppSettings)
 
 // Omit healthCheckPath when empty so Azure does not probe (JWT-only APIs often return 401 without Authorization).
 var backendSiteConfigBase = {

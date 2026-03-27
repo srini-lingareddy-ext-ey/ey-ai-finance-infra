@@ -1,4 +1,4 @@
-# Deploy main.bicep: resource group + Key Vault, App Configuration, OpenAI (model deployments from bicep/configs/openai_default_deployments.json), Postgres, Blob Storage; run init.sql on Postgres; then deploy App Services.
+# Deploy main.bicep: resource group + Key Vault, App Configuration, OpenAI account (no model deployments in Bicep), Postgres, Blob Storage; then best-effort OpenAI deployments from bicep/configs/openai_default_deployments.json; run init.sql; then App Services.
 # Trigger manually and pass pocSlug (and optionally location, frontend/backend images, appChoice). Password and pipeline principal from GitHub secrets.
 # Required secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, POSTGRES_ADMIN_PASSWORD, MONGO_ADMIN_PASSWORD.
 # Microsoft Entra on App Services is controlled by workflow input **enableMicrosoftEntraAuthentication** (not by “are secrets set?”).
@@ -96,14 +96,6 @@ jobs:
           MANIFEST="bicep/configs/blob_payloads.json"
           BLOB_CONTAINERS=$(jq -c 'keys' "$MANIFEST")
 
-          OPENAI_MANIFEST="bicep/configs/openai_default_deployments.json"
-          if [[ ! -f "$OPENAI_MANIFEST" ]]; then
-            echo "::error::Missing $OPENAI_MANIFEST"
-            exit 1
-          fi
-          OPENAI_DEPS=$(jq -c '.' "$OPENAI_MANIFEST")
-          echo "openAIDeployments: $(jq 'length' "$OPENAI_MANIFEST") deployment(s) from $OPENAI_MANIFEST"
-
           if [[ -z "${MONGO_PASSWORD}" ]]; then
             echo "::error::MONGO_ADMIN_PASSWORD repository secret is not set. Add it under Settings → Secrets and variables → Actions."
             exit 1
@@ -118,7 +110,7 @@ jobs:
               location="$LOCATION" \
               administratorLoginPassword="$PG_PASSWORD" \
               mongoAdministratorLoginPassword="$MONGO_PASSWORD" \
-              openAIDeployments="$OPENAI_DEPS" \
+              openAIDeployments='[]' \
               pocAppConfigKeyValues='[]' \
               blobContainerNames="$BLOB_CONTAINERS"
 
@@ -147,6 +139,14 @@ jobs:
           echo "mongoHost=$(jq -r '.mongoHost.value' core-outputs.json)" >> $GITHUB_OUTPUT
           echo "mongoClusterName=$(jq -r '.mongoClusterName.value' core-outputs.json)" >> $GITHUB_OUTPUT
           echo "mongoAdministratorLogin=$(jq -r '.mongoAdministratorLogin.value' core-outputs.json)" >> $GITHUB_OUTPUT
+
+      - name: Deploy OpenAI models
+        run: |
+          set -euo pipefail
+          RG="${{ steps.core-outputs.outputs.resourceGroupName }}"
+          OAI="${{ steps.core-outputs.outputs.openaiName }}"
+          MANIFEST="bicep/configs/openai_default_deployments.json"
+          bash scripts/deploy_openai_deployments.sh "$RG" "$OAI" "$MANIFEST"
 
       - name: Wait for RBAC Propagation
         run: echo "Waiting 30s for RBAC (contributor / Key Vault Data Access Administrator) to propagate..." && sleep 30
@@ -501,6 +501,14 @@ jobs:
             exit 1
           fi
 
+          OPENAI_NAME="${{ needs.deploy-main-resources.outputs.openaiName }}"
+          OAI_KEY=$(az cognitiveservices account keys list --name "$OPENAI_NAME" --resource-group "$RG" --query key1 -o tsv)
+          OPENAI_ACCOUNT_EUS2_JSON=$(jq -cn --arg n "$OPENAI_NAME" --arg k "$OAI_KEY" '[$n,$k]')
+          OPENAI_PARAM_FILE=$(mktemp)
+          trap 'rm -f "$OPENAI_PARAM_FILE"' EXIT
+          jq -n --arg v "$OPENAI_ACCOUNT_EUS2_JSON" '{parameters: {openAiAccountEus2Json: {value: $v}}}' > "$OPENAI_PARAM_FILE"
+          echo "Backend OPENAI_ACCOUNT_EUS2: account name from deployment ($OPENAI_NAME) + key (redacted)."
+
           az deployment group create \
             --resource-group "$RG" \
             --template-file bicep/appservices-stack.bicep \
@@ -522,4 +530,5 @@ jobs:
               postgresDatabaseName="$PG_DB" \
               postgresUser='citus' \
               postgresPort='5432' \
-              postgresPassword="$POSTGRES_ADMIN_PASSWORD"
+              postgresPassword="$POSTGRES_ADMIN_PASSWORD" \
+            --parameters @"$OPENAI_PARAM_FILE"

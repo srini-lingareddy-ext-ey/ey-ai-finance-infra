@@ -20,7 +20,7 @@ The **Deploy POC** workflow runs all phases in one go (core deploy → Key Vault
 | **AZURE_POC_CLIENT_ID**            | Managed identity's client (application) ID for Azure login.                                                                                                                                             |
 | **AZURE_POC_TENANT_ID**            | Azure AD tenant ID.                                                                                                                                                                                     |
 | **AZURE_POC_SUBSCRIPTION_ID**      | Target subscription ID.                                                                                                                                                                                 |
-| **POSTGRES_ADMIN_PASSWORD**        | PostgreSQL admin password: **`main.bicep`**, Key Vault **`PostgresConnectionString`**, **`init-postgres`**, and (Deploy POC) backend app setting **`POSTGRES_PASSWORD`**.                                                                                              |
+| **POSTGRES_ADMIN_PASSWORD**        | PostgreSQL admin password: **`main.bicep`**, Key Vault **`PostgresConnectionString`**, **`init-postgres`**, and (Deploy POC) backend app setting **`POSTGRES_PASSWORD`**.                               |
 | **ACR_MANAGED_IDENTITY_CLIENT_ID** | Client ID of **acr-managed-identity** (in rg-eyaifin-acr) for App Services image pull. Get with: `az identity show --resource-group rg-eyaifin-acr --name acr-managed-identity --query clientId -o tsv` |
 | **EY_AI_FINANCE_REPO_TOKEN**       | PAT to checkout the **ey-ai-finance** repo; required for the init step (run init.sql on the new Postgres).                                                                                              |
 
@@ -49,22 +49,23 @@ GitHub’s OIDC token used by **azure/login** is short-lived. This job calls **a
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1    | Checks out this repo.                                                                                                                                                                                                                                                                                        |
 | 2    | **Azure login (OIDC)** using repository secrets.                                                                                                                                                                                                                                                             |
-| 3    | Deploys **main.bicep** at subscription scope: creates `rg-<pocSlug>-poc` and core resources (Key Vault, App Configuration, OpenAI—including model deployments from **`bicep/configs/openai_default_deployments.json`**—Postgres, Blob Storage).                                                                                                                                 |
+| 3    | Deploys **main.bicep** at subscription scope: creates `rg-<pocSlug>-poc` and core resources (Key Vault, App Configuration, **Azure OpenAI account only** with `openAIDeployments=[]`, Postgres, Blob Storage).                                                                                                                                                           |
 | 4    | **Azure login (OIDC)** — refresh after the ARM deployment.                                                                                                                                                                                                                                                   |
 | 5    | Captures deployment outputs (resource group name, Key Vault name, App Config endpoint, Postgres host/DB, OpenAI name, storage account name).                                                                                                                                                                 |
-| 6    | Waits 30s for RBAC propagation.                                                                                                                                                                                                                                                                              |
-| 7    | Sets Key Vault network default action to **Allow** so the runner can write secrets.                                                                                                                                                                                                                          |
-| 8    | Populates the POC Key Vault with **PostgresConnectionString** and **OpenAIApiKey**.                                                                                                                                                                                                                          |
-| 9    | Lists secret names in the vault (verify only; no values).                                                                                                                                                                                                                                                    |
-| 10   | **Allow Blob Storage access from all networks:** `az storage account update` (public access **Enabled**, default action **Allow**, bypass **AzureServices**), then polls until the account shows **Allow** + **Enabled** (see **Blob storage** below).                                                       |
-| 11   | **Create blob payload files:** reads the storage connection string, probes the **data plane** with `az storage container list` (retries with backoff), uploads `{}` JSON blobs from `bicep/configs/blob_payloads.json` (quiet uploads). Total sleep for this step’s waits is **capped at 5 minutes (300s)**. |
-| 12   | Syncs App Configuration from `bicep/configs/backend_configs.yml` (label = `pocSlug`).                                                                                                                                                                                                                        |
-| 13   | Syncs blob payload path references into App Configuration via `scripts/sync_blob_payload_refs_to_appconfig.py`.                                                                                                                                                                                              |
-| 14   | Prints deployment outputs to the log.                                                                                                                                                                                                                                                                        |
+| 6    | **OpenAI model deployments (best-effort):** runs **`scripts/deploy_openai_deployments.sh`** against **`bicep/configs/openai_default_deployments.json`** — logs OK / SKIP / FAIL per model; job continues even if some fail.                                                                                                                                                 |
+| 7    | Waits 30s for RBAC propagation.                                                                                                                                                                                                                                                                              |
+| 8    | Sets Key Vault network default action to **Allow** so the runner can write secrets.                                                                                                                                                                                                                          |
+| 9    | Populates the POC Key Vault with **PostgresConnectionString** and **OpenAIApiKey**.                                                                                                                                                                                                                          |
+| 10   | Lists secret names in the vault (verify only; no values).                                                                                                                                                                                                                                                    |
+| 11   | **Allow Blob Storage access from all networks:** `az storage account update` (public access **Enabled**, default action **Allow**, bypass **AzureServices**), then polls until the account shows **Allow** + **Enabled** (see **Blob storage** below).                                                       |
+| 12   | **Create blob payload files:** reads the storage connection string, probes the **data plane** with `az storage container list` (retries with backoff), uploads `{}` JSON blobs from `bicep/configs/blob_payloads.json` (quiet uploads). Total sleep for this step’s waits is **capped at 5 minutes (300s)**. |
+| 13   | Syncs App Configuration from `bicep/configs/backend_configs.yml` (label = `pocSlug`).                                                                                                                                                                                                                        |
+| 14   | Syncs blob payload path references into App Configuration via `scripts/sync_blob_payload_refs_to_appconfig.py`.                                                                                                                                                                                              |
+| 15   | Prints deployment outputs to the log.                                                                                                                                                                                                                                                                        |
 
 **Job `init-postgres`:** checks out **ey-ai-finance** and runs `db/<appChoice>/init.sql`, then inserts a **tenant** row for `pocSlug`.
 
-**Job `deploy-app-services`:** deploys **appservices-stack.bicep** (frontend and backend App Services). Passes **`POSTGRES_ADMIN_PASSWORD`** into Bicep as secure **`postgresPassword`** so the backend gets **`POSTGRES_HOST`**, **`POSTGRES_DB`**, **`POSTGRES_USER`**, **`POSTGRES_PORT`**, and plain **`POSTGRES_PASSWORD`** app settings (Key Vault **`PostgresConnectionString`** is unchanged). Microsoft Entra on the Web Apps runs only when **`enableMicrosoftEntraAuthentication`** is **true** (workflow input).
+**Job `deploy-app-services`:** deploys **appservices-stack.bicep** (frontend and backend App Services). Passes **`POSTGRES_ADMIN_PASSWORD`** into Bicep as secure **`postgresPassword`** so the backend gets **`POSTGRES_*`** app settings. Builds **`OPENAI_ACCOUNT_EUS2`** as a compact JSON array **`[openaiName, key1]`** from the POC Azure OpenAI account (Key Vault **`OpenAIApiKey`** unchanged). Microsoft Entra on the Web Apps runs only when **`enableMicrosoftEntraAuthentication`** is **true** (workflow input).
 
 When it finishes, the POC resource group contains the full stack and the apps pull images from the central ACR using **acr-managed-identity**.
 
@@ -96,6 +97,14 @@ The CLI will prompt for template parameters as needed. You can also pass a param
 
 Resource group name will be **rg-<pocSlug>-poc** (e.g. `rg-mypoc-poc`).
 
+To match **Deploy POC**, pass **`openAIDeployments=[]`** (or omit) on **`main.bicep`**, then create models best-effort:
+
+```bash
+bash scripts/deploy_openai_deployments.sh rg-<pocSlug>-poc openai-<pocSlug>-poc bicep/configs/openai_default_deployments.json
+```
+
+For a single atomic deploy, pass a non-empty **`openAIDeployments`** array in your parameters file instead (all models must succeed or the deployment fails).
+
 ### Phase 2 — Populate Key Vault
 
 Using the phase 1 outputs, write **PostgresConnectionString** and **OpenAIApiKey** (and any other secrets) into the POC Key Vault. The deployment identity needs **Key Vault Administrator** (or equivalent) on that vault.
@@ -115,7 +124,7 @@ Set `keyVaultName` and `appConfigEndpoint` in the parameters file (or override o
 
 ## Modules and stack templates
 
-- **main.bicep** — Subscription scope: creates the resource group and deploys **core-resources.bicep** (Key Vault, App Configuration, OpenAI, Postgres, Blob Storage). Does not deploy App Services.
+- **main.bicep** — Subscription scope: creates the resource group and deploys **core-resources.bicep** (Key Vault, App Configuration, OpenAI account, Postgres, Blob Storage). Does not deploy App Services. **Deploy POC** leaves **`openAIDeployments`** empty and uses **`scripts/deploy_openai_deployments.sh`** afterward.
 - **core-resources.bicep** — Resource group scope: invoked by main.bicep; deploys the five core modules. Not run standalone in the normal flow.
 - **appservices-stack.bicep** — Resource group scope: deploys the App Service plan and frontend/backend web apps; call after core is deployed and Key Vault is populated.
 
@@ -138,30 +147,31 @@ Standalone module for RG only: **bicep/modules/resourceGroup.bicep** (subscripti
 
 ### main.bicep (phase 1)
 
-| Parameter                  | Required | Description                                                         |
-| -------------------------- | -------- | ------------------------------------------------------------------- |
-| pocSlug                    | Yes      | POC identifier. Resource group will be `rg-<pocSlug>-poc`.          |
-| location                   | No       | Azure region (default: eastus).                                     |
-| administratorLoginPassword | Yes      | PostgreSQL administrator password (secure).                         |
-| openAIDeployments          | No       | Array of { name, model, version, capacity } for OpenAI deployments. **Deploy POC** reads defaults from **`bicep/configs/openai_default_deployments.json`**. |
-| pocAppConfigKeyValues      | No       | Array of { key, value, contentType? } for App Configuration.        |
-| blobContainerNames         | No       | Array of blob container names to create (default: []).              |
+| Parameter                  | Required | Description                                                                                                                                                 |
+| -------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| pocSlug                    | Yes      | POC identifier. Resource group will be `rg-<pocSlug>-poc`.                                                                                                  |
+| location                   | No       | Azure region (default: eastus).                                                                                                                             |
+| administratorLoginPassword | Yes      | PostgreSQL administrator password (secure).                                                                                                                 |
+| openAIDeployments          | No       | Array of { name, model, version, capacity, skuName? } for models created **in the same Bicep deployment** (default **`[]`** for **Deploy POC**). **Deploy POC** applies **`bicep/configs/openai_default_deployments.json`** afterward via **`scripts/deploy_openai_deployments.sh`** (best-effort). |
+| pocAppConfigKeyValues      | No       | Array of { key, value, contentType? } for App Configuration.                                                                                                |
+| blobContainerNames         | No       | Array of blob container names to create (default: []).                                                                                                      |
 
 Optional Postgres overrides (e.g. coordinatorVCores, nodeCount, postgresqlVersion, citusVersion) are passed through to core-resources; see **main.bicep** and **modules/postgres.bicep** for names.
 
 ### appservices-stack.bicep (phase 3)
 
-| Parameter                  | Required | Description                                                             |
-| -------------------------- | -------- | ----------------------------------------------------------------------- |
-| pocSlug                    | Yes      | Same POC identifier as phase 1.                                         |
-| location                   | No       | Defaults to resource group location.                                    |
-| keyVaultName               | Yes      | Key Vault name in this RG (from phase 1 output).                        |
-| appConfigEndpoint          | Yes      | App Configuration endpoint (from phase 1 output).                       |
-| frontendImage              | Yes      | Container image for frontend (e.g. DOCKER\|creyaifinmain.azurecr.io/…). |
-| backendImage               | Yes      | Container image for backend.                                            |
-| acrManagedIdentityClientId | Yes      | Client ID of **acr-managed-identity** (for ACR image pull).             |
-| postgresHost, postgresDatabaseName, postgresUser, postgresPort | No | Backend **`POSTGRES_*`** app settings; omit or leave password empty to skip. |
-| postgresPassword           | No       | Secure. Plain **`POSTGRES_PASSWORD`** on backend when set with host/db/user. |
+| Parameter                                                      | Required | Description                                                                  |
+| -------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------- |
+| pocSlug                                                        | Yes      | Same POC identifier as phase 1.                                              |
+| location                                                       | No       | Defaults to resource group location.                                         |
+| keyVaultName                                                   | Yes      | Key Vault name in this RG (from phase 1 output).                             |
+| appConfigEndpoint                                              | Yes      | App Configuration endpoint (from phase 1 output).                            |
+| frontendImage                                                  | Yes      | Container image for frontend (e.g. DOCKER\|creyaifinmain.azurecr.io/…).      |
+| backendImage                                                   | Yes      | Container image for backend.                                                 |
+| acrManagedIdentityClientId                                     | Yes      | Client ID of **acr-managed-identity** (for ACR image pull).                  |
+| postgresHost, postgresDatabaseName, postgresUser, postgresPort | No       | Backend **`POSTGRES_*`** app settings; omit or leave password empty to skip. |
+| postgresPassword                                               | No       | Secure. Plain **`POSTGRES_PASSWORD`** on backend when set with host/db/user. |
+| openAiAccountEus2Json                                          | No       | Secure. JSON array string **`["accountName","apiKey"]`** → backend app setting **`OPENAI_ACCOUNT_EUS2`**. **Deploy POC** builds this from **`openaiName`** + key. Omit (empty) to skip. |
 
 ---
 
