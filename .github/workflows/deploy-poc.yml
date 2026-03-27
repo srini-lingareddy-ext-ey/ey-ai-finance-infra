@@ -61,7 +61,9 @@ env:
   AZURE_CLIENT_ID: ${{ secrets.AZURE_POC_CLIENT_ID }}
   AZURE_TENANT_ID: ${{ secrets.AZURE_POC_TENANT_ID }}
   AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
-
+permissions:
+  id-token: write
+  contents: read
 jobs:
   deploy-main-resources:
     runs-on: ubuntu-latest
