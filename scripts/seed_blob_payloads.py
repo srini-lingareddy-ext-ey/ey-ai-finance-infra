@@ -6,7 +6,9 @@ Seed blob paths from blob_payloads.json into Azure Storage (tenants container).
 - Under configs/lighthouse/*.yml and configs/chat/*.yml: uploads files from --config-dir
   (default bicep/configs) by matching the manifest filename (e.g. lh.yml -> config-dir/lh.yml).
 
-Tenant keys may contain "{pocSlug}"; replaced by --poc-slug for blob paths.
+Every occurrence of the literal "{pocSlug}" is replaced by --poc-slug in:
+  the manifest file itself (entire text, before JSON parse), tenant keys, paths/filenames derived
+  from the manifest, and the full UTF-8 text of each file read from --config-dir before upload.
 
 Uses Azure CLI: az storage blob upload --connection-string (same as deploy-poc workflow).
 """
@@ -21,6 +23,10 @@ import time
 from pathlib import Path
 
 
+def subst_poc_slug(s: str, poc_slug: str) -> str:
+    return s.replace("{pocSlug}", poc_slug)
+
+
 def collect_uploads(manifest: dict, poc_slug: str) -> list[tuple[str, str, str, str | None]]:
     """
     Return list of (container_name, blob_path, content_type, local_filename_or_none).
@@ -33,7 +39,7 @@ def collect_uploads(manifest: dict, poc_slug: str) -> list[tuple[str, str, str, 
         for tenant_key, tenant_val in container_content.items():
             if not isinstance(tenant_val, dict):
                 continue
-            prefix = tenant_key.replace("{pocSlug}", poc_slug)
+            prefix = subst_poc_slug(tenant_key, poc_slug)
             configs = tenant_val.get("configs")
             if not isinstance(configs, dict):
                 continue
@@ -43,10 +49,12 @@ def collect_uploads(manifest: dict, poc_slug: str) -> list[tuple[str, str, str, 
                 for folder, files in payloads.items():
                     if not isinstance(files, list):
                         continue
+                    folder_res = subst_poc_slug(folder, poc_slug)
                     for fname in files:
                         if not isinstance(fname, str):
                             continue
-                        blob = f"{prefix}/configs/payloads/{folder}/{fname}"
+                        fname_res = subst_poc_slug(fname, poc_slug)
+                        blob = f"{prefix}/configs/payloads/{folder_res}/{fname_res}"
                         out.append((container_name, blob, "application/json", None))
 
             for segment in ("lighthouse", "chat"):
@@ -56,10 +64,55 @@ def collect_uploads(manifest: dict, poc_slug: str) -> list[tuple[str, str, str, 
                 for fname in files:
                     if not isinstance(fname, str):
                         continue
-                    blob = f"{prefix}/configs/{segment}/{fname}"
-                    out.append((container_name, blob, "text/yaml", fname))
+                    fname_res = subst_poc_slug(fname, poc_slug)
+                    blob = f"{prefix}/configs/{segment}/{fname_res}"
+                    out.append((container_name, blob, "text/yaml", fname_res))
 
     return out
+
+
+def upload_config_file(
+    connection_string: str,
+    container: str,
+    blob_path: str,
+    source_path: Path,
+    content_type: str,
+    poc_slug: str,
+    max_attempts: int = 8,
+) -> None:
+    """Read source_path as UTF-8, replace {pocSlug}, upload (temp file only if substitution occurs)."""
+    text = source_path.read_text(encoding="utf-8")
+    rendered = subst_poc_slug(text, poc_slug)
+    if rendered == text:
+        az_upload(
+            connection_string,
+            container,
+            blob_path,
+            source_path,
+            content_type,
+            max_attempts=max_attempts,
+        )
+        return
+    suffix = source_path.suffix or ".txt"
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        suffix=suffix,
+        delete=False,
+    ) as tmp:
+        tmp.write(rendered)
+        tmp_path = Path(tmp.name)
+    try:
+        az_upload(
+            connection_string,
+            container,
+            blob_path,
+            tmp_path,
+            content_type,
+            max_attempts=max_attempts,
+        )
+    finally:
+        tmp_path.unlink(missing_ok=True)
 
 
 def az_upload(
@@ -125,7 +178,11 @@ def main() -> int:
         print(f"Manifest not found: {args.manifest}", file=sys.stderr)
         return 1
 
-    data = json.loads(args.manifest.read_text(encoding="utf-8"))
+    manifest_text = subst_poc_slug(
+        args.manifest.read_text(encoding="utf-8"),
+        args.poc_slug,
+    )
+    data = json.loads(manifest_text)
     uploads = collect_uploads(data, args.poc_slug)
     if not uploads:
         print("No blob paths derived from manifest; nothing to upload.", file=sys.stderr)
@@ -151,6 +208,16 @@ def main() -> int:
                     )
                     return 1
                 ct = content_type
+                upload_config_file(
+                    args.connection_string,
+                    container,
+                    blob_path,
+                    src,
+                    ct,
+                    args.poc_slug,
+                )
+                print(f"Uploaded {container}/{blob_path}")
+                continue
 
             az_upload(
                 args.connection_string,

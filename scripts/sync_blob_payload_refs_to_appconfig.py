@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """
-Set Azure App Configuration keys for blob payload paths under the "tenants" container.
+Set Azure App Configuration keys to blob paths (relative to the storage container) from blob_payloads.json.
 
-Reads bicep/configs/blob_payloads.json, walks tenants -> <root> (e.g. configs) -> <ver> -> payloads -> kpi|pnl -> files.
+Manifest shape matches scripts/seed_blob_payloads.py:
+  <container> -> <tenantKey> -> configs -> payloads (folder -> file list), lighthouse (file list), chat (file list).
 
-Each key maps to the blob name (path within the container). The tenant key in the manifest may be the
-literal "{pocSlug}"; that substring is replaced by --poc-slug everywhere it appears in the path.
+Every "{pocSlug}" in the manifest is replaced by --poc-slug (full-file text substitution before JSON parse).
 
-Key format: **`payloads:`** + the path **after** **`/payloads/`** in that blob name, with **`/`** replaced by **`:`**; the **last segment uses the filename without extension** (no **`.json`**).
-  Example: blob `…/configs/v1/payloads/kpi/all.json` → key **`payloads:kpi:all`** (`v1` stays only in the **value** path, not in the key).
+Key: path under **configs/** only, **/** → **:**, last segment = filename **without** extension.
+  configs/payloads/kpi/all.json   -> payloads:kpi:all
+  configs/lighthouse/lh.yml       -> lighthouse:lh
+  configs/chat/chat.yml           -> chat:chat
 
-Value: relative blob name in the tenants container (e.g. ``{pocSlug}/configs/.../payloads/...`` after substitution).
+Value: blob name inside the container (same layout as seed_blob_payloads): **{tenantPrefix}/configs/...**
 """
 from __future__ import annotations
 
@@ -21,53 +23,64 @@ import sys
 from pathlib import Path
 
 
-def iter_payload_entries(
-    tenants_block: dict,
-) -> list[tuple[str, str, str, str]]:
-    """Collect (root, ver, folder, filename) for each file under tenants/*/.../payloads."""
-    rows: list[tuple[str, str, str, str]] = []
-    for root, root_val in tenants_block.items():
-        if not isinstance(root_val, dict):
+def subst_poc_slug(s: str, poc_slug: str) -> str:
+    return s.replace("{pocSlug}", poc_slug)
+
+
+def app_config_key_from_configs_relative(relative_under_configs: str) -> str:
+    """
+    relative_under_configs: e.g. payloads/kpi/all.json or lighthouse/lh.yml (no leading configs/).
+    """
+    parts = relative_under_configs.strip("/").split("/")
+    if not parts or parts == [""]:
+        raise ValueError(f"empty path under configs: {relative_under_configs!r}")
+    parts[-1] = Path(parts[-1]).stem
+    return ":".join(parts)
+
+
+def collect_key_value_pairs(manifest: dict, poc_slug: str) -> list[tuple[str, str]]:
+    """Return (app_config_key, blob_path) for each payload / lighthouse / chat file."""
+    pairs: list[tuple[str, str]] = []
+    for _container_name, container_content in manifest.items():
+        if not isinstance(container_content, dict):
             continue
-        for ver, ver_val in root_val.items():
-            if not isinstance(ver_val, dict) or "payloads" not in ver_val:
+        for tenant_key, tenant_val in container_content.items():
+            if not isinstance(tenant_val, dict):
                 continue
-            payloads = ver_val["payloads"]
-            if not isinstance(payloads, dict):
+            prefix = subst_poc_slug(tenant_key, poc_slug)
+            configs = tenant_val.get("configs")
+            if not isinstance(configs, dict):
                 continue
-            for folder, files in payloads.items():
+
+            payloads = configs.get("payloads")
+            if isinstance(payloads, dict):
+                for folder, files in payloads.items():
+                    if not isinstance(files, list):
+                        continue
+                    folder_res = subst_poc_slug(folder, poc_slug)
+                    for fname in files:
+                        if not isinstance(fname, str):
+                            continue
+                        fname_res = subst_poc_slug(fname, poc_slug)
+                        rel = f"payloads/{folder_res}/{fname_res}"
+                        key = app_config_key_from_configs_relative(rel)
+                        blob = f"{prefix}/configs/payloads/{folder_res}/{fname_res}"
+                        pairs.append((key, blob))
+
+            for segment in ("lighthouse", "chat"):
+                files = configs.get(segment)
                 if not isinstance(files, list):
                     continue
                 for fname in files:
                     if not isinstance(fname, str):
                         continue
-                    rows.append((root, ver, folder, fname))
-    return rows
+                    fname_res = subst_poc_slug(fname, poc_slug)
+                    rel = f"{segment}/{fname_res}"
+                    key = app_config_key_from_configs_relative(rel)
+                    blob = f"{prefix}/configs/{segment}/{fname_res}"
+                    pairs.append((key, blob))
 
-
-def app_config_key_from_blob_path_after_payloads(relative_blob: str) -> str:
-    """Build key: payloads:<path after /payloads/>, slashes -> colons; last segment = stem (no .json)."""
-    marker = "/payloads/"
-    if marker not in relative_blob:
-        raise ValueError(f"expected '/payloads/' in blob path: {relative_blob!r}")
-    after = relative_blob.split(marker, 1)[1]
-    parts = after.split("/")
-    if parts:
-        parts[-1] = Path(parts[-1]).stem
-    return "payloads:" + ":".join(parts)
-
-
-def build_keys(rows: list[tuple[str, str, str, str]]) -> list[tuple[str, str, str, str, str, str]]:
-    """Return list of (key, blob_path_template, root, ver, folder, fname)."""
-    out: list[tuple[str, str, str, str, str, str]] = []
-    for root, ver, folder, fname in rows:
-        # Same suffix as in blob name; key mirrors only the part after .../payloads/
-        relative_no_slug = f"{root}/{ver}/payloads/{folder}/{fname}"
-        key = app_config_key_from_blob_path_after_payloads(relative_no_slug)
-        # Path within tenants container; root may be "{pocSlug}" (replaced by caller) or a fixed tenant id
-        blob_path = relative_no_slug
-        out.append((key, blob_path, root, ver, folder, fname))
-    return out
+    return pairs
 
 
 def main() -> int:
@@ -75,7 +88,12 @@ def main() -> int:
     parser.add_argument("--manifest", type=Path, default=Path("bicep/configs/blob_payloads.json"))
     parser.add_argument("--store", required=True, help="App Configuration store name")
     parser.add_argument("--label", required=True, help="Label (e.g. pocSlug)")
-    parser.add_argument("--poc-slug", required=True, dest="poc_slug", help="POC slug (replaces {pocSlug} in blob path values)")
+    parser.add_argument(
+        "--poc-slug",
+        required=True,
+        dest="poc_slug",
+        help="POC slug (replaces {pocSlug} in manifest and paths)",
+    )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
@@ -83,23 +101,18 @@ def main() -> int:
         print(f"Error: manifest not found: {args.manifest}", file=sys.stderr)
         return 1
 
-    data = json.loads(args.manifest.read_text(encoding="utf-8"))
-    tenants = data.get("tenants")
-    if not isinstance(tenants, dict):
-        print("Error: blob_payloads.json must have a 'tenants' object", file=sys.stderr)
-        return 1
+    manifest_text = subst_poc_slug(
+        args.manifest.read_text(encoding="utf-8"),
+        args.poc_slug,
+    )
+    data = json.loads(manifest_text)
 
-    rows = iter_payload_entries(tenants)
-    if not rows:
-        print("No payloads entries under tenants; nothing to sync.", file=sys.stderr)
+    pairs = collect_key_value_pairs(data, args.poc_slug)
+    if not pairs:
+        print("No payloads/lighthouse/chat entries in manifest; nothing to sync.", file=sys.stderr)
         return 0
 
-    built = build_keys(rows)
-    for item in built:
-        key = item[0]
-        blob_template = item[1]
-        value = blob_template.replace("{pocSlug}", args.poc_slug)
-
+    for key, value in pairs:
         if args.dry_run:
             print(f"  {key} -> {value}")
             continue

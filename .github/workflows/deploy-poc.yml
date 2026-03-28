@@ -705,7 +705,9 @@ jobs:
           ips = sorted({p.strip() for p in merged.split(',') if p.strip()})
           if not ips:
               raise SystemExit('No outbound IPs from Web Apps; refusing to set defaultAction Deny on OpenAI or storage')
-          rules = [{'value': ip if '/' in ip else ip + '/32'} for ip in ips]
+          # possibleOutboundIpAddresses are plain IPv4 hosts; pass through unchanged. (Azure OpenAI rejects /32 in rules;
+          # Storage accepts host or CIDR — see https://github.com/Azure/azure-powershell/issues/25455)
+          rules = [{'value': ip} for ip in ips]
           print(json.dumps(rules))
           ")
 
