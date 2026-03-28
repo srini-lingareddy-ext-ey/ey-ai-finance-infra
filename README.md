@@ -23,10 +23,11 @@ The **Deploy POC** workflow runs all phases in one go (core deploy → Key Vault
 | **AZURE_POC_TENANT_ID**            | Azure AD tenant ID.                                                                                                                                                                                     |
 | **AZURE_POC_SUBSCRIPTION_ID**      | Target subscription ID.                                                                                                                                                                                 |
 | **POSTGRES_ADMIN_PASSWORD**        | PostgreSQL admin password: **`main.bicep`**, Key Vault **`PostgresConnectionString`**, **`init-postgres`**, and (Deploy POC) backend app setting **`POSTGRES_PASSWORD`**.                               |
+| **MONGO_ADMIN_PASSWORD**         | MongoDB (Azure Cosmos DB for MongoDB cluster) admin password: **`main.bicep`**, Key Vault **`MongoConnectionString`**, and (Deploy POC) backend app setting **`MONGO_CONN_STR`**.                      |
 | **ACR_MANAGED_IDENTITY_CLIENT_ID** | Client ID of **acr-managed-identity** (in rg-eyaifin-acr) for App Services image pull. Get with: `az identity show --resource-group rg-eyaifin-acr --name acr-managed-identity --query clientId -o tsv` |
-| **EY_AI_FINANCE_REPO_TOKEN**       | PAT to checkout the **ey-ai-finance** repo; required for the init step (run init.sql on the new Postgres).                                                                                              |
+| **EY_AI_FINANCE_REPO_TOKEN**       | PAT to checkout the **ey-ai-finance** repo; required for **`build-frontend-image`** (when enabled) and the **`init-postgres`** step (run init.sql on the new Postgres).                                  |
 
-Omit **EY_AI_FINANCE_REPO_TOKEN** only if you skip or replace the init step.
+Omit **EY_AI_FINANCE_REPO_TOKEN** only if you skip or replace those steps (and set **`buildFrontendImage`** false with a pre-built **`frontendImage`**).
 
 ### 2. Trigger the workflow
 
@@ -58,21 +59,21 @@ GitHub’s OIDC token used by **azure/login** is short-lived. This job calls **a
 | 6    | **OpenAI model deployments (best-effort):** runs **`scripts/deploy_openai_deployments.sh`** against **`bicep/configs/openai_default_deployments.json`** — logs OK / SKIP / FAIL per model; job continues even if some fail.                                                                                                                                                 |
 | 7    | Waits 30s for RBAC propagation.                                                                                                                                                                                                                                                                              |
 | 8    | Sets Key Vault network default action to **Allow** so the runner can write secrets.                                                                                                                                                                                                                          |
-| 9    | Populates the POC Key Vault with **PostgresConnectionString** and **OpenAIApiKey**.                                                                                                                                                                                                                          |
+| 9    | Populates the POC Key Vault with **PostgresConnectionString**, **MongoConnectionString**, and **OpenAIApiKey**.                                                                                                                                                                                               |
 | 10   | Lists secret names in the vault (verify only; no values).                                                                                                                                                                                                                                                    |
 | 11   | **Allow Blob Storage access from all networks:** `az storage account update` (public access **Enabled**, default action **Allow**, bypass **AzureServices**), then polls until the account shows **Allow** + **Enabled** (see **Blob storage** below).                                                       |
-| 12   | **Create blob payload files:** reads the storage connection string, probes the **data plane** with `az storage container list` (retries with backoff), uploads `{}` JSON blobs from `bicep/configs/blob_payloads.json` (quiet uploads). Total sleep for this step’s waits is **capped at 5 minutes (300s)**. |
+| 12   | **Create blob payload files:** probes the storage **data plane** (retries; **300s** sleep budget shared with upload retries), then runs **`scripts/seed_blob_payloads.py`**: **`configs/payloads/*.json`** → minimal **`{}`** as **`application/json`**; **`configs/lighthouse/*.yml`** and **`configs/chat/*.yml`** → file contents from **`bicep/configs/`** (e.g. **`lh.yml`**, **`chat.yml`**). Tenant folder in the manifest uses the **`"{pocSlug}"`** key, substituted with the workflow **`pocSlug`**. |
 | 13   | Syncs App Configuration from `bicep/configs/backend_configs.yml` (label = `pocSlug`).                                                                                                                                                                                                                        |
 | 14   | Syncs blob payload path references into App Configuration via `scripts/sync_blob_payload_refs_to_appconfig.py`.                                                                                                                                                                                              |
 | 15   | Prints deployment outputs to the log.                                                                                                                                                                                                                                                                        |
 
 **Job `init-postgres`:** checks out **ey-ai-finance** and runs `db/<appChoice>/init.sql`, then inserts a **tenant** row for `pocSlug`.
 
-**Job `build-frontend-image`:** runs when **`buildFrontendImage`** is **true**; build/push steps match **`build-push-image.yml`** (manual-only workflow).
+**Job `build-frontend-image`:** runs when **`buildFrontendImage`** is **true**; checks out **ey-ai-finance**, builds with **Docker Buildx**, pushes **`creyaifinmain.azurecr.io/<image>:<pocSlug>`** ( **`aifinance-next-frontend`** or **`aifinance-frontend`** per **`appChoice`** ), with **`NEXT_PUBLIC_BACKEND_ENDPOINT_BASE=https://eyaifinance-backend-<pocSlug>.azurewebsites.net`**. Needs **AcrPush** and **`EY_AI_FINANCE_REPO_TOKEN`**.
 
-**Job `deploy-app-services`:** runs after core deploy + init (+ build job **success** or **skipped**); deploys **appservices-stack.bicep** using the built frontend image output or **`frontendImage`**. Passes **`POSTGRES_ADMIN_PASSWORD`** as **`postgresPassword`**; builds **`OPENAI_ACCOUNT_EUS2`** from the POC OpenAI account. Microsoft Entra on the frontend when **`enableMicrosoftEntraAuthentication`** is **true**.
+**Job `deploy-app-services`:** runs after **deploy-main-resources**, **init-postgres**, and **build-frontend-image** (**success** or **skipped**). Deploys **appservices-stack.bicep** using the built **`frontendImage`** output or workflow **`frontendImage`**. Passes **`POSTGRES_ADMIN_PASSWORD`**, builds **`OPENAI_ACCOUNT_EUS2`** and **`mongoConnStr`** (same shape as Key Vault). After deploy, **Restrict Azure OpenAI and Blob Storage to Web App outbound IPs**: **`defaultAction Deny`** on the POC OpenAI account and storage account with allow rules for merged **`possibleOutboundIpAddresses`** from frontend and backend Web Apps (**AzureServices** bypass). Microsoft Entra on the frontend when **`enableMicrosoftEntraAuthentication`** is **true**.
 
-When it finishes, the POC resource group contains the full stack and the apps pull images from the central ACR using **acr-managed-identity**.
+When it finishes, the POC resource group contains the full stack and the apps pull images from the central ACR using **acr-managed-identity**. The next **deploy-main-resources** run **opens blob storage to Allow** again (Step 11) before re-seeding so GitHub-hosted runners can upload.
 
 ---
 
@@ -81,7 +82,7 @@ When it finishes, the POC resource group contains the full stack and the apps pu
 - **Central ACR:** Registry **creyaifinmain** in resource group **rg-eyaifin-acr** (resource IDs are hardcoded in the templates).
 - **ACR pull:** User-assigned managed identity **acr-managed-identity** in **rg-eyaifin-acr** has **AcrPull** on the registry. App Services use this identity. Grant **Key Vault Secrets User** on each POC Key Vault if the apps use **Key Vault references** or runtime access to secrets via **`KEY_VAULT_URI`**; backend **`POSTGRES_PASSWORD`** is set directly on the web app by the workflow and does not require a Key Vault reference for Postgres.
 - **App Configuration:** If you deploy App Configuration (via workflow or Bicep) and get a **Forbidden** error, ensure the identity has **App Configuration Data Owner** on the resource group (or the App Configuration store), and **Contributor** to create the store.
-- **Blob storage “blocked by network rules”:** The workflow uses a dedicated step **Allow Blob Storage access from all networks** (`az storage account update`, then polling until **Enabled** + **Allow** are visible—up to ~5 minutes of 15s sleeps). A following step **Create blob payload files** uses a **separate** sleep budget (**300s** total) for data-plane probes and per-blob upload retries; if that budget is exhausted you will see `Sleep budget exhausted (300s). Aborting.` If **Azure Policy** (or manual changes) keeps forcing **Deny** or **public access disabled**, either step can still fail after retries. Fix: policy exception for POC storage accounts, align firewall rules, or use a **self-hosted runner** in an allowed network. **Logs:** expect `Waiting for storage network settings to propagate...`, then `Storage data-plane connectivity is ready.`, `Sleeping … (budget used: …/300s)` during uploads, and a summary line `Seeded payload JSON blobs from bicep/configs/blob_payloads.json (containers: …)`.
+- **Blob storage “blocked by network rules”:** **deploy-main-resources** uses **Allow Blob Storage access from all networks** (`az storage account update`, then polling until **Enabled** + **Allow**—up to ~5 minutes). **Create blob payload files** then uses a **300s** sleep budget for data-plane probes and **`seed_blob_payloads.py`** upload retries. After **deploy-app-services**, storage may be locked to **Web App outbound IPs only**; the **next** workflow run opens storage again in Step 11 before uploading. If policy blocks **Allow**, use a policy exception or a runner on an allowed network. **Logs:** `Seeded blobs from …/blob_payloads.json (containers: …)`.
 - **Redeploy same `pocSlug` / `blobStorage` error:** If deployment fails with **“Blob Delete Retention policy days should be longer than Point In Time Restore policy days”**, Azure requires **blob soft-delete retention to be strictly longer than PITR days** (e.g. both set to 7 is invalid). **`blobStorage.bicep`** turns **PITR off** and sets **blob soft-delete to 14 days** so updates pass. If it still fails, check **Data protection** on the storage account in the portal.
 
 ---
@@ -129,7 +130,7 @@ Set `keyVaultName` and `appConfigEndpoint` in the parameters file (or override o
 
 ## Modules and stack templates
 
-- **main.bicep** — Subscription scope: creates the resource group and deploys **core-resources.bicep** (Key Vault, App Configuration, OpenAI account, Postgres, Blob Storage). Does not deploy App Services. **Deploy POC** leaves **`openAIDeployments`** empty and uses **`scripts/deploy_openai_deployments.sh`** afterward.
+- **main.bicep** — Subscription scope: creates the resource group and deploys **core-resources.bicep** (Key Vault, App Configuration, OpenAI account, Postgres, MongoDB cluster, Blob Storage). Does not deploy App Services. **Deploy POC** leaves **`openAIDeployments`** empty and uses **`scripts/deploy_openai_deployments.sh`** afterward.
 - **core-resources.bicep** — Resource group scope: invoked by main.bicep; deploys the five core modules. Not run standalone in the normal flow.
 - **appservices-stack.bicep** — Resource group scope: deploys the App Service plan and frontend/backend web apps; call after core is deployed and Key Vault is populated.
 
@@ -177,6 +178,7 @@ Optional Postgres overrides (e.g. coordinatorVCores, nodeCount, postgresqlVersio
 | postgresHost, postgresDatabaseName, postgresUser, postgresPort | No       | Backend **`POSTGRES_*`** app settings; omit or leave password empty to skip. |
 | postgresPassword                                               | No       | Secure. Plain **`POSTGRES_PASSWORD`** on backend when set with host/db/user. |
 | openAiAccountEus2Json                                          | No       | Secure. JSON array string **`["accountName","apiKey"]`** → backend app setting **`OPENAI_ACCOUNT_EUS2`**. **Deploy POC** builds this from **`openaiName`** + key. Omit (empty) to skip. |
+| mongoConnStr                                                   | No       | Secure. MongoDB connection URI → backend app setting **`MONGO_CONN_STR`**. **Deploy POC** builds this from core outputs + **`MONGO_ADMIN_PASSWORD`**. Omit (empty) to skip. |
 
 ---
 
@@ -190,6 +192,7 @@ Optional Postgres overrides (e.g. coordinatorVCores, nodeCount, postgresqlVersio
 - **postgresHost**, **postgresDatabaseName** — PostgreSQL.
 - **openaiEndpoint**, **openaiName** — Azure OpenAI.
 - **storageAccountName** — Blob Storage account name.
+- **mongoHost**, **mongoClusterName**, **mongoAdministratorLogin** — Azure Cosmos DB for MongoDB (vCore) cluster connection details.
 
 ### Phase 3 (appservices-stack.bicep)
 
@@ -208,5 +211,5 @@ Optional Postgres overrides (e.g. coordinatorVCores, nodeCount, postgresqlVersio
 
 - App Services pull images from **creyaifinmain** using the shared managed identity **acr-managed-identity**.
 - The workflow (or your pipeline) populates Key Vault in phase 2; App Services read secrets at runtime from Key Vault.
-- **Frontend → backend URL:** The frontend Web App sets **`BACKEND_ENDPOINT_BASE`** to the default backend URL; **`RUNNING_IN_DOCKER`** comes from the **`aifinance-next` frontend Dockerfile** so `env-manager.ts` uses that base for **`/api/*`** proxy (e.g. **`/api/health`** → backend **`/health`**).
+- **Frontend → backend URL:** The frontend Web App sets **`BACKEND_ENDPOINT_BASE`**, **`BACKEND_URL`**, **`RUNNING_IN_DOCKER`**, and **`NEXT_PUBLIC_RUNNING_IN_DOCKER`** so **`ey-ai-finance`** `env-manager` can resolve the backend at runtime on App Service ( **`/api/*`** proxy, e.g. **`/api/health`**).
 - **Health checks:** Frontend probe path **`/api/health`**; backend **`/health`**. Azure sends **`GET`** on that path **with no `Authorization` header** — each app must return HTTP **2xx** without requiring auth on the probe route (e.g. exempt it in FastAPI). Otherwise the platform may mark instances unhealthy.

@@ -1,13 +1,13 @@
 {
   "tenants": {
-    "pocSlug": {
+    "{pocSlug}": {
       "configs": {
         "payloads": {
           "kpi": ["all.json"],
           "pnl": ["all.json"]
         },
-        "lighthouse": ["tenant_1_lh-v2.yml"],
-        "chat": ["tenant_1_chat.yml"]
+        "lighthouse": ["lh.yml"],
+        "chat": ["chat.yml"]
       }
     }
   }

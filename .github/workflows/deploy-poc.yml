@@ -1,4 +1,5 @@
 # Deploy main.bicep: resource group + Key Vault, App Configuration, OpenAI account (no model deployments in Bicep), Postgres, Blob Storage; then best-effort OpenAI deployments from bicep/configs/openai_default_deployments.json; run init.sql; then App Services.
+# After App Services deploy: Azure OpenAI and the POC storage account network ACLs are set to Deny with allow rules for frontend + backend Web App possible outbound IPs (plus AzureServices bypass). The deploy-main-resources job resets storage to default Allow before blob seeding so GitHub-hosted runners can upload on the next run.
 # Trigger manually and pass pocSlug (and optionally location, frontend/backend images, appChoice). Password and pipeline principal from GitHub secrets.
 # Required secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, POSTGRES_ADMIN_PASSWORD, MONGO_ADMIN_PASSWORD.
 # Microsoft Entra on App Services is controlled by workflow input **enableMicrosoftEntraAuthentication** (not by “are secrets set?”).
@@ -275,39 +276,13 @@ jobs:
           done
 
           MANIFEST="bicep/configs/blob_payloads.json"
-          TMP=$(mktemp)
-          printf '{}' > "$TMP"
-          # Per container: second level may be configs, data, ... then v1/v2 → payloads/test2 → kpi/pnl
-          # Blob path: {pocSlug}/<root>/<ver>/<segment>/<kpi|pnl>/<file>
-          while IFS="$(printf '\t')" read -r CONTAINER template; do
-            [ -z "$CONTAINER" ] && continue
-            [ -z "$template" ] && continue
-            path="${template//\{pocSlug\}/$POC_SLUG}"
-            uploaded=false
-            for i in {1..8}; do
-              if az storage blob upload \
-                --connection-string "$CONN" \
-                --container-name "$CONTAINER" \
-                --name "$path" \
-                --content-type "application/json" \
-                --file "$TMP" \
-                --overwrite \
-                --no-progress \
-                --output none \
-                >/dev/null 2>&1; then
-                uploaded=true
-                break
-              fi
-              WAIT=$((i * 10))
-              sleep_with_budget "$WAIT" || exit 1
-            done
-            if [[ "$uploaded" != true ]]; then
-              echo "Upload failed for ${CONTAINER}/${path} after retries."
-              exit 1
-            fi
-          done < <(jq -r 'to_entries[] | .key as $container | .value | to_entries[] | .key as $root | .value | to_entries[] | .key as $ver | .value | to_entries[] | .key as $segment | .value | to_entries[] | .key as $folder | .value[] | "\($container)\t{pocSlug}/\($root)/\($ver)/\($segment)/\($folder)/\(.)"' "$MANIFEST")
-          rm -f "$TMP"
-          echo "Seeded payload JSON blobs from ${MANIFEST} (containers: $(jq -r 'keys | join(", ")' "$MANIFEST"))"
+          # Payload JSON placeholders are "{}"; lighthouse/chat YAML is read from bicep/configs/ (e.g. lh.yml, chat.yml).
+          python3 scripts/seed_blob_payloads.py \
+            --manifest "$MANIFEST" \
+            --poc-slug "$POC_SLUG" \
+            --config-dir bicep/configs \
+            --connection-string "$CONN"
+          echo "Seeded blobs from ${MANIFEST} (containers: $(jq -r 'keys | join(", ")' "$MANIFEST"))"
 
       - name: Sync App Configuration from backend_configs.yml
         run: |
@@ -709,3 +684,65 @@ jobs:
               postgresPort='5432' \
               postgresPassword="$POSTGRES_ADMIN_PASSWORD" \
             --parameters @"$OPENAI_PARAM_FILE"
+
+      - name: Restrict Azure OpenAI and Blob Storage to Web App outbound IPs
+        run: |
+          set -euo pipefail
+          RG="${{ needs.deploy-main-resources.outputs.resourceGroupName }}"
+          POC_SLUG="${{ inputs.pocSlug }}"
+          OAI_NAME="${{ needs.deploy-main-resources.outputs.openaiName }}"
+          ST_NAME="${{ needs.deploy-main-resources.outputs.storageAccountName }}"
+          FE_APP="eyaifinance-${POC_SLUG}"
+          BE_APP="eyaifinance-backend-${POC_SLUG}"
+
+          echo "Collecting possibleOutboundIpAddresses for ${FE_APP} and ${BE_APP} (superset used when the plan scales)."
+          FE_IPS=$(az webapp show --resource-group "$RG" --name "$FE_APP" --query possibleOutboundIpAddresses -o tsv)
+          BE_IPS=$(az webapp show --resource-group "$RG" --name "$BE_APP" --query possibleOutboundIpAddresses -o tsv)
+          export MERGED="${FE_IPS},${BE_IPS}"
+
+          RULES_JSON=$(python3 -c "
+          import json, os
+          merged = os.environ.get('MERGED', '')
+          ips = sorted({p.strip() for p in merged.split(',') if p.strip()})
+          if not ips:
+              raise SystemExit('No outbound IPs from Web Apps; refusing to set defaultAction Deny on OpenAI or storage')
+          rules = [{'value': ip if '/' in ip else ip + '/32'} for ip in ips]
+          print(json.dumps(rules))
+          ")
+
+          SUB=$(az account show --query id -o tsv)
+          RULE_COUNT=$(echo "$RULES_JSON" | jq 'length')
+
+          # --- Azure OpenAI (Cognitive Services) ---
+          OAI_API_VER="2025-06-01"
+          OAI_RES_ID="/subscriptions/${SUB}/resourceGroups/${RG}/providers/Microsoft.CognitiveServices/accounts/${OAI_NAME}"
+          OAI_URL="https://management.azure.com${OAI_RES_ID}?api-version=${OAI_API_VER}"
+          OAI_BODY=$(jq -n \
+            --argjson rules "$RULES_JSON" \
+            '{properties: {networkAcls: {defaultAction: "Deny", bypass: "AzureServices", virtualNetworkRules: [], ipRules: $rules}}}')
+
+          echo "Patching OpenAI account ${OAI_NAME}: defaultAction Deny, ${RULE_COUNT} IP rule(s)."
+          az rest --method patch --url "$OAI_URL" --headers "Content-Type=application/json" --body "$OAI_BODY"
+          echo "OpenAI network ACLs updated."
+
+          # --- Storage account (blob data plane): ipRules require action Allow per ARM schema ---
+          ST_API_VER="2024-01-01"
+          ST_RES_ID="/subscriptions/${SUB}/resourceGroups/${RG}/providers/Microsoft.Storage/storageAccounts/${ST_NAME}"
+          ST_URL="https://management.azure.com${ST_RES_ID}?api-version=${ST_API_VER}"
+          ST_BODY=$(jq -n \
+            --argjson rules "$RULES_JSON" \
+            '{
+              properties: {
+                publicNetworkAccess: "Enabled",
+                networkAcls: {
+                  defaultAction: "Deny",
+                  bypass: "AzureServices",
+                  virtualNetworkRules: [],
+                  ipRules: ($rules | map(. + {action: "Allow"}))
+                }
+              }
+            }')
+
+          echo "Patching storage account ${ST_NAME}: defaultAction Deny, ${RULE_COUNT} IP rule(s), bypass AzureServices."
+          az rest --method patch --url "$ST_URL" --headers "Content-Type=application/json" --body "$ST_BODY"
+          echo "Blob storage network ACLs updated. Data-plane access is limited to the listed IPs (plus AzureServices bypass). Next deploy-main-resources run resets storage to Allow before seeding blobs."

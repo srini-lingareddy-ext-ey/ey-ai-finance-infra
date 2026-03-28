@@ -4,12 +4,13 @@ Set Azure App Configuration keys for blob payload paths under the "tenants" cont
 
 Reads bicep/configs/blob_payloads.json, walks tenants -> <root> (e.g. configs) -> <ver> -> payloads -> kpi|pnl -> files.
 
-Each key maps to the blob name (path within the container), with {pocSlug} replaced by --poc-slug.
+Each key maps to the blob name (path within the container). The tenant key in the manifest may be the
+literal "{pocSlug}"; that substring is replaced by --poc-slug everywhere it appears in the path.
 
 Key format: **`payloads:`** + the path **after** **`/payloads/`** in that blob name, with **`/`** replaced by **`:`**; the **last segment uses the filename without extension** (no **`.json`**).
   Example: blob `…/configs/v1/payloads/kpi/all.json` → key **`payloads:kpi:all`** (`v1` stays only in the **value** path, not in the key).
 
-Value: <pocSlug>/<root>/<ver>/payloads/<folder>/<filename>  (relative blob name in the tenants container)
+Value: relative blob name in the tenants container (e.g. ``{pocSlug}/configs/.../payloads/...`` after substitution).
 """
 from __future__ import annotations
 
@@ -63,8 +64,8 @@ def build_keys(rows: list[tuple[str, str, str, str]]) -> list[tuple[str, str, st
         # Same suffix as in blob name; key mirrors only the part after .../payloads/
         relative_no_slug = f"{root}/{ver}/payloads/{folder}/{fname}"
         key = app_config_key_from_blob_path_after_payloads(relative_no_slug)
-        # blob name within container (template with literal {pocSlug} for docs, substituted by caller)
-        blob_path = f"{{pocSlug}}/{relative_no_slug}"
+        # Path within tenants container; root may be "{pocSlug}" (replaced by caller) or a fixed tenant id
+        blob_path = relative_no_slug
         out.append((key, blob_path, root, ver, folder, fname))
     return out
 
