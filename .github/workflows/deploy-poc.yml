@@ -431,8 +431,7 @@ jobs:
             ('Kayl.Murdough@ey.com', true),
             ('Nicole.Belans@ey.com', true),
             ('Lucas.Benson@ey.com', true),
-            ('Christian.J.Noordover@ey.com', true),
-            
+            ('Christian.J.Noordover@ey.com', true)
           ON CONFLICT (email) DO UPDATE SET is_admin = EXCLUDED.is_admin;
           SQL
 
