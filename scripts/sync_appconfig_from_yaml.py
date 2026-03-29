@@ -73,9 +73,9 @@ def main() -> int:
             cmd.extend(["--label", args.label])
         r = subprocess.run(cmd)
         if r.returncode != 0:
-            print(f"Failed to set key: {key}", file=sys.stderr)
+            print(f"Failed to set App Config key: {key}", file=sys.stderr)
             return r.returncode
-        print(f"Set key: {key}")
+        print(f"Set App Config key: {key}")
 
     return 0
 

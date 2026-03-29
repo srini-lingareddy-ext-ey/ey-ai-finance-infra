@@ -16,7 +16,7 @@ param microsoftIdentityClientId string = ''
 @description('Microsoft Entra tenant ID (directory) for that app registration.')
 param microsoftIdentityTenantId string = ''
 
-@description('Client secret from the Entra app registration. Required for Easy Auth: App Service only accepts this via an app setting referenced by authsettingsV2 (cannot be omitted for that path).')
+@description('Client secret from the Entra app registration. Required for Easy Auth (authsettingsV2). Deploy POC always supplies this; leave empty only for manual app-managed auth without platform Easy Auth.')
 @secure()
 param microsoftIdentityClientSecret string = ''
 
@@ -197,6 +197,7 @@ resource appServiceBackend 'Microsoft.Web/sites@2024-11-01' = {
 
 // App Service Authentication (Easy Auth) — Microsoft Entra ID on the frontend only. Register redirect URI on the app registration:
 // https://<frontend-default-host>/.auth/login/aad/callback
+// Root-level login.tokenStore.enabled persists tokens server-side (portal “Token store” on).
 resource frontendAuthSettingsV2 'Microsoft.Web/sites/config@2024-11-01' = if (easyAuthEnabled) {
   parent: appServiceFrontend
   name: 'authsettingsV2'
@@ -215,6 +216,12 @@ resource frontendAuthSettingsV2 'Microsoft.Web/sites/config@2024-11-01' = if (ea
     }
     httpSettings: {
       requireHttps: true
+    }
+    // Token store is under root login (not identityProviders.azureActiveDirectory.login) — matches ARM / file-based auth schema.
+    login: {
+      tokenStore: {
+        enabled: true
+      }
     }
     identityProviders: {
       azureActiveDirectory: {
