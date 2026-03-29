@@ -391,7 +391,9 @@ jobs:
           echo "Database initialization completed successfully."
 
       # Inserts into public.tenant — table and columns must match ey-ai-finance init.sql (id, name, storage_path, created_at, updated_at, is_active, metadata).
+      # aifinance-next only: classic aifinance init/schema does not use this POC tenant row step.
       - name: Insert POC tenant row
+        if: ${{ inputs.appChoice != 'aifinance' }}
         env:
           PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
           POC_SLUG: ${{ inputs.pocSlug }}
@@ -556,13 +558,19 @@ jobs:
   deploy-app-services:
     runs-on: ubuntu-latest
     needs: [deploy-main-resources, init-postgres, build-frontend-image]
-    if: ${{ always() && needs.deploy-main-resources.result == 'success' && needs.init-postgres.result == 'success' && (needs.build-frontend-image.result == 'success' || needs.build-frontend-image.result == 'skipped') }}
+    # Continue even if init-postgres failed (schema/seed issues); core infra must have succeeded. Skip if init was cancelled.
+    if: ${{ always() && needs.deploy-main-resources.result == 'success' && (needs.init-postgres.result == 'success' || needs.init-postgres.result == 'failure') && (needs.build-frontend-image.result == 'success' || needs.build-frontend-image.result == 'skipped') }}
     permissions:
       id-token: write
       contents: read
     steps:
       - name: Checkout Repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Warn when Postgres init did not succeed
+        if: needs.init-postgres.result != 'success'
+        run: |
+          echo "::warning::Job init-postgres ended with result=${{ needs.init-postgres.result }}. Deploying App Services anyway — fix init.sql / tenant / preapproved_users and re-run this workflow or apply SQL manually if the app needs a ready database."
 
       - name: Azure login (OIDC)
         uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
