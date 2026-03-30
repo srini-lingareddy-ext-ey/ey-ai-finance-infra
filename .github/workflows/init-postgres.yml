@@ -14,7 +14,6 @@
 # SECRETS: EY_AI_FINANCE_REPO_TOKEN: Provides access to ey-ai-finance repo | POSTGRES_ADMIN_PASSWORD: PostgreSQL citus user password
 
 name: Initialize PostgreSQL DB
-
 on:
   workflow_dispatch:
     inputs:
@@ -46,7 +45,7 @@ jobs:
 
     steps:
       - name: Checkout ey-ai-finance repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: ${{ github.repository_owner }}/ey-ai-finance
           path: ey-ai-finance
