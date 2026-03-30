@@ -215,7 +215,6 @@ jobs:
         continue-on-error: true
         env:
           MONGO_PASSWORD: ${{ secrets.MONGO_ADMIN_PASSWORD }}
-          POC_SLUG: ${{ inputs.pocSlug }}
         run: |
           set -euo pipefail
           MONGO_HOST="${{ steps.core-outputs.outputs.mongoHost }}"
@@ -223,7 +222,7 @@ jobs:
           MONGO_PW_ENC=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$MONGO_PASSWORD")
           export MONGO_URI="mongodb+srv://${MONGO_USER}:${MONGO_PW_ENC}@${MONGO_HOST}/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000&authSource=admin"
           pip install pymongo --quiet
-          python3 scripts/seed_mongo_eyaifin.py --poc-slug "$POC_SLUG"
+          python3 scripts/seed_mongo_eyaifin.py
 
       - name: Allow Blob Storage access from all networks
         run: |

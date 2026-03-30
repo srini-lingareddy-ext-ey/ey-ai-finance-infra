@@ -82,8 +82,13 @@ var microsoftAuthSecretAppSettings = !empty(microsoftIdentityClientSecret)
       { name: entraClientSecretSettingName, value: microsoftIdentityClientSecret }
     ]
   : []
+// Require token tid to match this tenant (portal “Tenant requirement” → allow only issuer tenant). See Microsoft Learn: WEBSITE_AUTH_AAD_ALLOWED_TENANTS.
+var easyAuthAllowedTenantsAppSetting = {
+  name: 'WEBSITE_AUTH_AAD_ALLOWED_TENANTS'
+  value: microsoftIdentityTenantId
+}
 var microsoftIdentityFrontendAppSettings = easyAuthEnabled
-  ? microsoftAuthSecretAppSettings
+  ? concat(microsoftAuthSecretAppSettings, [easyAuthAllowedTenantsAppSetting])
   : (microsoftAuthEnabled
       ? concat(
           microsoftAuthCoreAppSettings,
@@ -221,17 +226,12 @@ resource frontendAuthSettingsV2 'Microsoft.Web/sites/config@2024-11-01' = if (ea
           clientSecretSettingName: entraClientSecretSettingName
           openIdIssuer: entraOpenIdIssuer
         }
-        // Portal “Authentication” → Microsoft Entra ID → “Additional authentication checks”:
-        // - Client application: allow only this app (audience + azp / client applications claim).
-        // - Identity: any signed-in user (omit defaultAuthorizationPolicy — no group/user allow list).
-        // - Tenant: issuer tenant only (enforced by tenant-specific openIdIssuer above, not common/organizations).
+        // Portal “Authentication” → Microsoft Entra ID: token store enabled; no explicit allowed token audiences.
+        // defaultAuthorizationPolicy.allowedApplications → “Allow requests only from this application itself” (appid/azp).
+        // Tenant tid check: WEBSITE_AUTH_AAD_ALLOWED_TENANTS app setting. Issuer: tenant-specific openIdIssuer.
         validation: {
-          allowedAudiences: [
-            microsoftIdentityClientId
-            'api://${microsoftIdentityClientId}'
-          ]
-          jwtClaimChecks: {
-            allowedClientApplications: [
+          defaultAuthorizationPolicy: {
+            allowedApplications: [
               microsoftIdentityClientId
             ]
           }

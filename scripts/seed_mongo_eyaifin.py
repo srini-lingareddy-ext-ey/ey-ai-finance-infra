@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
 After MongoDB (Cosmos DB for MongoDB vCore) is provisioned, ensure database eyaifin
-and collection chats exist with an initial chat-shaped document when the collection is empty.
-
-Idempotent: if chats already has documents, does nothing (safe on re-runs).
+and collection chats exist. Creates an empty chats collection when missing (which also
+materializes the database). Does not insert any documents into chats.
 """
 from __future__ import annotations
 
@@ -11,7 +10,6 @@ import argparse
 import os
 import sys
 import time
-from datetime import datetime, timezone
 
 try:
     from pymongo import MongoClient
@@ -25,10 +23,9 @@ DEFAULT_COLLECTION = "chats"
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Seed eyaifin.chats for POC Mongo")
+    parser = argparse.ArgumentParser(description="Ensure eyaifin.chats exists (empty), verify connectivity")
     parser.add_argument("--database", default=os.environ.get("MONGO_DATABASE", DEFAULT_DB))
     parser.add_argument("--collection", default=os.environ.get("MONGO_CHATS_COLLECTION", DEFAULT_COLLECTION))
-    parser.add_argument("--poc-slug", default=os.environ.get("POC_SLUG", ""))
     parser.add_argument("--max-wait-seconds", type=int, default=300, help="Retry connecting until this budget elapses")
     args = parser.parse_args()
 
@@ -60,24 +57,19 @@ def main() -> int:
     assert client is not None
     try:
         db = client[args.database]
-        col = db[args.collection]
-        # Use find_one (not estimated_document_count) — vCore can report counts oddly when empty.
-        if col.find_one() is not None:
-            print(f"Skip seed: {args.database}.{args.collection} already has at least one document.")
-            return 0
-
-        now = datetime.now(timezone.utc)
-        doc = {
-            "chatId": "poc-bootstrap",
-            "title": "POC bootstrap chat",
-            "messages": [],
-            "pocSlug": args.poc_slug or None,
-            "createdAt": now,
-            "updatedAt": now,
-            "_seedSource": "ey-ai-finance-infra deploy-poc",
-        }
-        col.insert_one(doc)
-        print(f"Seeded {args.database}.{args.collection} with bootstrap document (empty messages[]).")
+        db.command("ping")
+        existing = set(db.list_collection_names())
+        if args.collection not in existing:
+            db.create_collection(args.collection)
+            print(
+                f"Created empty collection {args.database!r}.{args.collection!r} "
+                f"(database materialized; no documents inserted)."
+            )
+        else:
+            print(
+                f"Mongo OK: {args.database!r}.{args.collection!r} already exists "
+                f"(left unchanged; no documents inserted)."
+            )
         return 0
     except PyMongoError as e:
         print(f"Error: Mongo operation failed: {e}", file=sys.stderr)
