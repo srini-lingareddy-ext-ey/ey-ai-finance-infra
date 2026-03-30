@@ -1,5 +1,5 @@
-# Deploy main.bicep: resource group + Key Vault, App Configuration, OpenAI account (no model deployments in Bicep), Postgres, Blob Storage; then best-effort OpenAI deployments from bicep/configs/openai_default_deployments.json; run init.sql; then App Services.
-# After App Services deploy: Azure OpenAI and the POC storage account network ACLs are set to Deny with allow rules for frontend + backend Web App possible outbound IPs (plus AzureServices bypass). The deploy-main-resources job resets storage to default Allow before blob seeding so GitHub-hosted runners can upload on the next run.
+# Deploy main.bicep: resource group + Key Vault, App Configuration, optional Azure OpenAI account (no model deployments in Bicep), Postgres, Blob Storage; then optional best-effort OpenAI model deployments from bicep/configs/openai_default_deployments.json; run init.sql; then App Services.
+# After App Services deploy: POC storage account network ACLs Deny with allow rules for frontend + backend Web App outbound IPs (plus AzureServices bypass). The deploy-main-resources job resets storage to default Allow before blob seeding so GitHub-hosted runners can upload on the next run.
 # Trigger manually and pass pocSlug (and optionally location, frontend/backend images, appChoice). Password and pipeline principal from GitHub secrets.
 # Required secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, POSTGRES_ADMIN_PASSWORD, MONGO_ADMIN_PASSWORD,
 # EY_AI_FINANCE_REPO_TOKEN, ACR_MANAGED_IDENTITY_CLIENT_ID, MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID, MICROSOFT_PROVIDER_AUTHENTICATION_SECRET.
@@ -11,8 +11,7 @@
 # Repository secrets only; this job has no environment:.
 #
 # OIDC note: GitHub’s ID token (client assertion for federated login) is only valid for a few minutes. deploy-main-resources logs in before
-# main.bicep, captures outputs, runs azure/login again before Key Vault / storage / App Config, and a third time immediately before OpenAI model
-# deployments so later `az` calls (including az cognitiveservices) do not fail with AADSTS700024 (assertion expired).
+# main.bicep, captures outputs, runs azure/login again before Key Vault / storage / App Config. When **createAzureOpenAiResource** is true, run OpenAI model deployments after App Config (refresh login before that segment if you add a dedicated azure/login step).
 # For init.sql + optional frontend image build: EY_AI_FINANCE_REPO_TOKEN (checkout ey-ai-finance). For app services: ACR_MANAGED_IDENTITY_CLIENT_ID; POSTGRES_ADMIN_PASSWORD also sets backend POSTGRES_PASSWORD app setting.
 # When buildFrontendImage is true, job build-frontend-image runs the same steps as build-push-image.yml (inlined here so OIDC id-token works; reusable workflow_call cannot grant id-token to nested jobs). OIDC identity needs AcrPush.
 
@@ -53,6 +52,11 @@ on:
         required: false
         type: string
         default: ""
+      createAzureOpenAiResource:
+        description: "If true, deploy Azure OpenAI. If false, use existing main account."
+        required: true
+        type: boolean
+        default: false
 
 env:
   AZURE_CLIENT_ID: ${{ secrets.AZURE_POC_CLIENT_ID }}
@@ -127,10 +131,11 @@ jobs:
           tenant-id: ${{ secrets.AZURE_POC_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
 
-      - name: Deploy main.bicep (ResourceGroup + Key Vault, App Config, OpenAI, Postgres, Mongo, Blob Storage)
+      - name: Deploy main.bicep (ResourceGroup + Key Vault, App Config, optional OpenAI, Postgres, Mongo, Blob Storage)
         env:
           PG_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
           MONGO_PASSWORD: ${{ secrets.MONGO_ADMIN_PASSWORD }}
+          DEPLOY_AZURE_OPENAI: ${{ inputs.createAzureOpenAiResource }}
         run: |
           POC_SLUG="${{ inputs.pocSlug }}"
           LOCATION="${{ inputs.location }}"
@@ -148,7 +153,8 @@ jobs:
               mongoAdministratorLoginPassword="$MONGO_PASSWORD" \
               openAIDeployments='[]' \
               pocAppConfigKeyValues='[]' \
-              blobContainerNames="$BLOB_CONTAINERS"
+              blobContainerNames="$BLOB_CONTAINERS" \
+              deployAzureOpenAi="$DEPLOY_AZURE_OPENAI"
       - name: Capture Deployment Outputs
         id: core-outputs
         run: |
@@ -189,6 +195,7 @@ jobs:
         env:
           PG_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
           MONGO_PASSWORD: ${{ secrets.MONGO_ADMIN_PASSWORD }}
+          CREATE_AZURE_OPENAI: ${{ inputs.createAzureOpenAiResource }}
         run: |
           RG="${{ steps.core-outputs.outputs.resourceGroupName }}"
           KV="${{ steps.core-outputs.outputs.keyVaultName }}"
@@ -206,10 +213,6 @@ jobs:
           MONGO_CONN="mongodb+srv://${MONGO_USER}:${MONGO_PW_ENC}@${MONGO_HOST}/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000&authSource=admin"
           az keyvault secret set --vault-name "$KV" --name "MongoConnectionString" --value "$MONGO_CONN" --output none
           echo "Set MongoConnectionString in $KV"
-
-          OPENAI_KEY=$(az cognitiveservices account keys list --name "$OPENAI_NAME" --resource-group "$RG" --query key1 -o tsv)
-          az keyvault secret set --vault-name "$KV" --name "OpenAIApiKey" --value "$OPENAI_KEY" --output none
-          echo "Set OpenAIApiKey in $KV"
 
       - name: Populate MongoDB (eyaifin.chats)
         continue-on-error: true
@@ -319,6 +322,7 @@ jobs:
             --poc-slug "${{ inputs.pocSlug }}"
 
       - name: Deploy OpenAI models
+        if: ${{ inputs.createAzureOpenAiResource }}
         run: |
           set -euo pipefail
           RG="${{ steps.core-outputs.outputs.resourceGroupName }}"
@@ -671,6 +675,9 @@ jobs:
           AZURE_POC_TENANT_ID: ${{ secrets.AZURE_POC_TENANT_ID }}
           POSTGRES_ADMIN_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
           MONGO_PASSWORD: ${{ secrets.MONGO_ADMIN_PASSWORD }}
+          CREATE_AZURE_OPENAI: ${{ inputs.createAzureOpenAiResource }}
+          AZURE_OPENAI_ACCOUNT_NAME: ${{ secrets.AZURE_OPENAI_ACCOUNT_NAME }}
+          AZURE_OPENAI_ACCOUNT_SECRET: ${{ secrets.AZURE_OPENAI_ACCOUNT_SECRET }}
         run: |
           set -euo pipefail
           echo "Frontend container image: ${FRONTEND_IMAGE}"
@@ -695,16 +702,25 @@ jobs:
           MONGO_PW_ENC=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$MONGO_PASSWORD")
           MONGO_CONN="mongodb+srv://${MONGO_USER}:${MONGO_PW_ENC}@${MONGO_HOST}/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000&authSource=admin"
 
-          OPENAI_NAME="${{ needs.deploy-main-resources.outputs.openaiName }}"
-          OAI_KEY=$(az cognitiveservices account keys list --name "$OPENAI_NAME" --resource-group "$RG" --query key1 -o tsv)
-          OPENAI_ACCOUNT_EUS2_JSON=$(jq -cn --arg n "$OPENAI_NAME" --arg k "$OAI_KEY" '[$n,$k]')
+          # Backend OPENAI_ACCOUNT_EUS2: compact JSON array of two JSON strings — ["<accountName>","<apiKey>"].
+          if [[ "$CREATE_AZURE_OPENAI" == "true" ]]; then
+            OPENAI_NAME="${{ needs.deploy-main-resources.outputs.openaiName }}"
+            OAI_KEY=$(az cognitiveservices account keys list --name "$OPENAI_NAME" --resource-group "$RG" --query key1 -o tsv)
+            OPENAI_ACCOUNT_EUS2_JSON=$(OPENAI_N="$OPENAI_NAME" OPENAI_K="$OAI_KEY" python3 -c 'import json, os; print(json.dumps([os.environ["OPENAI_N"], os.environ["OPENAI_K"]], separators=(",", ":")))')
+            echo "Backend OPENAI_ACCOUNT_EUS2: JSON string array from new POC OpenAI resource (name=$OPENAI_NAME, key redacted)."
+          elif [[ -n "${AZURE_OPENAI_ACCOUNT_NAME:-}" && -n "${AZURE_OPENAI_ACCOUNT_SECRET:-}" ]]; then
+            OPENAI_ACCOUNT_EUS2_JSON=$(OPENAI_N="$AZURE_OPENAI_ACCOUNT_NAME" OPENAI_K="$AZURE_OPENAI_ACCOUNT_SECRET" python3 -c 'import json, os; print(json.dumps([os.environ["OPENAI_N"], os.environ["OPENAI_K"]], separators=(",", ":")))')
+            echo "Backend OPENAI_ACCOUNT_EUS2: JSON string array from AZURE_OPENAI_ACCOUNT_NAME + AZURE_OPENAI_ACCOUNT_SECRET (key redacted)."
+          else
+            OPENAI_ACCOUNT_EUS2_JSON=""
+            echo "Skipping OPENAI_ACCOUNT_EUS2 (no POC OpenAI deploy; set AZURE_OPENAI_ACCOUNT_NAME and AZURE_OPENAI_ACCOUNT_SECRET to use a shared account)."
+          fi
           OPENAI_PARAM_FILE=$(mktemp)
           trap 'rm -f "$OPENAI_PARAM_FILE"' EXIT
           jq -n \
             --arg oai "$OPENAI_ACCOUNT_EUS2_JSON" \
             --arg mongo "$MONGO_CONN" \
             '{parameters: {openAiAccountEus2Json: {value: $oai}, mongoConnStr: {value: $mongo}}}' > "$OPENAI_PARAM_FILE"
-          echo "Backend OPENAI_ACCOUNT_EUS2: account name from deployment ($OPENAI_NAME) + key (redacted)."
           echo "Backend MONGO_CONN_STR: same URI shape as Key Vault MongoConnectionString (password redacted)."
 
           az deployment group create \
@@ -731,12 +747,11 @@ jobs:
               postgresPassword="$POSTGRES_ADMIN_PASSWORD" \
             --parameters @"$OPENAI_PARAM_FILE"
 
-      - name: Restrict Azure OpenAI and Blob Storage to Web App outbound IPs
+      - name: Restrict Blob Storage to Web App outbound IPs
         run: |
           set -euo pipefail
           RG="${{ needs.deploy-main-resources.outputs.resourceGroupName }}"
           POC_SLUG="${{ inputs.pocSlug }}"
-          OAI_NAME="${{ needs.deploy-main-resources.outputs.openaiName }}"
           ST_NAME="${{ needs.deploy-main-resources.outputs.storageAccountName }}"
           FE_APP="eyaifinance-${POC_SLUG}"
           BE_APP="eyaifinance-backend-${POC_SLUG}"
@@ -751,27 +766,14 @@ jobs:
           merged = os.environ.get('MERGED', '')
           ips = sorted({p.strip() for p in merged.split(',') if p.strip()})
           if not ips:
-              raise SystemExit('No outbound IPs from Web Apps; refusing to set defaultAction Deny on OpenAI or storage')
-          # possibleOutboundIpAddresses are plain IPv4 hosts; pass through unchanged. (Azure OpenAI rejects /32 in rules;
-          # Storage accepts host or CIDR — see https://github.com/Azure/azure-powershell/issues/25455)
+              raise SystemExit('No outbound IPs from Web Apps; refusing to set defaultAction Deny on storage')
+          # possibleOutboundIpAddresses are plain IPv4 hosts; Storage accepts host or CIDR — see https://github.com/Azure/azure-powershell/issues/25455
           rules = [{'value': ip} for ip in ips]
           print(json.dumps(rules))
           ")
 
           SUB=$(az account show --query id -o tsv)
           RULE_COUNT=$(echo "$RULES_JSON" | jq 'length')
-
-          # --- Azure OpenAI (Cognitive Services) ---
-          OAI_API_VER="2025-06-01"
-          OAI_RES_ID="/subscriptions/${SUB}/resourceGroups/${RG}/providers/Microsoft.CognitiveServices/accounts/${OAI_NAME}"
-          OAI_URL="https://management.azure.com${OAI_RES_ID}?api-version=${OAI_API_VER}"
-          OAI_BODY=$(jq -n \
-            --argjson rules "$RULES_JSON" \
-            '{properties: {networkAcls: {defaultAction: "Deny", bypass: "AzureServices", virtualNetworkRules: [], ipRules: $rules}}}')
-
-          echo "Patching OpenAI account ${OAI_NAME}: defaultAction Deny, ${RULE_COUNT} IP rule(s)."
-          az rest --method patch --url "$OAI_URL" --headers "Content-Type=application/json" --body "$OAI_BODY"
-          echo "OpenAI network ACLs updated."
 
           # --- Storage account (blob data plane): ipRules require action Allow per ARM schema ---
           ST_API_VER="2024-01-01"

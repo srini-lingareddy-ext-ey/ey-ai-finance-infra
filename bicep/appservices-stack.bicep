@@ -58,7 +58,7 @@ param postgresPort string = '5432'
 @secure()
 param postgresPassword string = ''
 
-@description('Backend-only: JSON array string for OPENAI_ACCOUNT_EUS2 (account name + API key). Empty = omit.')
+@description('Backend-only: Compact JSON array of two strings for OPENAI_ACCOUNT_EUS2, e.g. ["my-openai-account","api-key"]. Empty = omit.')
 @secure()
 param openAiAccountEus2Json string = ''
 

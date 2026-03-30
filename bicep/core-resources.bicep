@@ -9,6 +9,8 @@ param pocSlug string
 param location string = 'eastus'
 param openAIDeployments array = []
 param pocAppConfigKeyValues array = []
+@description('When false, skip Azure OpenAI account deployment.')
+param deployAzureOpenAi bool = false
 
 // Optional Postgres overrides (match modules/postgres.bicep defaults)
 param coordinatorVCores int = 2
@@ -96,8 +98,8 @@ module blobStorage 'modules/blobStorage.bicep' = {
 
 output keyVaultName string = keyVault.outputs.keyVaultName
 output keyVaultUri string = keyVault.outputs.keyVaultUri
-output openaiEndpoint string = openAI.outputs.endpoint
-output openaiName string = openAI.outputs.openaiName
+output openaiEndpoint string = deployAzureOpenAi ? openAI.outputs.endpoint : ''
+output openaiName string = deployAzureOpenAi ? openAI.outputs.openaiName : ''
 output appConfigEndpoint string = appConfiguration.outputs.endpoint
 output appConfigStoreName string = appConfiguration.outputs.storeName
 output postgresHost string = postgres.outputs.host

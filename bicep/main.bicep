@@ -12,6 +12,8 @@ param pocSlug string
 param location string = 'eastus'
 param openAIDeployments array = []
 param pocAppConfigKeyValues array = []
+@description('When false, skip Azure OpenAI (Cognitive Services) account; openaiName/openaiEndpoint outputs are empty.')
+param deployAzureOpenAi bool = false
 
 // Optional Postgres overrides (passed through to core-resources)
 param coordinatorVCores int = 2
@@ -60,6 +62,7 @@ module mainResources 'core-resources.bicep' = {
     citusVersion: citusVersion
     blobContainerNames: blobContainerNames
     mongoAdministratorLoginPassword: mongoAdministratorLoginPassword
+    deployAzureOpenAi: deployAzureOpenAi
   }
 }
 
