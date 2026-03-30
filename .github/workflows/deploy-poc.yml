@@ -305,6 +305,17 @@ jobs:
             --label "${{ inputs.pocSlug }}" \
             --poc-slug "${{ inputs.pocSlug }}"
 
+      - name: Populate MongoDB (eyaifin.chats)
+        env:
+          MONGO_PASSWORD: ${{ secrets.MONGO_ADMIN_PASSWORD }}
+          POC_SLUG: ${{ inputs.pocSlug }}
+        run: |
+          set -euo pipefail
+          MONGO_HOST="${{ steps.core-outputs.outputs.mongoHost }}"
+          MONGO_USER="${{ steps.core-outputs.outputs.mongoAdministratorLogin }}"
+          MONGO_PW_ENC=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$MONGO_PASSWORD")
+          export MONGO_URI="mongodb+srv://${MONGO_USER}:${MONGO_PW_ENC}@${MONGO_HOST}/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000"
+          pip install pymongo --quiet
       - name: Deploy OpenAI models
         run: |
           set -euo pipefail
