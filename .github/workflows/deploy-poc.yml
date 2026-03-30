@@ -203,13 +203,27 @@ jobs:
           echo "Set PostgresConnectionString in $KV"
 
           MONGO_PW_ENC=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$MONGO_PASSWORD")
-          MONGO_CONN="mongodb+srv://${MONGO_USER}:${MONGO_PW_ENC}@${MONGO_HOST}/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000"
+          MONGO_CONN="mongodb+srv://${MONGO_USER}:${MONGO_PW_ENC}@${MONGO_HOST}/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000&authSource=admin"
           az keyvault secret set --vault-name "$KV" --name "MongoConnectionString" --value "$MONGO_CONN" --output none
           echo "Set MongoConnectionString in $KV"
 
           OPENAI_KEY=$(az cognitiveservices account keys list --name "$OPENAI_NAME" --resource-group "$RG" --query key1 -o tsv)
           az keyvault secret set --vault-name "$KV" --name "OpenAIApiKey" --value "$OPENAI_KEY" --output none
           echo "Set OpenAIApiKey in $KV"
+
+      - name: Populate MongoDB (eyaifin.chats)
+        continue-on-error: true
+        env:
+          MONGO_PASSWORD: ${{ secrets.MONGO_ADMIN_PASSWORD }}
+          POC_SLUG: ${{ inputs.pocSlug }}
+        run: |
+          set -euo pipefail
+          MONGO_HOST="${{ steps.core-outputs.outputs.mongoHost }}"
+          MONGO_USER="${{ steps.core-outputs.outputs.mongoAdministratorLogin }}"
+          MONGO_PW_ENC=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$MONGO_PASSWORD")
+          export MONGO_URI="mongodb+srv://${MONGO_USER}:${MONGO_PW_ENC}@${MONGO_HOST}/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000&authSource=admin"
+          pip install pymongo --quiet
+          python3 scripts/seed_mongo_eyaifin.py --poc-slug "$POC_SLUG"
 
       - name: Allow Blob Storage access from all networks
         run: |
@@ -305,17 +319,6 @@ jobs:
             --label "${{ inputs.pocSlug }}" \
             --poc-slug "${{ inputs.pocSlug }}"
 
-      - name: Populate MongoDB (eyaifin.chats)
-        env:
-          MONGO_PASSWORD: ${{ secrets.MONGO_ADMIN_PASSWORD }}
-          POC_SLUG: ${{ inputs.pocSlug }}
-        run: |
-          set -euo pipefail
-          MONGO_HOST="${{ steps.core-outputs.outputs.mongoHost }}"
-          MONGO_USER="${{ steps.core-outputs.outputs.mongoAdministratorLogin }}"
-          MONGO_PW_ENC=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$MONGO_PASSWORD")
-          export MONGO_URI="mongodb+srv://${MONGO_USER}:${MONGO_PW_ENC}@${MONGO_HOST}/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000"
-          pip install pymongo --quiet
       - name: Deploy OpenAI models
         run: |
           set -euo pipefail
@@ -691,7 +694,7 @@ jobs:
           MONGO_HOST="${{ needs.deploy-main-resources.outputs.mongoHost }}"
           MONGO_USER="${{ needs.deploy-main-resources.outputs.mongoAdministratorLogin }}"
           MONGO_PW_ENC=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$MONGO_PASSWORD")
-          MONGO_CONN="mongodb+srv://${MONGO_USER}:${MONGO_PW_ENC}@${MONGO_HOST}/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000"
+          MONGO_CONN="mongodb+srv://${MONGO_USER}:${MONGO_PW_ENC}@${MONGO_HOST}/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000&authSource=admin"
 
           OPENAI_NAME="${{ needs.deploy-main-resources.outputs.openaiName }}"
           OAI_KEY=$(az cognitiveservices account keys list --name "$OPENAI_NAME" --resource-group "$RG" --query key1 -o tsv)

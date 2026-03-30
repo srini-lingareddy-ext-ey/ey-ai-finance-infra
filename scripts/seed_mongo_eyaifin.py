@@ -61,9 +61,9 @@ def main() -> int:
     try:
         db = client[args.database]
         col = db[args.collection]
-        n = col.estimated_document_count()
-        if n > 0:
-            print(f"Skip seed: {args.database}.{args.collection} already has ~{n} document(s).")
+        # Use find_one (not estimated_document_count) — vCore can report counts oddly when empty.
+        if col.find_one() is not None:
+            print(f"Skip seed: {args.database}.{args.collection} already has at least one document.")
             return 0
 
         now = datetime.now(timezone.utc)
