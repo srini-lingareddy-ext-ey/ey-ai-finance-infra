@@ -70,16 +70,6 @@ var entraLoginRoot = endsWith(environment().authentication.loginEndpoint, '/')
 var microsoftAuthority = '${entraLoginRoot}/${microsoftIdentityTenantId}/v2.0'
 // Issuer URL expected by App Service Easy Auth / Entra v2 (same tenant segment as authority).
 var entraOpenIdIssuer = microsoftAuthority
-var backendPublicBaseUrl = 'https://${backendName}.azurewebsites.net'
-// aifinance-next env-manager: IN_DOCKER must be true to use BACKEND_ENDPOINT_BASE. The image runner stage
-// does not set RUNNING_IN_DOCKER — inject here so App Service matches local Docker behavior.
-// BACKEND_URL is set for any code paths that read process.env.BACKEND_URL directly.
-var frontendServiceAppSettings = [
-  { name: 'RUNNING_IN_DOCKER', value: 'true' }
-  { name: 'NEXT_PUBLIC_RUNNING_IN_DOCKER', value: 'true' }
-  { name: 'BACKEND_ENDPOINT_BASE', value: backendPublicBaseUrl }
-  { name: 'BACKEND_URL', value: backendPublicBaseUrl }
-]
 // Easy Auth: client ID + issuer live in authsettingsV2 only. Azure still requires the client secret as an app setting (see clientSecretSettingName).
 // If you use app-managed auth instead (no secret / no Easy Auth), expose id + tenant + authority + public URL to the container here.
 var microsoftAuthCoreAppSettings = [
@@ -102,7 +92,7 @@ var microsoftIdentityFrontendAppSettings = easyAuthEnabled
           ]
         )
       : [])
-var frontendAppSettings = concat(sharedAppSettings, frontendServiceAppSettings, microsoftIdentityFrontendAppSettings)
+var frontendAppSettings = concat(sharedAppSettings, microsoftIdentityFrontendAppSettings)
 
 var injectBackendPostgresSettings = !empty(postgresHost) && !empty(postgresDatabaseName) && !empty(postgresUser) && !empty(postgresPassword)
 var backendPostgresAppSettings = injectBackendPostgresSettings
@@ -230,6 +220,21 @@ resource frontendAuthSettingsV2 'Microsoft.Web/sites/config@2024-11-01' = if (ea
           clientId: microsoftIdentityClientId
           clientSecretSettingName: entraClientSecretSettingName
           openIdIssuer: entraOpenIdIssuer
+        }
+        // Portal “Authentication” → Microsoft Entra ID → “Additional authentication checks”:
+        // - Client application: allow only this app (audience + azp / client applications claim).
+        // - Identity: any signed-in user (omit defaultAuthorizationPolicy — no group/user allow list).
+        // - Tenant: issuer tenant only (enforced by tenant-specific openIdIssuer above, not common/organizations).
+        validation: {
+          allowedAudiences: [
+            microsoftIdentityClientId
+            'api://${microsoftIdentityClientId}'
+          ]
+          jwtClaimChecks: {
+            allowedClientApplications: [
+              microsoftIdentityClientId
+            ]
+          }
         }
       }
     }
