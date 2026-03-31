@@ -10,5 +10,9 @@
         "chat": ["chat.yml"]
       }
     }
-  }
+  },
+  "chats": {},
+  "chat-completions": {},
+  "chat-completions-messages": {},
+  "responses": {}
 }
