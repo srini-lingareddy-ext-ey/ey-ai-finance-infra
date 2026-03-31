@@ -42,21 +42,21 @@ on:
         required: true
         type: boolean
         default: true
-      frontendImage:
-        description: "Optional. Ignored when the build job succeeds (built image is always deployed). Otherwise: if non-empty, used; if empty, DOCKER|creyaifinmain.azurecr.io/<appChoice>-frontend:latest."
-        required: false
-        type: string
-        default: ""
-      backendImage:
-        description: "Optional. If empty, uses DOCKER|creyaifinmain.azurecr.io/<appChoice>-backend:latest (aifinance-next-backend or aifinance-backend)."
-        required: false
-        type: string
-        default: ""
       createAzureOpenAiResource:
         description: "If true, deploy Azure OpenAI. If false, use existing main account."
         required: true
         type: boolean
         default: false
+      frontendImage:
+        description: "Frontend Image - Optional - Ignored when the build job succeeds (built image is always deployed). Otherwise: if non-empty, used; if empty, DOCKER|creyaifinmain.azurecr.io/<appChoice>-frontend:latest."
+        required: false
+        type: string
+        default: ""
+      backendImage:
+        description: "Backend Image - Optional - If empty, uses DOCKER|creyaifinmain.azurecr.io/<appChoice>-backend:latest (aifinance-next-backend or aifinance-backend)."
+        required: false
+        type: string
+        default: ""
 
 env:
   AZURE_CLIENT_ID: ${{ secrets.AZURE_POC_CLIENT_ID }}
