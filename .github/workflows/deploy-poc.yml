@@ -847,11 +847,26 @@ jobs:
           OAI_RES_ID="/subscriptions/${SUB}/resourceGroups/${OAI_RG}/providers/Microsoft.CognitiveServices/accounts/${OAI_NAME}"
           OAI_URL="https://management.azure.com${OAI_RES_ID}?api-version=${OAI_API_VER}"
 
-          CURRENT=$(az rest --method get --url "$OAI_URL")
+          OAI_GET_JSON=$(mktemp)
+          trap 'rm -f "$OAI_GET_JSON"' EXIT
+
+          if ! az rest --method get --url "$OAI_URL" > "$OAI_GET_JSON"; then
+            echo "::error::GET Cognitive Services account failed (name, resource group, or subscription)."
+            exit 1
+          fi
+          if [[ ! -s "$OAI_GET_JSON" ]]; then
+            echo "::error::Empty response when GETting OpenAI account."
+            exit 1
+          fi
+          if ! jq -e . "$OAI_GET_JSON" >/dev/null 2>&1; then
+            echo "::error::GET OpenAI account did not return valid JSON (first 400 chars):"
+            head -c 400 "$OAI_GET_JSON" | cat -v || true
+            exit 1
+          fi
 
           # Main/shared account: never create networkAcls or change non-IP settings — only merge into existing ipRules (or skip).
           if [[ "$CREATE_FLAG" == "false" ]]; then
-            NA_TYPE=$(echo "$CURRENT" | jq -r '(.properties // {}) | .networkAcls | type')
+            NA_TYPE=$(jq -r '(.properties // {}) | .networkAcls | type' "$OAI_GET_JSON")
             if [[ "$NA_TYPE" != "object" ]]; then
               echo "Skipping: main OpenAI account has no existing networkAcls; not creating firewall settings or changing the account beyond IP allow lists."
               exit 0
@@ -860,7 +875,7 @@ jobs:
 
           MAIN_FLAG=$([[ "$CREATE_FLAG" == "false" ]] && echo 1 || echo 0)
           set +e
-          PATCH_BODY=$(echo "$CURRENT" | MERGED="$MERGED" MAIN_SHARED_OPENAI="$MAIN_FLAG" python3 <<'PY'
+          PATCH_BODY=$(MERGED="$MERGED" MAIN_SHARED_OPENAI="$MAIN_FLAG" OAI_GET_JSON="$OAI_GET_JSON" python3 <<'PY'
           import copy
           import json
           import os
@@ -872,7 +887,8 @@ jobs:
               raise SystemExit("No outbound IPs from frontend Web App; refusing to patch OpenAI network ACLs")
 
           main_shared = os.environ.get("MAIN_SHARED_OPENAI", "0") == "1"
-          current = json.load(sys.stdin)
+          with open(os.environ["OAI_GET_JSON"], encoding="utf-8") as f:
+              current = json.load(f)
           props = current.get("properties") or {}
           na = props.get("networkAcls")
 
