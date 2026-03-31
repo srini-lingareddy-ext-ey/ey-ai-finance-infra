@@ -53,7 +53,7 @@ param openAiAccountEus2Json string = ''
 @secure()
 param mongoConnStr string = ''
 
-@description('Backend-only: POC Blob Storage full connection string for app setting AZURE_STORAGE_CONNECTION_STRING (account key). Empty = omit. Stored as plain app setting value in ARM (like POSTGRES_PASSWORD); visible to authorized portal users.')
+@description('Backend-only: POC Blob Storage full connection string for app setting STORAGE_ACCOUNT (account key). Empty = omit. Stored as plain app setting value in ARM (like POSTGRES_PASSWORD); visible to authorized portal users.')
 @secure()
 param storageConnectionString string = ''
 
@@ -125,7 +125,7 @@ var backendMongoAppSettings = !empty(mongoConnStr)
   : []
 var backendStorageConnectionAppSettings = !empty(storageConnectionString)
   ? [
-      { name: 'AZURE_STORAGE_CONNECTION_STRING', value: storageConnectionString }
+      { name: 'STORAGE_ACCOUNT', value: storageConnectionString }
     ]
   : []
 var backendEntraAppSettings = !empty(microsoftIdentityClientId) && !empty(microsoftIdentityTenantId)

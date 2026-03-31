@@ -66,7 +66,7 @@ param openAiAccountEus2Json string = ''
 @secure()
 param mongoConnStr string = ''
 
-@description('Backend-only: POC Blob Storage connection string for AZURE_STORAGE_CONNECTION_STRING on the backend Web App. Empty = omit.')
+@description('Backend-only: POC Blob Storage connection string for STORAGE_ACCOUNT on the backend Web App. Empty = omit.')
 @secure()
 param storageConnectionString string = ''
 
