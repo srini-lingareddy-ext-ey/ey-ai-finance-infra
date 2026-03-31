@@ -235,6 +235,12 @@ resource frontendAuthSettingsV2 'Microsoft.Web/sites/config@2024-11-01' = if (ea
           clientSecretSettingName: entraClientSecretSettingName
           openIdIssuer: entraOpenIdIssuer
         }
+        // Request offline_access so Entra issues a refresh token; Easy Auth /.auth/refresh otherwise often returns 403.
+        login: {
+          loginParameters: [
+            'scope=openid profile email offline_access'
+          ]
+        }
         // Portal “Authentication” → Microsoft Entra ID: token store enabled; no explicit allowed token audiences.
         // defaultAuthorizationPolicy.allowedApplications → “Allow requests only from this application itself” (appid/azp).
         // Tenant tid check: WEBSITE_AUTH_AAD_ALLOWED_TENANTS app setting. Issuer: tenant-specific openIdIssuer.
