@@ -685,6 +685,7 @@ jobs:
           RG="${{ needs.deploy-main-resources.outputs.resourceGroupName }}"
           KV="${{ needs.deploy-main-resources.outputs.keyVaultName }}"
           APP_CFG="${{ needs.deploy-main-resources.outputs.appConfigEndpoint }}"
+          ST_NAME="${{ needs.deploy-main-resources.outputs.storageAccountName }}"
           POC_SLUG="${{ inputs.pocSlug }}"
           FRONTEND_BASE="https://eyaifinance-${POC_SLUG}.azurewebsites.net"
 
@@ -715,12 +716,16 @@ jobs:
             OPENAI_ACCOUNT_EUS2_JSON=""
             echo "Skipping OPENAI_ACCOUNT_EUS2 (no POC OpenAI deploy; set AZURE_OPENAI_ACCOUNT_NAME and AZURE_OPENAI_ACCOUNT_SECRET to use a shared account)."
           fi
+          STORAGE_CONN=$(az storage account show-connection-string --resource-group "$RG" --name "$ST_NAME" --query connectionString -o tsv)
+          echo "Backend AZURE_STORAGE_CONNECTION_STRING: retrieved for storage account name=$ST_NAME (secret not logged)."
+
           OPENAI_PARAM_FILE=$(mktemp)
           trap 'rm -f "$OPENAI_PARAM_FILE"' EXIT
           jq -n \
             --arg oai "$OPENAI_ACCOUNT_EUS2_JSON" \
             --arg mongo "$MONGO_CONN" \
-            '{parameters: {openAiAccountEus2Json: {value: $oai}, mongoConnStr: {value: $mongo}}}' > "$OPENAI_PARAM_FILE"
+            --arg st "$STORAGE_CONN" \
+            '{parameters: {openAiAccountEus2Json: {value: $oai}, mongoConnStr: {value: $mongo}, storageConnectionString: {value: $st}}}' > "$OPENAI_PARAM_FILE"
           echo "Backend MONGO_CONN_STR: same URI shape as Key Vault MongoConnectionString (password redacted)."
 
           az deployment group create \

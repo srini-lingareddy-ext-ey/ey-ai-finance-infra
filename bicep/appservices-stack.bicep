@@ -66,6 +66,10 @@ param openAiAccountEus2Json string = ''
 @secure()
 param mongoConnStr string = ''
 
+@description('Backend-only: POC Blob Storage connection string for AZURE_STORAGE_CONNECTION_STRING on the backend Web App. Empty = omit.')
+@secure()
+param storageConnectionString string = ''
+
 // Central ACR identity (acr-managed-identity in rg-eyaifin-acr) — hardcoded for this subscription.
 var acrManagedIdentityResourceIdFinal = '/subscriptions/08d343af-2a3c-4f13-86a5-d9bde4948ae8/resourceGroups/rg-eyaifin-acr/providers/Microsoft.ManagedIdentity/userAssignedIdentities/acr-managed-identity'
 var keyVaultUri = 'https://${keyVaultName}${environment().suffixes.keyvaultDns}/'
@@ -94,6 +98,7 @@ module appService 'modules/appService.bicep' = {
     postgresPassword: postgresPassword
     openAiAccountEus2Json: openAiAccountEus2Json
     mongoConnStr: mongoConnStr
+    storageConnectionString: storageConnectionString
   }
 }
 

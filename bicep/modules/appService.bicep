@@ -53,6 +53,10 @@ param openAiAccountEus2Json string = ''
 @secure()
 param mongoConnStr string = ''
 
+@description('Backend-only: POC Blob Storage full connection string for app setting AZURE_STORAGE_CONNECTION_STRING (account key). Empty = omit. Stored as plain app setting value in ARM (like POSTGRES_PASSWORD); visible to authorized portal users.')
+@secure()
+param storageConnectionString string = ''
+
 var appServicePlanName = 'asp-${pocSlug}'
 // Default hostnames: https://eyaifinance-<pocSlug>.azurewebsites.net and https://eyaifinance-backend-<pocSlug>.azurewebsites.net
 var frontendName = 'eyaifinance-${pocSlug}'
@@ -119,13 +123,18 @@ var backendMongoAppSettings = !empty(mongoConnStr)
       { name: 'MONGO_CONN_STR', value: mongoConnStr }
     ]
   : []
+var backendStorageConnectionAppSettings = !empty(storageConnectionString)
+  ? [
+      { name: 'AZURE_STORAGE_CONNECTION_STRING', value: storageConnectionString }
+    ]
+  : []
 var backendEntraAppSettings = !empty(microsoftIdentityClientId) && !empty(microsoftIdentityTenantId)
   ? [
       { name: 'AZURE_CLIENT_ID', value: microsoftIdentityClientId }
       { name: 'AZURE_TENANT_ID', value: microsoftIdentityTenantId }
     ]
   : []
-var backendAppSettings = concat(sharedAppSettings, backendPostgresAppSettings, backendMongoAppSettings, backendOpenAiEus2AppSettings, backendEntraAppSettings)
+var backendAppSettings = concat(sharedAppSettings, backendPostgresAppSettings, backendMongoAppSettings, backendStorageConnectionAppSettings, backendOpenAiEus2AppSettings, backendEntraAppSettings)
 
 // Omit healthCheckPath when empty so Azure does not probe (JWT-only APIs often return 401 without Authorization).
 var backendSiteConfigBase = {
