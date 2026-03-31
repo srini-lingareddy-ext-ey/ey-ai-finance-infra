@@ -37,7 +37,7 @@ module keyVault 'modules/keyVault.bicep' = {
   }
 }
 
-module openAI 'modules/openAI.bicep' = {
+module openAI 'modules/openAI.bicep' = if (deployAzureOpenAi) {
   name: 'openAI'
   params: {
     pocSlug: pocSlug
