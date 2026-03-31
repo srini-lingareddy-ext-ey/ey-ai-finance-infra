@@ -9,7 +9,7 @@
 
 # MANUAL FOLLOW-UP STEPS:
 #   - Verify tables were created: connect to DB and run \dt to list tables
-#   - preapproved_users is upserted after init.sql (same list as Deploy POC init-postgres job)
+#   - preapproved_users is upserted after init.sql via scripts/upsert_preapproved_users.py (defaults + optional preapprovedUserEmails input; same as Deploy POC)
 
 # SECRETS: EY_AI_FINANCE_REPO_TOKEN: Provides access to ey-ai-finance repo | POSTGRES_ADMIN_PASSWORD: PostgreSQL citus user password
 
@@ -37,6 +37,11 @@ on:
           - aifinance-next
           - aifinance
         default: "aifinance-next"
+      preapprovedUserEmails:
+        description: "Optional comma-separated emails appended to the default preapproved admin list (all upserted as is_admin true)."
+        required: false
+        type: string
+        default: ""
 
 jobs:
   init-database:
@@ -44,6 +49,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout infra repo (scripts)
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
       - name: Checkout ey-ai-finance repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:

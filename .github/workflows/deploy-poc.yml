@@ -57,6 +57,11 @@ on:
         required: false
         type: string
         default: ""
+      preapprovedUserEmails:
+        description: "Optional comma-separated emails appended to the default preapproved admin list (all upserted as is_admin true). Spaces trimmed; duplicates ignored case-insensitively."
+        required: false
+        type: string
+        default: ""
 
 env:
   AZURE_CLIENT_ID: ${{ secrets.AZURE_POC_CLIENT_ID }}
@@ -350,6 +355,9 @@ jobs:
     permissions:
       contents: read
     steps:
+      - name: Checkout infra repo (scripts)
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
       - name: Checkout ey-ai-finance repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -438,24 +446,15 @@ jobs:
       - name: Insert preapproved admin users
         env:
           PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+          PGHOST: ${{ needs.deploy-main-resources.outputs.postgresHost }}
+          PGDATABASE: ${{ needs.deploy-main-resources.outputs.postgresDatabaseName }}
+          PGUSER: citus
+          PGSSLMODE: require
+          PREAPPROVED_EXTRA_EMAILS: ${{ inputs.preapprovedUserEmails }}
         run: |
           set -euo pipefail
-          PG_HOST="${{ needs.deploy-main-resources.outputs.postgresHost }}"
-          PG_DB="${{ needs.deploy-main-resources.outputs.postgresDatabaseName }}"
-
-          psql "host=${PG_HOST} port=5432 dbname=${PG_DB} user=citus sslmode=require" \
-            -v ON_ERROR_STOP=1 <<'SQL'
-          INSERT INTO preapproved_users (email, is_admin)
-          VALUES
-            ('Amy.Feng.Chen@ey.com', true),
-            ('Kayl.Murdough@ey.com', true),
-            ('Nicole.Belans@ey.com', true),
-            ('Lucas.Benson@ey.com', true),
-            ('Christian.J.Noordover@ey.com', true)
-          ON CONFLICT (email) DO UPDATE SET is_admin = EXCLUDED.is_admin;
-          SQL
-
-          echo "Preapproved admin users upserted successfully."
+          python3 scripts/upsert_preapproved_users.py
+          echo "Preapproved admin users upserted successfully (defaults + preapproved user emails input)."
 
   build-frontend-image:
     name: build and push frontend image
@@ -707,6 +706,8 @@ jobs:
             echo "Skipping OPENAI_ACCOUNT_EUS2 (no POC OpenAI deploy; set AZURE_OPENAI_ACCOUNT_NAME and AZURE_OPENAI_ACCOUNT_SECRET to use a shared account)."
           fi
           STORAGE_CONN=$(az storage account show-connection-string --resource-group "$RG" --name "$ST_NAME" --query connectionString -o tsv)
+          # Backend expects STORAGE_ACCOUNT wrapped in double quotes (connection string semantics).
+          STORAGE_CONN_APP=$(printf '"%s"' "$STORAGE_CONN")
           echo "Backend STORAGE_ACCOUNT: retrieved for storage account name=$ST_NAME (secret not logged)."
 
           OPENAI_PARAM_FILE=$(mktemp)
@@ -714,7 +715,7 @@ jobs:
           jq -n \
             --arg oai "$OPENAI_ACCOUNT_EUS2_JSON" \
             --arg mongo "$MONGO_CONN" \
-            --arg st "$STORAGE_CONN" \
+            --arg st "$STORAGE_CONN_APP" \
             '{parameters: {openAiAccountEus2Json: {value: $oai}, mongoConnStr: {value: $mongo}, storageConnectionString: {value: $st}}}' > "$OPENAI_PARAM_FILE"
           echo "Backend MONGO_CONN_STR: same URI shape as Key Vault MongoConnectionString (password redacted)."
 
