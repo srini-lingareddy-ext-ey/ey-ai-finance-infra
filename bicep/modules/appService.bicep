@@ -77,8 +77,8 @@ var appServicePlanName = 'asp-${pocSlug}'
 // Default hostnames: https://eyaifinance-<pocSlug>.azurewebsites.net and https://eyaifinance-backend-<pocSlug>.azurewebsites.net
 var frontendName = 'eyaifinance-${pocSlug}'
 var backendName = 'eyaifinance-backend-${pocSlug}'
-// Backend FRONTEND_URL: matches frontendPublicBaseUrl when set (Deploy POC); else cloud default hostname for the frontend web app.
-var frontendDefaultSiteUrl = 'https://${frontendName}.${environment().suffixes.webSites}'
+// Backend FRONTEND_URL: matches frontendPublicBaseUrl when set (Deploy POC); else default hostname (public Azure App Service suffix; suffixes.webSites is not on environment().suffixes in Bicep).
+var frontendDefaultSiteUrl = 'https://${frontendName}.azurewebsites.net'
 var backendFrontendUrl = !empty(frontendPublicBaseUrl) ? frontendPublicBaseUrl : frontendDefaultSiteUrl
 var backendFrontendUrlAppSettings = [
   { name: 'FRONTEND_URL', value: backendFrontendUrl }
@@ -90,9 +90,10 @@ var microsoftAuthEnabled = !empty(microsoftIdentityClientId) && !empty(microsoft
 var easyAuthEnabled = microsoftAuthEnabled && !empty(microsoftIdentityClientSecret)
 var entraClientSecretSettingName = 'MICROSOFT_PROVIDER_CLIENT_SECRET'
 // Use cloud-specific login root (public Azure → Microsoft Entra sign-in endpoint).
-var entraLoginRoot = endsWith(environment().authentication.loginEndpoint, '/')
-  ? substring(environment().authentication.loginEndpoint, 0, length(environment().authentication.loginEndpoint) - 1)
-  : environment().authentication.loginEndpoint
+var entraLoginEndpoint = environment().authentication.loginEndpoint
+var entraLoginRoot = length(entraLoginEndpoint) > 0 && endsWith(entraLoginEndpoint, '/')
+  ? substring(entraLoginEndpoint, 0, length(entraLoginEndpoint) - 1)
+  : entraLoginEndpoint
 var microsoftAuthority = '${entraLoginRoot}/${microsoftIdentityTenantId}/v2.0'
 // Issuer URL expected by App Service Easy Auth / Entra v2 (same tenant segment as authority).
 var entraOpenIdIssuer = microsoftAuthority
