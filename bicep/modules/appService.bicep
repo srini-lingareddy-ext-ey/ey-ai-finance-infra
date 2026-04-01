@@ -57,10 +57,32 @@ param mongoConnStr string = ''
 @secure()
 param storageConnectionString string = ''
 
+@description('Backend-only: optional app setting OPENAI_ACCOUNT_EUS2_LEGACY (e.g. JSON or connection string). Empty = omit.')
+@secure()
+param openAiAccountEus2Legacy string = ''
+
+@description('Backend-only: optional app setting OPENAI_ACCOUNT_WUS. Empty = omit.')
+@secure()
+param openAiAccountWus string = ''
+
+@description('Backend-only: optional app setting OPENAI_ACCOUNT_WUS3. Empty = omit.')
+@secure()
+param openAiAccountWus3 string = ''
+
+@description('Backend-only: optional app setting SEARCH_ACCOUNT. Empty = omit.')
+@secure()
+param searchAccount string = ''
+
 var appServicePlanName = 'asp-${pocSlug}'
 // Default hostnames: https://eyaifinance-<pocSlug>.azurewebsites.net and https://eyaifinance-backend-<pocSlug>.azurewebsites.net
 var frontendName = 'eyaifinance-${pocSlug}'
 var backendName = 'eyaifinance-backend-${pocSlug}'
+// Backend FRONTEND_URL: matches frontendPublicBaseUrl when set (Deploy POC); else cloud default hostname for the frontend web app.
+var frontendDefaultSiteUrl = 'https://${frontendName}.${environment().suffixes.webSites}'
+var backendFrontendUrl = !empty(frontendPublicBaseUrl) ? frontendPublicBaseUrl : frontendDefaultSiteUrl
+var backendFrontendUrlAppSettings = [
+  { name: 'FRONTEND_URL', value: backendFrontendUrl }
+]
 var sharedAppSettings = [ { name: 'AZURE_APP_CONFIGURATION_CONNECTION', value: appConfigEndpoint }, { name: 'KEY_VAULT_URI', value: keyVaultUri } ]
 
 var microsoftAuthEnabled = !empty(microsoftIdentityClientId) && !empty(microsoftIdentityTenantId) && !empty(frontendPublicBaseUrl)
@@ -128,13 +150,45 @@ var backendStorageConnectionAppSettings = !empty(storageConnectionString)
       { name: 'STORAGE_ACCOUNT', value: storageConnectionString }
     ]
   : []
+var backendOpenAiLegacyAppSettings = !empty(openAiAccountEus2Legacy)
+  ? [
+      { name: 'OPENAI_ACCOUNT_EUS2_LEGACY', value: openAiAccountEus2Legacy }
+    ]
+  : []
+var backendOpenAiWusAppSettings = !empty(openAiAccountWus)
+  ? [
+      { name: 'OPENAI_ACCOUNT_WUS', value: openAiAccountWus }
+    ]
+  : []
+var backendOpenAiWus3AppSettings = !empty(openAiAccountWus3)
+  ? [
+      { name: 'OPENAI_ACCOUNT_WUS3', value: openAiAccountWus3 }
+    ]
+  : []
+var backendSearchAccountAppSettings = !empty(searchAccount)
+  ? [
+      { name: 'SEARCH_ACCOUNT', value: searchAccount }
+    ]
+  : []
 var backendEntraAppSettings = !empty(microsoftIdentityClientId) && !empty(microsoftIdentityTenantId)
   ? [
       { name: 'AZURE_CLIENT_ID', value: microsoftIdentityClientId }
       { name: 'AZURE_TENANT_ID', value: microsoftIdentityTenantId }
     ]
   : []
-var backendAppSettings = concat(sharedAppSettings, backendPostgresAppSettings, backendMongoAppSettings, backendStorageConnectionAppSettings, backendOpenAiEus2AppSettings, backendEntraAppSettings)
+var backendAppSettings = concat(
+  sharedAppSettings,
+  backendFrontendUrlAppSettings,
+  backendPostgresAppSettings,
+  backendMongoAppSettings,
+  backendStorageConnectionAppSettings,
+  backendOpenAiEus2AppSettings,
+  backendOpenAiLegacyAppSettings,
+  backendOpenAiWusAppSettings,
+  backendOpenAiWus3AppSettings,
+  backendSearchAccountAppSettings,
+  backendEntraAppSettings
+)
 
 // Omit healthCheckPath when empty so Azure does not probe (JWT-only APIs often return 401 without Authorization).
 var backendSiteConfigBase = {

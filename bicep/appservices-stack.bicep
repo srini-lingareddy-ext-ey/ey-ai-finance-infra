@@ -70,6 +70,22 @@ param mongoConnStr string = ''
 @secure()
 param storageConnectionString string = ''
 
+@description('Backend-only: optional OPENAI_ACCOUNT_EUS2_LEGACY app setting. Empty = omit.')
+@secure()
+param openAiAccountEus2Legacy string = ''
+
+@description('Backend-only: optional OPENAI_ACCOUNT_WUS app setting. Empty = omit.')
+@secure()
+param openAiAccountWus string = ''
+
+@description('Backend-only: optional OPENAI_ACCOUNT_WUS3 app setting. Empty = omit.')
+@secure()
+param openAiAccountWus3 string = ''
+
+@description('Backend-only: optional SEARCH_ACCOUNT app setting. Empty = omit.')
+@secure()
+param searchAccount string = ''
+
 // Central ACR identity (acr-managed-identity in rg-eyaifin-acr) — hardcoded for this subscription.
 var acrManagedIdentityResourceIdFinal = '/subscriptions/08d343af-2a3c-4f13-86a5-d9bde4948ae8/resourceGroups/rg-eyaifin-acr/providers/Microsoft.ManagedIdentity/userAssignedIdentities/acr-managed-identity'
 var keyVaultUri = 'https://${keyVaultName}${environment().suffixes.keyvaultDns}/'
@@ -99,6 +115,10 @@ module appService 'modules/appService.bicep' = {
     openAiAccountEus2Json: openAiAccountEus2Json
     mongoConnStr: mongoConnStr
     storageConnectionString: storageConnectionString
+    openAiAccountEus2Legacy: openAiAccountEus2Legacy
+    openAiAccountWus: openAiAccountWus
+    openAiAccountWus3: openAiAccountWus3
+    searchAccount: searchAccount
   }
 }
 

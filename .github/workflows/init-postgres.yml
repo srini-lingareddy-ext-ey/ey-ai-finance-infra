@@ -9,7 +9,7 @@
 
 # MANUAL FOLLOW-UP STEPS:
 #   - Verify tables were created: connect to DB and run \dt to list tables
-#   - preapproved_users is upserted after init.sql via scripts/upsert_preapproved_users.py (defaults + optional preapprovedUserEmails input; same as Deploy POC)
+#   - preapproved_users is upserted after init.sql via scripts/upsert_preapproved_users.py when preapprovedUserEmails is non-empty (same as Deploy POC; empty logs a warning and skips; no built-in default list)
 
 # SECRETS: EY_AI_FINANCE_REPO_TOKEN: Provides access to ey-ai-finance repo | POSTGRES_ADMIN_PASSWORD: PostgreSQL citus user password
 
@@ -38,7 +38,7 @@ on:
           - aifinance
         default: "aifinance-next"
       preapprovedUserEmails:
-        description: "Optional comma-separated emails appended to the default preapproved admin list (all upserted as is_admin true)."
+        description: "Comma-separated emails upserted into preapproved_users (is_admin true). Leave empty only if you will add admins via SQL — empty logs a workflow warning and skips the upsert. No built-in default list."
         required: false
         type: string
         default: ""
@@ -97,17 +97,11 @@ jobs:
       - name: Insert preapproved admin users
         env:
           PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+          PGHOST: ${{ inputs.postgresHost }}
+          PGDATABASE: ${{ inputs.databaseName }}
+          PGUSER: citus
+          PGSSLMODE: require
+          PREAPPROVED_EXTRA_EMAILS: ${{ inputs.preapprovedUserEmails }}
         run: |
           set -euo pipefail
-          psql "host=${{ inputs.postgresHost }} port=5432 dbname=${{ inputs.databaseName }} user=citus sslmode=require" \
-            -v ON_ERROR_STOP=1 <<'SQL'
-          INSERT INTO preapproved_users (email, is_admin)
-          VALUES
-            ('Amy.Feng.Chen@ey.com', true),
-            ('Kayl.Murdough@ey.com', true),
-            ('Nicole.Belans@ey.com', true),
-            ('Lucas.Benson@ey.com', true),
-            ('Christian.J.Noordover@ey.com', true)
-          ON CONFLICT (email) DO UPDATE SET is_admin = EXCLUDED.is_admin;
-          SQL
-          echo "Preapproved admin users upserted successfully."
+          python3 scripts/upsert_preapproved_users.py

@@ -1,8 +1,9 @@
 # Deploy main.bicep: resource group + Key Vault, App Configuration, optional Azure OpenAI account (no model deployments in Bicep), Postgres, Blob Storage; then optional best-effort OpenAI model deployments from bicep/configs/openai_default_deployments.json; run init.sql; then App Services.
 # After App Services deploy: POC storage account network ACLs Deny with allow rules for frontend + backend Web App outbound IPs (plus AzureServices bypass). The deploy-main-resources job resets storage to default Allow before blob seeding so GitHub-hosted runners can upload on the next run.
-# Trigger manually and pass pocSlug (and optionally location, frontend/backend images, appChoice). Password and pipeline principal from GitHub secrets.
+# Trigger manually and pass pocSlug (and optionally location, frontend/backend images, appChoice, preapprovedUserEmails). Empty preapprovedUserEmails logs a warning and skips preapproved_users upsert — add admins via SQL in Postgres. Password and pipeline principal from GitHub secrets.
 # Required secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, POSTGRES_ADMIN_PASSWORD, MONGO_ADMIN_PASSWORD,
-# EY_AI_FINANCE_REPO_TOKEN, ACR_MANAGED_IDENTITY_CLIENT_ID, MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID, MICROSOFT_PROVIDER_AUTHENTICATION_SECRET.
+# EY_AI_FINANCE_REPO_TOKEN, ACR_MANAGED_IDENTITY_CLIENT_ID, MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID, MICROSOFT_PROVIDER_AUTHENTICATION_SECRET,
+# OPENAI_ACCOUNT_EUS2_LEGACY, OPENAI_ACCOUNT_WUS, OPENAI_ACCOUNT_WUS3, SEARCH_ACCOUNT.
 # Validated in job validate-secrets before Azure deploy.
 # Microsoft Entra on App Services is always configured for the POC Web Apps (not optional per run).
 # Requires MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID, AZURE_POC_TENANT_ID, and MICROSOFT_PROVIDER_AUTHENTICATION_SECRET (Easy Auth / authsettingsV2 on the frontend).
@@ -49,7 +50,7 @@ on:
         default: false
 
       preapprovedUserEmails:
-        description: "Preapproved User Emails - Optional - comma-separated emails appended to the default preapproved admin list (i.e. John.Doe@ey.com,Jane.Smith@ey.com)."
+        description: "Comma-separated admin emails upserted into preapproved_users (is_admin true). Example: John.Doe@ey.com,Jane.Smith@ey.com. Leave empty only if you will add admins via SQL in PostgreSQL — empty logs a workflow warning and skips the upsert."
         required: false
         type: string
         default: ""
@@ -89,6 +90,10 @@ jobs:
           ACR_MANAGED_IDENTITY_CLIENT_ID: ${{ secrets.ACR_MANAGED_IDENTITY_CLIENT_ID }}
           MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID: ${{ secrets.MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID }}
           MICROSOFT_PROVIDER_AUTHENTICATION_SECRET: ${{ secrets.MICROSOFT_PROVIDER_AUTHENTICATION_SECRET }}
+          OPENAI_ACCOUNT_EUS2_LEGACY: ${{ secrets.OPENAI_ACCOUNT_EUS2_LEGACY }}
+          OPENAI_ACCOUNT_WUS: ${{ secrets.OPENAI_ACCOUNT_WUS }}
+          OPENAI_ACCOUNT_WUS3: ${{ secrets.OPENAI_ACCOUNT_WUS3 }}
+          SEARCH_ACCOUNT: ${{ secrets.SEARCH_ACCOUNT }}
         run: |
           set -euo pipefail
           missing=()
@@ -101,6 +106,10 @@ jobs:
           [[ -n "${ACR_MANAGED_IDENTITY_CLIENT_ID:-}" ]] || missing+=("ACR_MANAGED_IDENTITY_CLIENT_ID")
           [[ -n "${MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID:-}" ]] || missing+=("MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID")
           [[ -n "${MICROSOFT_PROVIDER_AUTHENTICATION_SECRET:-}" ]] || missing+=("MICROSOFT_PROVIDER_AUTHENTICATION_SECRET")
+          [[ -n "${OPENAI_ACCOUNT_EUS2_LEGACY:-}" ]] || missing+=("OPENAI_ACCOUNT_EUS2_LEGACY")
+          [[ -n "${OPENAI_ACCOUNT_WUS:-}" ]] || missing+=("OPENAI_ACCOUNT_WUS")
+          [[ -n "${OPENAI_ACCOUNT_WUS3:-}" ]] || missing+=("OPENAI_ACCOUNT_WUS3")
+          [[ -n "${SEARCH_ACCOUNT:-}" ]] || missing+=("SEARCH_ACCOUNT")
           if (( ${#missing[@]} > 0 )); then
             echo "::error::Missing or empty repository secrets: ${missing[*]}. Add them under Settings → Secrets and variables → Actions."
             exit 1
@@ -456,7 +465,6 @@ jobs:
         run: |
           set -euo pipefail
           python3 scripts/upsert_preapproved_users.py
-          echo "Preapproved admin users upserted successfully (defaults + preapproved user emails input)."
 
   build-frontend-image:
     name: build and push frontend image
@@ -669,6 +677,10 @@ jobs:
           CREATE_AZURE_OPENAI: ${{ inputs.createAzureOpenAiResource }}
           AZURE_OPENAI_ACCOUNT_NAME: ${{ secrets.AZURE_OPENAI_ACCOUNT_NAME }}
           AZURE_OPENAI_ACCOUNT_SECRET: ${{ secrets.AZURE_OPENAI_ACCOUNT_SECRET }}
+          OPENAI_ACCOUNT_EUS2_LEGACY: ${{ secrets.OPENAI_ACCOUNT_EUS2_LEGACY }}
+          OPENAI_ACCOUNT_WUS: ${{ secrets.OPENAI_ACCOUNT_WUS }}
+          OPENAI_ACCOUNT_WUS3: ${{ secrets.OPENAI_ACCOUNT_WUS3 }}
+          SEARCH_ACCOUNT: ${{ secrets.SEARCH_ACCOUNT }}
         run: |
           set -euo pipefail
           echo "Frontend container image: ${FRONTEND_IMAGE}"
@@ -718,7 +730,11 @@ jobs:
             --arg oai "$OPENAI_ACCOUNT_EUS2_JSON" \
             --arg mongo "$MONGO_CONN" \
             --arg st "$STORAGE_CONN_APP" \
-            '{parameters: {openAiAccountEus2Json: {value: $oai}, mongoConnStr: {value: $mongo}, storageConnectionString: {value: $st}}}' > "$OPENAI_PARAM_FILE"
+            --arg leg "${OPENAI_ACCOUNT_EUS2_LEGACY:-}" \
+            --arg wus "${OPENAI_ACCOUNT_WUS:-}" \
+            --arg wus3 "${OPENAI_ACCOUNT_WUS3:-}" \
+            --arg search "${SEARCH_ACCOUNT:-}" \
+            '{parameters: {openAiAccountEus2Json: {value: $oai}, mongoConnStr: {value: $mongo}, storageConnectionString: {value: $st}, openAiAccountEus2Legacy: {value: $leg}, openAiAccountWus: {value: $wus}, openAiAccountWus3: {value: $wus3}, searchAccount: {value: $search}}}' > "$OPENAI_PARAM_FILE"
           echo "Backend MONGO_CONN_STR: same URI shape as Key Vault MongoConnectionString (password redacted)."
 
           az deployment group create \
