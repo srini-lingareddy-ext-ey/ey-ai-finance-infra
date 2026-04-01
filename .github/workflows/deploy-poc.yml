@@ -429,6 +429,7 @@ jobs:
           echo "Database initialization completed successfully."
 
       - name: Clear tenants after init
+        if: ${{ inputs.appChoice == 'aifinance-next' }}
         env:
           PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
         run: |
