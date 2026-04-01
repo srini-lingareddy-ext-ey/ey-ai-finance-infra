@@ -1,6 +1,6 @@
 {
   "tenants": {
-    "{pocSlug}": {
+    "tenant_1": {
       "configs": {
         "payloads": {
           "kpi": ["all.json"],
