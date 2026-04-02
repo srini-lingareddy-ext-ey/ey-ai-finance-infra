@@ -36,3 +36,6 @@ resource keyValues 'Microsoft.AppConfiguration/configurationStores/keyValues@202
 
 output endpoint string = configurationStore.properties.endpoint
 output storeName string = configurationStore.name
+// Primary read-only credential (listKeys order: Primary, Secondary, Primary Read Only, Secondary Read Only).
+@secure()
+output readOnlyConnectionString string = configurationStore.listKeys().value[2].connectionString

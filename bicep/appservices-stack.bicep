@@ -1,5 +1,5 @@
 // App Services only (resource-group scope). Deploy after poc-stack-core and after Key Vault is populated.
-// Use outputs from the core deployment (or main.bicep) for keyVaultName and appConfigEndpoint.
+// Use outputs from the core deployment (or main.bicep) for keyVaultName and appConfigConnectionString (read-only; Endpoint=...;Id=...;Secret=...).
 targetScope = 'resourceGroup'
 
 @description('POC identifier used in resource names (e.g. mypoc).')
@@ -8,8 +8,9 @@ param pocSlug string
 @description('Azure region for all resources.')
 param location string = resourceGroup().location
 
-@description('App Configuration connection endpoint (from core deployment output).')
-param appConfigEndpoint string
+@description('App Configuration primary read-only connection string (Endpoint=https://...;Id=...;Secret=...). Obtain from Portal Access keys, main.bicep secure output appConfigConnectionString, or az appconfig credential list (read-only key).')
+@secure()
+param appConfigConnectionString string
 
 @description('Key Vault name in this resource group (from core deployment output).')
 param keyVaultName string
@@ -96,7 +97,7 @@ module appService 'modules/appService.bicep' = {
     pocSlug: pocSlug
     location: location
     acrManagedIdentityResourceId: acrManagedIdentityResourceIdFinal
-    appConfigEndpoint: appConfigEndpoint
+    appConfigConnectionString: appConfigConnectionString
     keyVaultUri: keyVaultUri
     frontendImage: frontendImage
     backendImage: backendImage

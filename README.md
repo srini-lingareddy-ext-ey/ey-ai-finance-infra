@@ -137,7 +137,7 @@ az deployment group create \
   --parameters bicep/parameters/main-appservices.parameters.json
 ```
 
-Set `keyVaultName` and `appConfigEndpoint` in the parameters file (or override on the command line) to the values from phase 1 outputs. To mirror the workflow’s backend Postgres env vars, pass **`postgresHost`**, **`postgresDatabaseName`**, **`postgresUser`**, **`postgresPort`**, and secure **`postgresPassword`** (use a Key Vault parameters reference or `--parameters postgresPassword=...` from a secure input—do not commit secrets).
+Set `keyVaultName` and secure **`appConfigConnectionString`** (read-only App Configuration connection string: `Endpoint=...;Id=...;Secret=...`) in the parameters file or override on the command line. Copy the read-only key from the App Configuration store (portal **Access keys**) or run `az appconfig credential list --name <store> --resource-group <rg> -o json` and pick an entry with **`readOnly`: true** — do not commit real secrets. To mirror the workflow’s backend Postgres env vars, pass **`postgresHost`**, **`postgresDatabaseName`**, **`postgresUser`**, **`postgresPort`**, and secure **`postgresPassword`** (use a Key Vault parameters reference or `--parameters postgresPassword=...` from a secure input—do not commit secrets).
 
 ---
 
@@ -185,7 +185,7 @@ Optional Postgres overrides (e.g. coordinatorVCores, nodeCount, postgresqlVersio
 | pocSlug                                                        | Yes      | Same POC identifier as phase 1.                                                                                                                                                                                                                                                               |
 | location                                                       | No       | Defaults to resource group location.                                                                                                                                                                                                                                                          |
 | keyVaultName                                                   | Yes      | Key Vault name in this RG (from phase 1 output).                                                                                                                                                                                                                                              |
-| appConfigEndpoint                                              | Yes      | App Configuration endpoint (from phase 1 output).                                                                                                                                                                                                                                             |
+| appConfigConnectionString                                      | Yes      | Secure. App Configuration **read-only** connection string (`Endpoint=...;Id=...;Secret=...`). From portal Access keys, or phase 1 output **`appConfigConnectionString`** (masked in some CLI views), or **`az appconfig credential list`**.                                                                                                                      |
 | frontendImage                                                  | Yes\*    | Container image for frontend (e.g. DOCKER\|creyaifinmain.azurecr.io/…). \***Deploy POC** always passes a value (built **`<image>:<pocSlug>`**, or input, or **`appChoice`** **`-frontend:latest`**).                                                                                          |
 | backendImage                                                   | Yes\*    | Container image for backend. \***Deploy POC** passes input or **`appChoice`** **`-backend:latest`**.                                                                                                                                                                                          |
 | acrManagedIdentityClientId                                     | Yes      | Client ID of **acr-managed-identity** (for ACR image pull).                                                                                                                                                                                                                                   |
@@ -202,7 +202,7 @@ Optional Postgres overrides (e.g. coordinatorVCores, nodeCount, postgresqlVersio
 
 - **resourceGroupName**, **resourceGroupLocation** — Created RG.
 - **keyVaultName**, **keyVaultUri** — Key Vault (pipeline writes secrets here; pass keyVaultName to phase 3).
-- **appConfigEndpoint**, **appConfigStoreName** — App Configuration (pass appConfigEndpoint to phase 3).
+- **appConfigEndpoint**, **appConfigStoreName**, **appConfigConnectionString** (secure) — App Configuration. Pass **`appConfigConnectionString`** (read-only full connection string) to phase 3; **`appConfigEndpoint`** is the HTTPS endpoint only.
 - **postgresHost**, **postgresDatabaseName** — PostgreSQL.
 - **openaiEndpoint**, **openaiName** — Azure OpenAI.
 - **storageAccountName** — Blob Storage account name.
@@ -217,7 +217,7 @@ Optional Postgres overrides (e.g. coordinatorVCores, nodeCount, postgresqlVersio
 ## Optional: core only or app services only
 
 - **Core only (existing RG):** Deploy **core-resources.bicep** at resource group scope with the same parameters as main (no RG creation). Omit frontend/backend images if not running App Services.
-- **App services only:** Use **appservices-stack.bicep** as in phase 3, with `keyVaultName` and `appConfigEndpoint` from the existing core deployment.
+- **App services only:** Use **appservices-stack.bicep** as in phase 3, with `keyVaultName` and secure **`appConfigConnectionString`** from the existing core deployment (or from **`az appconfig credential list`**).
 
 ---
 

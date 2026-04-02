@@ -687,7 +687,7 @@ jobs:
           echo "Backend container image: ${BACKEND_IMAGE}"
           RG="${{ needs.deploy-main-resources.outputs.resourceGroupName }}"
           KV="${{ needs.deploy-main-resources.outputs.keyVaultName }}"
-          APP_CFG="${{ needs.deploy-main-resources.outputs.appConfigEndpoint }}"
+          APP_CFG_STORE="${{ needs.deploy-main-resources.outputs.appConfigStoreName }}"
           ST_NAME="${{ needs.deploy-main-resources.outputs.storageAccountName }}"
           POC_SLUG="${{ inputs.pocSlug }}"
           FRONTEND_BASE="https://eyaifinance-${POC_SLUG}.azurewebsites.net"
@@ -697,6 +697,14 @@ jobs:
           MS_SECRET="${MICROSOFT_PROVIDER_AUTHENTICATION_SECRET}"
           FRONTEND_AUTH_BASE="$FRONTEND_BASE"
           echo "Microsoft Entra: Easy Auth on frontend (MICROSOFT_PROVIDER_CLIENT_SECRET on frontend plus shared App Config / Key Vault)."
+
+          APP_CFG_RAW=$(az appconfig credential list --name "$APP_CFG_STORE" --resource-group "$RG" -o json)
+          APP_CFG_CONN=$(echo "$APP_CFG_RAW" | jq -r '(if type == "array" then . elif .value then .value else [] end) | map(select(.readOnly==true)) | .[0].connectionString // empty')
+          if [[ -z "$APP_CFG_CONN" || "$APP_CFG_CONN" == "null" ]]; then
+            echo "::error::Could not read App Configuration read-only connection string for store $APP_CFG_STORE (check az appconfig credential list and store RBAC)."
+            exit 1
+          fi
+          echo "App Configuration: read-only connection string resolved for store $APP_CFG_STORE (secret not logged)."
 
           PG_HOST="${{ needs.deploy-main-resources.outputs.postgresHost }}"
           PG_DB="${{ needs.deploy-main-resources.outputs.postgresDatabaseName }}"
@@ -744,7 +752,7 @@ jobs:
               pocSlug=${{ inputs.pocSlug }} \
               location=${{ inputs.location }} \
               keyVaultName="$KV" \
-              appConfigEndpoint="$APP_CFG" \
+              appConfigConnectionString="$APP_CFG_CONN" \
               frontendImage="$FRONTEND_IMAGE" \
               backendImage="$BACKEND_IMAGE" \
               acrManagedIdentityClientId='${{ secrets.ACR_MANAGED_IDENTITY_CLIENT_ID }}' \

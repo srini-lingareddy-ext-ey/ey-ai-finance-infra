@@ -101,6 +101,8 @@ output keyVaultUri string = keyVault.outputs.keyVaultUri
 output openaiEndpoint string = deployAzureOpenAi ? openAI.outputs.endpoint : ''
 output openaiName string = deployAzureOpenAi ? openAI.outputs.openaiName : ''
 output appConfigEndpoint string = appConfiguration.outputs.endpoint
+@secure()
+output appConfigConnectionString string = appConfiguration.outputs.readOnlyConnectionString
 output appConfigStoreName string = appConfiguration.outputs.storeName
 output postgresHost string = postgres.outputs.host
 output postgresDatabaseName string = postgres.outputs.databaseName

@@ -73,6 +73,8 @@ output keyVaultUri string = mainResources.outputs.keyVaultUri
 output openaiEndpoint string = mainResources.outputs.openaiEndpoint
 output openaiName string = mainResources.outputs.openaiName
 output appConfigEndpoint string = mainResources.outputs.appConfigEndpoint
+@secure()
+output appConfigConnectionString string = mainResources.outputs.appConfigConnectionString
 output appConfigStoreName string = mainResources.outputs.appConfigStoreName
 output postgresHost string = mainResources.outputs.postgresHost
 output postgresDatabaseName string = mainResources.outputs.postgresDatabaseName

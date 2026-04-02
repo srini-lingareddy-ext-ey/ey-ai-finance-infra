@@ -4,7 +4,9 @@ param location string
 param acrManagedIdentityResourceId string
 @description('Client ID (applicationId) of the user-assigned managed identity used for ACR pull. Required for acrUseManagedIdentityCreds.')
 param acrManagedIdentityClientId string
-param appConfigEndpoint string
+@description('App Configuration read-only connection string: Endpoint=https://...;Id=...;Secret=...')
+@secure()
+param appConfigConnectionString string
 param keyVaultUri string
 param frontendImage string
 param backendImage string
@@ -83,7 +85,7 @@ var backendFrontendUrl = !empty(frontendPublicBaseUrl) ? frontendPublicBaseUrl :
 var backendFrontendUrlAppSettings = [
   { name: 'FRONTEND_URL', value: backendFrontendUrl }
 ]
-var sharedAppSettings = [ { name: 'AZURE_APP_CONFIGURATION_CONNECTION', value: appConfigEndpoint }, { name: 'KEY_VAULT_URI', value: keyVaultUri } ]
+var sharedAppSettings = [ { name: 'AZURE_APP_CONFIG_CONNECTION_STRING', value: appConfigConnectionString }, { name: 'KEY_VAULT_URI', value: keyVaultUri } ]
 
 var microsoftAuthEnabled = !empty(microsoftIdentityClientId) && !empty(microsoftIdentityTenantId) && !empty(frontendPublicBaseUrl)
 // Easy Auth (Microsoft provider) needs a client secret and an app setting name referenced by authsettingsV2.
