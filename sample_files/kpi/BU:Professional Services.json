@@ -1,0 +1,317 @@
+{
+  "tenant_id": 1,
+  "kpis": [
+    {
+      "variables": {
+        "SUBS_2025": {
+          "line_item_code": "paid_subscribers",
+          "start_date": "2025-01-01",
+          "end_date": "2025-06-30",
+          "aggregation": "point_in_time_latest_sum",
+          "entity_codes": [
+            "PRD:AppCare|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudAssist|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudShield|PG:Managed Support|BU:Professional Services",
+            "PRD:DevAssist|PG:Managed Support|BU:Professional Services"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "ARPU_2025": {
+          "line_item_code": "arpu",
+          "start_date": "2025-01-01",
+          "end_date": "2025-06-30",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "paid_subscribers",
+          "entity_codes": [
+            "PRD:AppCare|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudAssist|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudShield|PG:Managed Support|BU:Professional Services",
+            "PRD:DevAssist|PG:Managed Support|BU:Professional Services"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "SUBS_2024": {
+          "line_item_code": "paid_subscribers",
+          "start_date": "2024-01-01",
+          "end_date": "2024-06-30",
+          "aggregation": "point_in_time_latest_sum",
+          "entity_codes": [
+            "PRD:AppCare|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudAssist|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudShield|PG:Managed Support|BU:Professional Services",
+            "PRD:DevAssist|PG:Managed Support|BU:Professional Services"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "ARPU_2024": {
+          "line_item_code": "arpu",
+          "start_date": "2024-01-01",
+          "end_date": "2024-06-30",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "paid_subscribers",
+          "entity_codes": [
+            "PRD:AppCare|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudAssist|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudShield|PG:Managed Support|BU:Professional Services",
+            "PRD:DevAssist|PG:Managed Support|BU:Professional Services"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        }
+      },
+      "value_formula": "{{SUBS_2025}} * {{ARPU_2025}} * 12",
+      "change_formula": "(({{SUBS_2025}} * {{ARPU_2025}}) - ({{SUBS_2024}} * {{ARPU_2024}})) / ({{SUBS_2024}} * {{ARPU_2024}}) * 100",
+      "label": "ARR",
+      "value_units": "USD",
+      "change_label": "vs. prior year"
+    },
+    {
+      "variables": {
+        "UTIL_2025": {
+          "line_item_code": "utilization_rate",
+          "start_date": "2025-01-01",
+          "end_date": "2025-06-30",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "total_fte",
+          "entity_codes": [
+            "PRD:Consulting|PG:Project Services|BU:Professional Services",
+            "PRD:Implementation|PG:Project Services|BU:Professional Services",
+            "PRD:Training|PG:Project Services|BU:Professional Services"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "UTIL_2024": {
+          "line_item_code": "utilization_rate",
+          "start_date": "2024-01-01",
+          "end_date": "2024-06-30",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "total_fte",
+          "entity_codes": [
+            "PRD:Consulting|PG:Project Services|BU:Professional Services",
+            "PRD:Implementation|PG:Project Services|BU:Professional Services",
+            "PRD:Training|PG:Project Services|BU:Professional Services"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        }
+      },
+      "value_formula": "{{UTIL_2025}} * 100",
+      "change_formula": "(({{UTIL_2025}} - {{UTIL_2024}}) / {{UTIL_2024}}) * 100",
+      "label": "Utilization Rate",
+      "value_units": "%",
+      "change_label": "vs. prior year"
+    },
+    {
+      "variables": {
+        "BILL_RATE_2025": {
+          "line_item_code": "avg_bill_rate",
+          "start_date": "2025-01-01",
+          "end_date": "2025-06-30",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "hours_billed",
+          "entity_codes": [
+            "PRD:Consulting|PG:Project Services|BU:Professional Services",
+            "PRD:Implementation|PG:Project Services|BU:Professional Services",
+            "PRD:Training|PG:Project Services|BU:Professional Services",
+            "PRD:AppCare|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudAssist|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudShield|PG:Managed Support|BU:Professional Services",
+            "PRD:DevAssist|PG:Managed Support|BU:Professional Services"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "BILL_RATE_2024": {
+          "line_item_code": "avg_bill_rate",
+          "start_date": "2024-01-01",
+          "end_date": "2024-06-30",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "hours_billed",
+          "entity_codes": [
+            "PRD:Consulting|PG:Project Services|BU:Professional Services",
+            "PRD:Implementation|PG:Project Services|BU:Professional Services",
+            "PRD:Training|PG:Project Services|BU:Professional Services",
+            "PRD:AppCare|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudAssist|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudShield|PG:Managed Support|BU:Professional Services",
+            "PRD:DevAssist|PG:Managed Support|BU:Professional Services"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        }
+      },
+      "value_formula": "{{BILL_RATE_2025}}",
+      "change_formula": "(({{BILL_RATE_2025}} - {{BILL_RATE_2024}}) / {{BILL_RATE_2024}}) * 100",
+      "label": "Average Bill Rate",
+      "value_units": "USD",
+      "change_label": "vs. prior year"
+    },
+    {
+      "variables": {
+        "FTE_2025": {
+          "line_item_code": "total_fte",
+          "start_date": "2025-01-01",
+          "end_date": "2025-06-30",
+          "aggregation": "point_in_time_latest_sum",
+          "entity_codes": [
+            "PRD:Consulting|PG:Project Services|BU:Professional Services",
+            "PRD:Implementation|PG:Project Services|BU:Professional Services",
+            "PRD:Training|PG:Project Services|BU:Professional Services",
+            "PRD:AppCare|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudAssist|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudShield|PG:Managed Support|BU:Professional Services",
+            "PRD:DevAssist|PG:Managed Support|BU:Professional Services"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "FTE_2024": {
+          "line_item_code": "total_fte",
+          "start_date": "2024-01-01",
+          "end_date": "2024-06-30",
+          "aggregation": "point_in_time_latest_sum",
+          "entity_codes": [
+            "PRD:Consulting|PG:Project Services|BU:Professional Services",
+            "PRD:Implementation|PG:Project Services|BU:Professional Services",
+            "PRD:Training|PG:Project Services|BU:Professional Services",
+            "PRD:AppCare|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudAssist|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudShield|PG:Managed Support|BU:Professional Services",
+            "PRD:DevAssist|PG:Managed Support|BU:Professional Services"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        }
+      },
+      "value_formula": "{{FTE_2025}}",
+      "change_formula": "(({{FTE_2025}} - {{FTE_2024}}) / {{FTE_2024}}) * 100",
+      "label": "Headcount (FTE)",
+      "value_units": "FTE",
+      "change_label": "vs. prior year"
+    },
+    {
+      "variables": {
+        "REV_2025": {
+          "line_item_code": "net_revenue",
+          "start_date": "2025-01-01",
+          "end_date": "2025-06-30",
+          "aggregation": "sum",
+          "entity_codes": [
+            "PRD:Consulting|PG:Project Services|BU:Professional Services",
+            "PRD:Implementation|PG:Project Services|BU:Professional Services",
+            "PRD:Training|PG:Project Services|BU:Professional Services",
+            "PRD:AppCare|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudAssist|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudShield|PG:Managed Support|BU:Professional Services",
+            "PRD:DevAssist|PG:Managed Support|BU:Professional Services"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "FTE_2025": {
+          "line_item_code": "total_fte",
+          "start_date": "2025-01-01",
+          "end_date": "2025-06-30",
+          "aggregation": "point_in_time_latest_sum",
+          "entity_codes": [
+            "PRD:Consulting|PG:Project Services|BU:Professional Services",
+            "PRD:Implementation|PG:Project Services|BU:Professional Services",
+            "PRD:Training|PG:Project Services|BU:Professional Services",
+            "PRD:AppCare|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudAssist|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudShield|PG:Managed Support|BU:Professional Services",
+            "PRD:DevAssist|PG:Managed Support|BU:Professional Services"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "REV_2024": {
+          "line_item_code": "net_revenue",
+          "start_date": "2024-01-01",
+          "end_date": "2024-06-30",
+          "aggregation": "sum",
+          "entity_codes": [
+            "PRD:Consulting|PG:Project Services|BU:Professional Services",
+            "PRD:Implementation|PG:Project Services|BU:Professional Services",
+            "PRD:Training|PG:Project Services|BU:Professional Services",
+            "PRD:AppCare|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudAssist|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudShield|PG:Managed Support|BU:Professional Services",
+            "PRD:DevAssist|PG:Managed Support|BU:Professional Services"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "FTE_2024": {
+          "line_item_code": "total_fte",
+          "start_date": "2024-01-01",
+          "end_date": "2024-06-30",
+          "aggregation": "point_in_time_latest_sum",
+          "entity_codes": [
+            "PRD:Consulting|PG:Project Services|BU:Professional Services",
+            "PRD:Implementation|PG:Project Services|BU:Professional Services",
+            "PRD:Training|PG:Project Services|BU:Professional Services",
+            "PRD:AppCare|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudAssist|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudShield|PG:Managed Support|BU:Professional Services",
+            "PRD:DevAssist|PG:Managed Support|BU:Professional Services"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        }
+      },
+      "value_formula": "{{REV_2025}} / {{FTE_2025}}",
+      "change_formula": "(({{REV_2025}} / {{FTE_2025}}) - ({{REV_2024}} / {{FTE_2024}})) / ({{REV_2024}} / {{FTE_2024}}) * 100",
+      "label": "Revenue per FTE",
+      "value_units": "USD per FTE",
+      "change_label": "vs. prior year"
+    },
+    {
+      "variables": {
+        "BACKLOG_2025": {
+          "line_item_code": "contracted_backlog_hours",
+          "start_date": "2025-01-01",
+          "end_date": "2025-06-30",
+          "aggregation": "point_in_time_latest_sum",
+          "entity_codes": [
+            "PRD:Consulting|PG:Project Services|BU:Professional Services",
+            "PRD:Implementation|PG:Project Services|BU:Professional Services",
+            "PRD:Training|PG:Project Services|BU:Professional Services",
+            "PRD:AppCare|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudAssist|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudShield|PG:Managed Support|BU:Professional Services",
+            "PRD:DevAssist|PG:Managed Support|BU:Professional Services"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "BACKLOG_2024": {
+          "line_item_code": "contracted_backlog_hours",
+          "start_date": "2024-01-01",
+          "end_date": "2024-06-30",
+          "aggregation": "point_in_time_latest_sum",
+          "entity_codes": [
+            "PRD:Consulting|PG:Project Services|BU:Professional Services",
+            "PRD:Implementation|PG:Project Services|BU:Professional Services",
+            "PRD:Training|PG:Project Services|BU:Professional Services",
+            "PRD:AppCare|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudAssist|PG:Managed Support|BU:Professional Services",
+            "PRD:CloudShield|PG:Managed Support|BU:Professional Services",
+            "PRD:DevAssist|PG:Managed Support|BU:Professional Services"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        }
+      },
+      "value_formula": "{{BACKLOG_2025}}",
+      "change_formula": "(({{BACKLOG_2025}} - {{BACKLOG_2024}}) / {{BACKLOG_2024}}) * 100",
+      "label": "Backlog",
+      "value_units": "hours",
+      "change_label": "vs. prior year"
+    }
+  ]
+}

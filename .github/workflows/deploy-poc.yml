@@ -326,14 +326,14 @@ jobs:
           python scripts/sync_appconfig_from_yaml.py \
             --config bicep/configs/backend_configs.yml \
             --store "${{ steps.core-outputs.outputs.appConfigStoreName }}" \
-            --label "${{ inputs.pocSlug }}"
+            --label "tenant-1"
 
       - name: Populate App Configuration tenant configs (from tenants blob storage)
         run: |
           python3 scripts/sync_blob_payload_refs_to_appconfig.py \
             --manifest bicep/configs/blob_payloads.json \
             --store "${{ steps.core-outputs.outputs.appConfigStoreName }}" \
-            --label "${{ inputs.pocSlug }}" \
+            --label "tenant-1" \
             --poc-slug "${{ inputs.pocSlug }}"
 
       - name: Deploy OpenAI models
@@ -730,8 +730,7 @@ jobs:
             echo "Skipping OPENAI_ACCOUNT_EUS2 (no POC OpenAI deploy; set AZURE_OPENAI_ACCOUNT_NAME and AZURE_OPENAI_ACCOUNT_SECRET to use a shared account)."
           fi
           STORAGE_CONN=$(az storage account show-connection-string --resource-group "$RG" --name "$ST_NAME" --query connectionString -o tsv)
-          # Backend expects STORAGE_ACCOUNT wrapped in double quotes (connection string semantics).
-          STORAGE_CONN_APP=$(printf '"%s"' "$STORAGE_CONN")
+          # Raw connection string; appservices-stack / appService.bicep wraps STORAGE_ACCOUNT in double quotes.
           echo "Backend STORAGE_ACCOUNT: retrieved for storage account name=$ST_NAME (secret not logged)."
 
           OPENAI_PARAM_FILE=$(mktemp)
@@ -739,7 +738,7 @@ jobs:
           jq -n \
             --arg oai "$OPENAI_ACCOUNT_EUS2_JSON" \
             --arg mongo "$MONGO_CONN" \
-            --arg st "$STORAGE_CONN_APP" \
+            --arg st "$STORAGE_CONN" \
             --arg leg "${OPENAI_ACCOUNT_EUS2_LEGACY:-}" \
             --arg wus "${OPENAI_ACCOUNT_WUS:-}" \
             --arg wus3 "${OPENAI_ACCOUNT_WUS3:-}" \

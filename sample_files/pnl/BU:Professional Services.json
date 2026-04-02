@@ -1,0 +1,315 @@
+{
+  "tenant_id": 1,
+  "table_label": "Professional Services PnL Table",
+  "cache_table": false,
+  "pnl_requests": [
+    {
+      "tenant_id": 1,
+      "table_label": "Project Service Hours Billed",
+      "cache_table": false,
+      "root_entity_code": "BU:Professional Services",
+      "exclude_entity_codes": [
+        "PG:Managed Support|BU:Professional Services",
+        "PRD:AppCare|PG:Managed Support|BU:Professional Services",
+        "PRD:CloudAssist|PG:Managed Support|BU:Professional Services",
+        "PRD:CloudShield|PG:Managed Support|BU:Professional Services",
+        "PRD:DevAssist|PG:Managed Support|BU:Professional Services"
+      ],
+      "entity_formula": "{{hours_billed}}",
+      "entity_rollup": "sum",
+      "entity_rollup_measure": "hours",
+      "line_items": [
+        {
+          "line_item_code": "hours_billed",
+          "aggregation": "sum",
+          "hide_from_children": true
+        },
+        {
+          "line_item_code": "utilization_rate",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "total_fte"
+        }
+      ],
+      "entity_line_item_overrides": null,
+      "geography_codes": ["APAC", "EMEA", "North America"],
+      "period": {
+        "start_date": "2025-01-01",
+        "end_date": "2025-06-30"
+      },
+      "main_column": {
+        "label": "Actuals",
+        "version_code": "Actual",
+        "period": null,
+        "show_percent_change": false
+      },
+      "comparison_columns": [
+        {
+          "label": "VS. AOP",
+          "version_code": "AOP",
+          "show_percent_change": true,
+          "period": {
+            "start_date": "2025-01-01",
+            "end_date": "2025-06-30"
+          }
+        },
+        {
+          "label": "VS. FORECAST",
+          "version_code": "3x9 Forecast",
+          "show_percent_change": true,
+          "period": {
+            "start_date": "2025-01-01",
+            "end_date": "2025-06-30"
+          }
+        },
+        {
+          "label": "VS. PRIOR YEAR",
+          "version_code": "Actual",
+          "show_percent_change": true,
+          "period": {
+            "start_date": "2024-01-01",
+            "end_date": "2024-06-30"
+          }
+        }
+      ],
+      "override_row_names": [
+        {
+          "code": "BU:Professional Services",
+          "row_type": "entity",
+          "name_override": "Hours"
+        },
+        {
+          "code": "PG:Project Services|BU:Professional Services",
+          "row_type": "entity",
+          "name_override": "Project Services"
+        },
+        {
+          "code": "utilization_rate",
+          "row_type": "line_item",
+          "name_override": "Utilization Rate"
+        }
+      ]
+    },
+
+    {
+      "tenant_id": 2,
+      "table_label": "Managed Support Subscribers",
+      "cache_table": false,
+      "root_entity_code": "BU:Professional Services",
+      "exclude_entity_codes": [
+        "PG:Project Services|BU:Professional Services",
+        "PRD:Consulting|PG:Project Services|BU:Professional Services",
+        "PRD:Implementation|PG:Project Services|BU:Professional Services",
+        "PRD:Training|PG:Project Services|BU:Professional Services"
+      ],
+      "entity_formula": "{{paid_subscribers}}",
+      "entity_rollup": "sum",
+      "entity_rollup_measure": "count",
+      "line_items": [
+        {
+          "line_item_code": "paid_subscribers",
+          "aggregation": "point_in_time_latest_sum",
+          "hide_from_children": true
+        },
+        {
+          "line_item_code": "churn",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "paid_subscribers"
+        }
+      ],
+      "entity_line_item_overrides": null,
+      "geography_codes": ["APAC", "EMEA", "North America"],
+      "period": {
+        "start_date": "2025-01-01",
+        "end_date": "2025-06-30"
+      },
+      "main_column": {
+        "label": "Actuals",
+        "version_code": "Actual",
+        "period": null,
+        "show_percent_change": false
+      },
+      "comparison_columns": [
+        {
+          "label": "VS. AOP",
+          "version_code": "AOP",
+          "show_percent_change": true,
+          "period": {
+            "start_date": "2025-01-01",
+            "end_date": "2025-06-30"
+          }
+        },
+        {
+          "label": "VS. FORECAST",
+          "version_code": "3x9 Forecast",
+          "show_percent_change": true,
+          "period": {
+            "start_date": "2025-01-01",
+            "end_date": "2025-06-30"
+          }
+        },
+        {
+          "label": "VS. PRIOR YEAR",
+          "version_code": "Actual",
+          "show_percent_change": true,
+          "period": {
+            "start_date": "2024-01-01",
+            "end_date": "2024-06-30"
+          }
+        }
+      ],
+      "override_row_names": [
+        {
+          "code": "BU:Professional Services",
+          "row_type": "entity",
+          "name_override": "Subscribers"
+        },
+        {
+          "code": "PG:Managed Support|BU:Professional Services",
+          "row_type": "entity",
+          "name_override": "Managed Support"
+        }
+      ]
+    },
+
+    {
+      "tenant_id": 2,
+      "table_label": "Professional Services Overall Revenue",
+      "cache_table": false,
+      "root_entity_code": "BU:Professional Services",
+      "exclude_entity_codes": null,
+      "entity_formula": "{{net_revenue}}",
+      "entity_rollup": "sum",
+      "entity_rollup_measure": "USD",
+      "line_items": [
+        {
+          "line_item_code": "net_revenue",
+          "aggregation": "sum",
+          "hide_from_children": true
+        },
+        {
+          "line_item_code": "avg_bill_rate",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "hours_billed"
+        },
+        {
+          "line_item_code": "contracted_backlog_hours",
+          "aggregation": "point_in_time_latest_sum"
+        },
+        {
+          "line_item_code": "arpu",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "paid_subscribers"
+        },
+        {
+          "line_item_code": "renewal_rate",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "paid_subscribers"
+        }
+      ],
+      "entity_line_item_overrides": {
+        "PRD:Consulting|PG:Project Services|BU:Professional Services": [
+          "net_revenue",
+          "avg_bill_rate",
+          "contracted_backlog_hours"
+        ],
+        "PRD:Implementation|PG:Project Services|BU:Professional Services": [
+          "net_revenue",
+          "avg_bill_rate",
+          "contracted_backlog_hours"
+        ],
+        "PRD:Training|PG:Project Services|BU:Professional Services": [
+          "net_revenue",
+          "avg_bill_rate",
+          "contracted_backlog_hours"
+        ],
+        "PRD:AppCare|PG:Managed Support|BU:Professional Services": [
+          "net_revenue",
+          "arpu",
+          "renewal_rate"
+        ],
+        "PRD:CloudAssist|PG:Managed Support|BU:Professional Services": [
+          "net_revenue",
+          "arpu",
+          "renewal_rate"
+        ],
+        "PRD:CloudShield|PG:Managed Support|BU:Professional Services": [
+          "net_revenue",
+          "arpu",
+          "renewal_rate"
+        ],
+        "PRD:DevAssist|PG:Managed Support|BU:Professional Services": [
+          "net_revenue",
+          "arpu",
+          "renewal_rate"
+        ]
+      },
+      "geography_codes": ["APAC", "EMEA", "North America"],
+      "period": {
+        "start_date": "2025-01-01",
+        "end_date": "2025-06-30"
+      },
+      "main_column": {
+        "label": "Actuals",
+        "version_code": "Actual",
+        "period": null,
+        "show_percent_change": false
+      },
+      "comparison_columns": [
+        {
+          "label": "VS. AOP",
+          "version_code": "AOP",
+          "show_percent_change": true,
+          "period": {
+            "start_date": "2025-01-01",
+            "end_date": "2025-06-30"
+          }
+        },
+        {
+          "label": "VS. FORECAST",
+          "version_code": "3x9 Forecast",
+          "show_percent_change": true,
+          "period": {
+            "start_date": "2025-01-01",
+            "end_date": "2025-06-30"
+          }
+        },
+        {
+          "label": "VS. PRIOR YEAR",
+          "version_code": "Actual",
+          "show_percent_change": true,
+          "period": {
+            "start_date": "2024-01-01",
+            "end_date": "2024-06-30"
+          }
+        }
+      ],
+      "override_row_names": [
+        {
+          "code": "BU:Professional Services",
+          "row_type": "entity",
+          "name_override": "Net Revenue"
+        },
+        {
+          "code": "PG:Project Services|BU:Professional Services",
+          "row_type": "entity",
+          "name_override": "Project Services"
+        },
+        {
+          "code": "PG:Managed Support|BU:Professional Services",
+          "row_type": "entity",
+          "name_override": "Managed Support"
+        },
+        {
+          "code": "arpu",
+          "row_type": "line_item",
+          "name_override": "ARPU"
+        },
+        {
+          "code": "contracted_backlog_hours",
+          "row_type": "line_item",
+          "name_override": "Contracted Backlog"
+        }
+      ]
+    }
+  ]
+}

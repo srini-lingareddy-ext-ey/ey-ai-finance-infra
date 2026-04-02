@@ -87,7 +87,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Sync tenants payload blob paths to App Configuration")
     parser.add_argument("--manifest", type=Path, default=Path("bicep/configs/blob_payloads.json"))
     parser.add_argument("--store", required=True, help="App Configuration store name")
-    parser.add_argument("--label", required=True, help="Label (e.g. pocSlug)")
+    parser.add_argument("--label", required=True, help="App Configuration label (Deploy POC uses tenant-1)")
     parser.add_argument(
         "--poc-slug",
         required=True,

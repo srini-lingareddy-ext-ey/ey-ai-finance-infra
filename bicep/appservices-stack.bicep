@@ -8,7 +8,7 @@ param pocSlug string
 @description('Azure region for all resources.')
 param location string = resourceGroup().location
 
-@description('App Configuration primary read-only connection string (Endpoint=https://...;Id=...;Secret=...). Obtain from Portal Access keys, main.bicep secure output appConfigConnectionString, or az appconfig credential list (read-only key).')
+@description('Primary read-only Connection string from the store Access keys (Endpoint=...;Id=...;Secret=...). Same as portal copy or main.bicep output appConfigConnectionString, or az appconfig credential list readOnly credential.')
 @secure()
 param appConfigConnectionString string
 
@@ -67,7 +67,7 @@ param openAiAccountEus2Json string = ''
 @secure()
 param mongoConnStr string = ''
 
-@description('Backend-only: POC Blob Storage connection string for STORAGE_ACCOUNT on the backend Web App. Empty = omit.')
+@description('Backend-only: POC Blob Storage connection string (no surrounding quotes). STORAGE_ACCOUNT app setting is emitted with double quotes around the string. Empty = omit.')
 @secure()
 param storageConnectionString string = ''
 

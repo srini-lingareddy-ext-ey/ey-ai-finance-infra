@@ -4,7 +4,7 @@ param location string
 param acrManagedIdentityResourceId string
 @description('Client ID (applicationId) of the user-assigned managed identity used for ACR pull. Required for acrUseManagedIdentityCreds.')
 param acrManagedIdentityClientId string
-@description('App Configuration read-only connection string: Endpoint=https://...;Id=...;Secret=...')
+@description('Read-only connection string from the store Access keys (Connection string column): Endpoint=https://...;Id=...;Secret=...')
 @secure()
 param appConfigConnectionString string
 param keyVaultUri string
@@ -55,7 +55,7 @@ param openAiAccountEus2Json string = ''
 @secure()
 param mongoConnStr string = ''
 
-@description('Backend-only: POC Blob Storage full connection string for app setting STORAGE_ACCOUNT (account key). Empty = omit. Stored as plain app setting value in ARM (like POSTGRES_PASSWORD); visible to authorized portal users.')
+@description('Backend-only: POC Blob Storage connection string (no surrounding quotes). Empty = omit. App setting STORAGE_ACCOUNT is stored as double-quoted value. Visible to authorized portal users.')
 @secure()
 param storageConnectionString string = ''
 
@@ -85,8 +85,7 @@ var backendFrontendUrl = !empty(frontendPublicBaseUrl) ? frontendPublicBaseUrl :
 var backendFrontendUrlAppSettings = [
   { name: 'FRONTEND_URL', value: backendFrontendUrl }
 ]
-var azureAppConfigConnectionStringQuoted = '"${appConfigConnectionString}"'
-var sharedAppSettings = [ { name: 'AZURE_APP_CONFIG_CONNECTION_STRING', value: azureAppConfigConnectionStringQuoted }, { name: 'KEY_VAULT_URI', value: keyVaultUri } ]
+var sharedAppSettings = [ { name: 'AZURE_APP_CONFIG_CONNECTION_STRING', value: appConfigConnectionString }, { name: 'KEY_VAULT_URI', value: keyVaultUri } ]
 
 var microsoftAuthEnabled = !empty(microsoftIdentityClientId) && !empty(microsoftIdentityTenantId) && !empty(frontendPublicBaseUrl)
 // Easy Auth (Microsoft provider) needs a client secret and an app setting name referenced by authsettingsV2.
@@ -149,9 +148,10 @@ var backendMongoAppSettings = !empty(mongoConnStr)
       { name: 'MONGO_CONN_STR', value: mongoConnStr }
     ]
   : []
+var storageAccountConnectionQuoted = '"${storageConnectionString}"'
 var backendStorageConnectionAppSettings = !empty(storageConnectionString)
   ? [
-      { name: 'STORAGE_ACCOUNT', value: storageConnectionString }
+      { name: 'STORAGE_ACCOUNT', value: storageAccountConnectionQuoted }
     ]
   : []
 var backendOpenAiLegacyAppSettings = !empty(openAiAccountEus2Legacy)

@@ -1,0 +1,238 @@
+{
+  "tenant_id": 1,
+  "table_label": "Software Products PnL Table",
+  "cache_table": false,
+  "pnl_requests": [
+    {
+      "tenant_id": 1,
+      "table_label": "Software Products Overall Subscribers",
+      "cache_table": false,
+      "root_entity_code": "BU:Software Products",
+      "exclude_entity_codes": null,
+      "entity_formula": "{{paid_subscribers}}",
+      "entity_rollup": "sum",
+      "entity_rollup_measure": "count",
+      "line_items": [
+        {
+          "line_item_code": "paid_subscribers",
+          "aggregation": "point_in_time_latest_sum",
+          "hide_from_children": true
+        },
+        {
+          "line_item_code": "churn",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "paid_subscribers"
+        }
+      ],
+      "entity_line_item_overrides": null,
+      "geography_codes": ["APAC", "EMEA", "North America"],
+      "period": {
+        "start_date": "2025-01-01",
+        "end_date": "2025-06-30"
+      },
+      "main_column": {
+        "label": "Actuals",
+        "version_code": "Actual",
+        "period": null,
+        "show_percent_change": false
+      },
+      "comparison_columns": [
+        {
+          "label": "VS. AOP",
+          "version_code": "AOP",
+          "show_percent_change": true,
+          "period": {
+            "start_date": "2025-01-01",
+            "end_date": "2025-06-30"
+          }
+        },
+        {
+          "label": "VS. FORECAST",
+          "version_code": "3x9 Forecast",
+          "show_percent_change": true,
+          "period": {
+            "start_date": "2025-01-01",
+            "end_date": "2025-06-30"
+          }
+        },
+        {
+          "label": "VS. PRIOR YEAR",
+          "version_code": "Actual",
+          "show_percent_change": true,
+          "period": {
+            "start_date": "2024-01-01",
+            "end_date": "2024-06-30"
+          }
+        }
+      ],
+      "override_row_names": [
+        {
+          "code": "BU:Software Products",
+          "row_type": "entity",
+          "name_override": "Subscribers"
+        },
+        {
+          "code": "PG:Productivity Licenses|BU:Software Products",
+          "row_type": "entity",
+          "name_override": "Productivity Licenses"
+        },
+        {
+          "code": "PG:Developer Licenses|BU:Software Products",
+          "row_type": "entity",
+          "name_override": "Developer Licenses"
+        },
+        {
+          "code": "PRD:CollabPro|PG:Productivity Licenses|BU:Software Products",
+          "row_type": "entity",
+          "name_override": "Platform"
+        },
+        {
+          "code": "PRD:MeetSync|PG:Productivity Licenses|BU:Software Products",
+          "row_type": "entity",
+          "name_override": "Premium"
+        },
+        {
+          "code": "PRD:SyncBoard|PG:Productivity Licenses|BU:Software Products",
+          "row_type": "entity",
+          "name_override": "Enterprise"
+        },
+        {
+          "code": "PRD:CodeSuite|PG:Developer Licenses|BU:Software Products",
+          "row_type": "entity",
+          "name_override": "Platform"
+        },
+        {
+          "code": "PRD:DataFlow|PG:Developer Licenses|BU:Software Products",
+          "row_type": "entity",
+          "name_override": "Premium"
+        },
+        {
+          "code": "PRD:ScriptLab|PG:Developer Licenses|BU:Software Products",
+          "row_type": "entity",
+          "name_override": "Enterprise"
+        }
+      ]
+    },
+
+    {
+      "tenant_id": 1,
+      "table_label": "Software Products Overall Revenue",
+      "cache_table": false,
+      "root_entity_code": "BU:Software Products",
+      "exclude_entity_codes": null,
+      "entity_formula": "{{net_revenue}}",
+      "entity_rollup": "sum",
+      "entity_rollup_measure": "USD",
+      "line_items": [
+        {
+          "line_item_code": "net_revenue",
+          "aggregation": "sum",
+          "hide_from_children": true
+        },
+        {
+          "line_item_code": "arpu",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "paid_subscribers"
+        },
+        {
+          "line_item_code": "renewal_rate",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "paid_subscribers"
+        }
+      ],
+      "entity_line_item_overrides": null,
+      "geography_codes": ["APAC", "EMEA", "North America"],
+      "period": {
+        "start_date": "2025-01-01",
+        "end_date": "2025-06-30"
+      },
+      "main_column": {
+        "label": "Actuals",
+        "version_code": "Actual",
+        "period": null,
+        "show_percent_change": false
+      },
+      "comparison_columns": [
+        {
+          "label": "VS. AOP",
+          "version_code": "AOP",
+          "show_percent_change": true,
+          "period": {
+            "start_date": "2025-01-01",
+            "end_date": "2025-06-30"
+          }
+        },
+        {
+          "label": "VS. FORECAST",
+          "version_code": "3x9 Forecast",
+          "show_percent_change": true,
+          "period": {
+            "start_date": "2025-01-01",
+            "end_date": "2025-06-30"
+          }
+        },
+        {
+          "label": "VS. PRIOR YEAR",
+          "version_code": "Actual",
+          "show_percent_change": true,
+          "period": {
+            "start_date": "2024-01-01",
+            "end_date": "2024-06-30"
+          }
+        }
+      ],
+      "override_row_names": [
+        {
+          "code": "BU:Software Products",
+          "row_type": "entity",
+          "name_override": "Net Revenue"
+        },
+        {
+          "code": "PG:Productivity Licenses|BU:Software Products",
+          "row_type": "entity",
+          "name_override": "Productivity Licenses"
+        },
+        {
+          "code": "PG:Developer Licenses|BU:Software Products",
+          "row_type": "entity",
+          "name_override": "Developer Licenses"
+        },
+        {
+          "code": "PRD:CollabPro|PG:Productivity Licenses|BU:Software Products",
+          "row_type": "entity",
+          "name_override": "Platform"
+        },
+        {
+          "code": "PRD:MeetSync|PG:Productivity Licenses|BU:Software Products",
+          "row_type": "entity",
+          "name_override": "Premium"
+        },
+        {
+          "code": "PRD:SyncBoard|PG:Productivity Licenses|BU:Software Products",
+          "row_type": "entity",
+          "name_override": "Enterprise"
+        },
+        {
+          "code": "PRD:CodeSuite|PG:Developer Licenses|BU:Software Products",
+          "row_type": "entity",
+          "name_override": "Platform"
+        },
+        {
+          "code": "PRD:DataFlow|PG:Developer Licenses|BU:Software Products",
+          "row_type": "entity",
+          "name_override": "Premium"
+        },
+        {
+          "code": "PRD:ScriptLab|PG:Developer Licenses|BU:Software Products",
+          "row_type": "entity",
+          "name_override": "Enterprise"
+        },
+        {
+          "code": "arpu",
+          "row_type": "line_item",
+          "name_override": "ARPU"
+        }
+      ]
+    }
+  ]
+}

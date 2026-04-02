@@ -1,0 +1,323 @@
+{
+  "tenant_id": 1,
+  "kpis": [
+    {
+      "variables": {
+        "SUBS_2025": {
+          "line_item_code": "paid_subscribers",
+          "start_date": "2025-01-01",
+          "end_date": "2025-06-30",
+          "aggregation": "point_in_time_latest_sum",
+          "entity_codes": [
+            "PRD:CollabPro|PG:Productivity Licenses|BU:Software Products",
+            "PRD:MeetSync|PG:Productivity Licenses|BU:Software Products",
+            "PRD:SyncBoard|PG:Productivity Licenses|BU:Software Products",
+            "PRD:CodeSuite|PG:Developer Licenses|BU:Software Products",
+            "PRD:DataFlow|PG:Developer Licenses|BU:Software Products",
+            "PRD:ScriptLab|PG:Developer Licenses|BU:Software Products"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "ARPU_2025": {
+          "line_item_code": "arpu",
+          "start_date": "2025-01-01",
+          "end_date": "2025-06-30",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "paid_subscribers",
+          "entity_codes": [
+            "PRD:CollabPro|PG:Productivity Licenses|BU:Software Products",
+            "PRD:MeetSync|PG:Productivity Licenses|BU:Software Products",
+            "PRD:SyncBoard|PG:Productivity Licenses|BU:Software Products",
+            "PRD:CodeSuite|PG:Developer Licenses|BU:Software Products",
+            "PRD:DataFlow|PG:Developer Licenses|BU:Software Products",
+            "PRD:ScriptLab|PG:Developer Licenses|BU:Software Products"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "SUBS_2024": {
+          "line_item_code": "paid_subscribers",
+          "start_date": "2024-01-01",
+          "end_date": "2024-06-30",
+          "aggregation": "point_in_time_latest_sum",
+          "entity_codes": [
+            "PRD:CollabPro|PG:Productivity Licenses|BU:Software Products",
+            "PRD:MeetSync|PG:Productivity Licenses|BU:Software Products",
+            "PRD:SyncBoard|PG:Productivity Licenses|BU:Software Products",
+            "PRD:CodeSuite|PG:Developer Licenses|BU:Software Products",
+            "PRD:DataFlow|PG:Developer Licenses|BU:Software Products",
+            "PRD:ScriptLab|PG:Developer Licenses|BU:Software Products"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "ARPU_2024": {
+          "line_item_code": "arpu",
+          "start_date": "2024-01-01",
+          "end_date": "2024-06-30",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "paid_subscribers",
+          "entity_codes": [
+            "PRD:CollabPro|PG:Productivity Licenses|BU:Software Products",
+            "PRD:MeetSync|PG:Productivity Licenses|BU:Software Products",
+            "PRD:SyncBoard|PG:Productivity Licenses|BU:Software Products",
+            "PRD:CodeSuite|PG:Developer Licenses|BU:Software Products",
+            "PRD:DataFlow|PG:Developer Licenses|BU:Software Products",
+            "PRD:ScriptLab|PG:Developer Licenses|BU:Software Products"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        }
+      },
+      "value_formula": "{{SUBS_2025}} * {{ARPU_2025}} * 12",
+      "change_formula": "(({{SUBS_2025}} * {{ARPU_2025}}) - ({{SUBS_2024}} * {{ARPU_2024}})) / ({{SUBS_2024}} * {{ARPU_2024}}) * 100",
+      "label": "ARR",
+      "value_units": "USD",
+      "change_label": "vs. prior year"
+    },
+    {
+      "variables": {
+        "SUBS_2025": {
+          "line_item_code": "paid_subscribers",
+          "start_date": "2025-01-01",
+          "end_date": "2025-06-30",
+          "aggregation": "point_in_time_latest_sum",
+          "entity_codes": [
+            "PRD:CollabPro|PG:Productivity Licenses|BU:Software Products",
+            "PRD:MeetSync|PG:Productivity Licenses|BU:Software Products",
+            "PRD:SyncBoard|PG:Productivity Licenses|BU:Software Products",
+            "PRD:CodeSuite|PG:Developer Licenses|BU:Software Products",
+            "PRD:DataFlow|PG:Developer Licenses|BU:Software Products",
+            "PRD:ScriptLab|PG:Developer Licenses|BU:Software Products"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "ARPU_2025": {
+          "line_item_code": "arpu",
+          "start_date": "2025-01-01",
+          "end_date": "2025-06-30",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "paid_subscribers",
+          "entity_codes": [
+            "PRD:CollabPro|PG:Productivity Licenses|BU:Software Products",
+            "PRD:MeetSync|PG:Productivity Licenses|BU:Software Products",
+            "PRD:SyncBoard|PG:Productivity Licenses|BU:Software Products",
+            "PRD:CodeSuite|PG:Developer Licenses|BU:Software Products",
+            "PRD:DataFlow|PG:Developer Licenses|BU:Software Products",
+            "PRD:ScriptLab|PG:Developer Licenses|BU:Software Products"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "SUBS_2024": {
+          "line_item_code": "paid_subscribers",
+          "start_date": "2024-01-01",
+          "end_date": "2024-06-30",
+          "aggregation": "point_in_time_latest_sum",
+          "entity_codes": [
+            "PRD:CollabPro|PG:Productivity Licenses|BU:Software Products",
+            "PRD:MeetSync|PG:Productivity Licenses|BU:Software Products",
+            "PRD:SyncBoard|PG:Productivity Licenses|BU:Software Products",
+            "PRD:CodeSuite|PG:Developer Licenses|BU:Software Products",
+            "PRD:DataFlow|PG:Developer Licenses|BU:Software Products",
+            "PRD:ScriptLab|PG:Developer Licenses|BU:Software Products"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "ARPU_2024": {
+          "line_item_code": "arpu",
+          "start_date": "2024-01-01",
+          "end_date": "2024-06-30",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "paid_subscribers",
+          "entity_codes": [
+            "PRD:CollabPro|PG:Productivity Licenses|BU:Software Products",
+            "PRD:MeetSync|PG:Productivity Licenses|BU:Software Products",
+            "PRD:SyncBoard|PG:Productivity Licenses|BU:Software Products",
+            "PRD:CodeSuite|PG:Developer Licenses|BU:Software Products",
+            "PRD:DataFlow|PG:Developer Licenses|BU:Software Products",
+            "PRD:ScriptLab|PG:Developer Licenses|BU:Software Products"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        }
+      },
+      "value_formula": "{{SUBS_2025}} * {{ARPU_2025}}",
+      "change_formula": "(({{SUBS_2025}} * {{ARPU_2025}}) - ({{SUBS_2024}} * {{ARPU_2024}})) / ({{SUBS_2024}} * {{ARPU_2024}}) * 100",
+      "label": "MRR",
+      "value_units": "USD",
+      "change_label": "vs. prior year"
+    },
+    {
+      "variables": {
+        "SUBS_2025": {
+          "line_item_code": "paid_subscribers",
+          "start_date": "2025-01-01",
+          "end_date": "2025-06-30",
+          "aggregation": "point_in_time_latest_sum",
+          "entity_codes": [
+            "PRD:CollabPro|PG:Productivity Licenses|BU:Software Products",
+            "PRD:MeetSync|PG:Productivity Licenses|BU:Software Products",
+            "PRD:SyncBoard|PG:Productivity Licenses|BU:Software Products",
+            "PRD:CodeSuite|PG:Developer Licenses|BU:Software Products",
+            "PRD:DataFlow|PG:Developer Licenses|BU:Software Products",
+            "PRD:ScriptLab|PG:Developer Licenses|BU:Software Products"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "SUBS_2024": {
+          "line_item_code": "paid_subscribers",
+          "start_date": "2024-01-01",
+          "end_date": "2024-06-30",
+          "aggregation": "point_in_time_latest_sum",
+          "entity_codes": [
+            "PRD:CollabPro|PG:Productivity Licenses|BU:Software Products",
+            "PRD:MeetSync|PG:Productivity Licenses|BU:Software Products",
+            "PRD:SyncBoard|PG:Productivity Licenses|BU:Software Products",
+            "PRD:CodeSuite|PG:Developer Licenses|BU:Software Products",
+            "PRD:DataFlow|PG:Developer Licenses|BU:Software Products",
+            "PRD:ScriptLab|PG:Developer Licenses|BU:Software Products"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        }
+      },
+      "value_formula": "{{SUBS_2025}}",
+      "change_formula": "(({{SUBS_2025}} - {{SUBS_2024}}) / {{SUBS_2024}}) * 100",
+      "label": "Total Subscribers",
+      "value_units": "subscribers",
+      "change_label": "vs. prior year"
+    },
+    {
+      "variables": {
+        "ARPU_2025": {
+          "line_item_code": "arpu",
+          "start_date": "2025-01-01",
+          "end_date": "2025-06-30",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "paid_subscribers",
+          "entity_codes": [
+            "PRD:CollabPro|PG:Productivity Licenses|BU:Software Products",
+            "PRD:MeetSync|PG:Productivity Licenses|BU:Software Products",
+            "PRD:SyncBoard|PG:Productivity Licenses|BU:Software Products",
+            "PRD:CodeSuite|PG:Developer Licenses|BU:Software Products",
+            "PRD:DataFlow|PG:Developer Licenses|BU:Software Products",
+            "PRD:ScriptLab|PG:Developer Licenses|BU:Software Products"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "ARPU_2024": {
+          "line_item_code": "arpu",
+          "start_date": "2024-01-01",
+          "end_date": "2024-06-30",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "paid_subscribers",
+          "entity_codes": [
+            "PRD:CollabPro|PG:Productivity Licenses|BU:Software Products",
+            "PRD:MeetSync|PG:Productivity Licenses|BU:Software Products",
+            "PRD:SyncBoard|PG:Productivity Licenses|BU:Software Products",
+            "PRD:CodeSuite|PG:Developer Licenses|BU:Software Products",
+            "PRD:DataFlow|PG:Developer Licenses|BU:Software Products",
+            "PRD:ScriptLab|PG:Developer Licenses|BU:Software Products"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        }
+      },
+      "value_formula": "{{ARPU_2025}}",
+      "change_formula": "(({{ARPU_2025}} - {{ARPU_2024}}) / {{ARPU_2024}}) * 100",
+      "label": "Blended ARPU",
+      "value_units": "USD per subscriber",
+      "change_label": "vs. prior year"
+    },
+    {
+      "variables": {
+        "CHURN_2025": {
+          "line_item_code": "churn",
+          "start_date": "2025-01-01",
+          "end_date": "2025-06-30",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "paid_subscribers",
+          "entity_codes": [
+            "PRD:CollabPro|PG:Productivity Licenses|BU:Software Products",
+            "PRD:MeetSync|PG:Productivity Licenses|BU:Software Products",
+            "PRD:SyncBoard|PG:Productivity Licenses|BU:Software Products",
+            "PRD:CodeSuite|PG:Developer Licenses|BU:Software Products",
+            "PRD:DataFlow|PG:Developer Licenses|BU:Software Products",
+            "PRD:ScriptLab|PG:Developer Licenses|BU:Software Products"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "CHURN_2024": {
+          "line_item_code": "churn",
+          "start_date": "2024-01-01",
+          "end_date": "2024-06-30",
+          "aggregation": "point_in_time_weighted_avg",
+          "weight_line_item_code": "paid_subscribers",
+          "entity_codes": [
+            "PRD:CollabPro|PG:Productivity Licenses|BU:Software Products",
+            "PRD:MeetSync|PG:Productivity Licenses|BU:Software Products",
+            "PRD:SyncBoard|PG:Productivity Licenses|BU:Software Products",
+            "PRD:CodeSuite|PG:Developer Licenses|BU:Software Products",
+            "PRD:DataFlow|PG:Developer Licenses|BU:Software Products",
+            "PRD:ScriptLab|PG:Developer Licenses|BU:Software Products"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        }
+      },
+      "value_formula": "{{CHURN_2025}}",
+      "change_formula": "({{CHURN_2025}} - {{CHURN_2024}}) * 100",
+      "label": "Monthly Churn Rate",
+      "value_units": "%",
+      "change_label": "vs. prior year"
+    },
+    {
+      "variables": {
+        "REV_2025": {
+          "line_item_code": "net_revenue",
+          "start_date": "2025-01-01",
+          "end_date": "2025-06-30",
+          "aggregation": "sum",
+          "entity_codes": [
+            "PRD:CollabPro|PG:Productivity Licenses|BU:Software Products",
+            "PRD:MeetSync|PG:Productivity Licenses|BU:Software Products",
+            "PRD:SyncBoard|PG:Productivity Licenses|BU:Software Products",
+            "PRD:CodeSuite|PG:Developer Licenses|BU:Software Products",
+            "PRD:DataFlow|PG:Developer Licenses|BU:Software Products",
+            "PRD:ScriptLab|PG:Developer Licenses|BU:Software Products"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        },
+        "REV_2024": {
+          "line_item_code": "net_revenue",
+          "start_date": "2024-01-01",
+          "end_date": "2024-06-30",
+          "aggregation": "sum",
+          "entity_codes": [
+            "PRD:CollabPro|PG:Productivity Licenses|BU:Software Products",
+            "PRD:MeetSync|PG:Productivity Licenses|BU:Software Products",
+            "PRD:SyncBoard|PG:Productivity Licenses|BU:Software Products",
+            "PRD:CodeSuite|PG:Developer Licenses|BU:Software Products",
+            "PRD:DataFlow|PG:Developer Licenses|BU:Software Products",
+            "PRD:ScriptLab|PG:Developer Licenses|BU:Software Products"
+          ],
+          "geography_codes": ["APAC", "EMEA", "North America"],
+          "version_codes": ["Actual"]
+        }
+      },
+      "value_formula": "({{REV_2025}} / {{REV_2024}}) * 100",
+      "change_formula": "{{REV_2025}} / {{REV_2024}} - 1",
+      "label": "NRR",
+      "value_units": "%",
+      "change_label": "vs. prior year"
+    }
+  ]
+}

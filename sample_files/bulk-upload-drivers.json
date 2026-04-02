@@ -1,0 +1,5550 @@
+{
+  "tenant_id": 1,
+  "drivers": [
+    {
+      "observation_date": "2020-01-01",
+      "driver_name": "PPI Energy",
+      "value": 170.1,
+      "units": null
+    },
+    {
+      "observation_date": "2020-02-01",
+      "driver_name": "PPI Energy",
+      "value": 169.0,
+      "units": null
+    },
+    {
+      "observation_date": "2020-03-01",
+      "driver_name": "PPI Energy",
+      "value": 168.8,
+      "units": null
+    },
+    {
+      "observation_date": "2020-04-01",
+      "driver_name": "PPI Energy",
+      "value": 167.5,
+      "units": null
+    },
+    {
+      "observation_date": "2020-05-01",
+      "driver_name": "PPI Energy",
+      "value": 170.3,
+      "units": null
+    },
+    {
+      "observation_date": "2020-06-01",
+      "driver_name": "PPI Energy",
+      "value": 183.0,
+      "units": null
+    },
+    {
+      "observation_date": "2020-07-01",
+      "driver_name": "PPI Energy",
+      "value": 185.1,
+      "units": null
+    },
+    {
+      "observation_date": "2020-08-01",
+      "driver_name": "PPI Energy",
+      "value": 184.9,
+      "units": null
+    },
+    {
+      "observation_date": "2020-09-01",
+      "driver_name": "PPI Energy",
+      "value": 184.7,
+      "units": null
+    },
+    {
+      "observation_date": "2020-10-01",
+      "driver_name": "PPI Energy",
+      "value": 176.2,
+      "units": null
+    },
+    {
+      "observation_date": "2020-11-01",
+      "driver_name": "PPI Energy",
+      "value": 170.8,
+      "units": null
+    },
+    {
+      "observation_date": "2020-12-01",
+      "driver_name": "PPI Energy",
+      "value": 171.0,
+      "units": null
+    },
+    {
+      "observation_date": "2021-01-01",
+      "driver_name": "PPI Energy",
+      "value": 172.9,
+      "units": null
+    },
+    {
+      "observation_date": "2021-02-01",
+      "driver_name": "PPI Energy",
+      "value": 173.9,
+      "units": null
+    },
+    {
+      "observation_date": "2021-03-01",
+      "driver_name": "PPI Energy",
+      "value": 179.9,
+      "units": null
+    },
+    {
+      "observation_date": "2021-04-01",
+      "driver_name": "PPI Energy",
+      "value": 175.8,
+      "units": null
+    },
+    {
+      "observation_date": "2021-05-01",
+      "driver_name": "PPI Energy",
+      "value": 177.0,
+      "units": null
+    },
+    {
+      "observation_date": "2021-06-01",
+      "driver_name": "PPI Energy",
+      "value": 191.9,
+      "units": null
+    },
+    {
+      "observation_date": "2021-07-01",
+      "driver_name": "PPI Energy",
+      "value": 193.634,
+      "units": null
+    },
+    {
+      "observation_date": "2021-08-01",
+      "driver_name": "PPI Energy",
+      "value": 193.594,
+      "units": null
+    },
+    {
+      "observation_date": "2021-09-01",
+      "driver_name": "PPI Energy",
+      "value": 194.769,
+      "units": null
+    },
+    {
+      "observation_date": "2021-10-01",
+      "driver_name": "PPI Energy",
+      "value": 186.408,
+      "units": null
+    },
+    {
+      "observation_date": "2021-11-01",
+      "driver_name": "PPI Energy",
+      "value": 184.192,
+      "units": null
+    },
+    {
+      "observation_date": "2021-12-01",
+      "driver_name": "PPI Energy",
+      "value": 181.817,
+      "units": null
+    },
+    {
+      "observation_date": "2022-01-01",
+      "driver_name": "PPI Energy",
+      "value": 192.906,
+      "units": null
+    },
+    {
+      "observation_date": "2022-02-01",
+      "driver_name": "PPI Energy",
+      "value": 188.038,
+      "units": null
+    },
+    {
+      "observation_date": "2022-03-01",
+      "driver_name": "PPI Energy",
+      "value": 194.751,
+      "units": null
+    },
+    {
+      "observation_date": "2022-04-01",
+      "driver_name": "PPI Energy",
+      "value": 192.601,
+      "units": null
+    },
+    {
+      "observation_date": "2022-05-01",
+      "driver_name": "PPI Energy",
+      "value": 194.776,
+      "units": null
+    },
+    {
+      "observation_date": "2022-06-01",
+      "driver_name": "PPI Energy",
+      "value": 214.805,
+      "units": null
+    },
+    {
+      "observation_date": "2022-07-01",
+      "driver_name": "PPI Energy",
+      "value": 219.793,
+      "units": null
+    },
+    {
+      "observation_date": "2022-08-01",
+      "driver_name": "PPI Energy",
+      "value": 224.115,
+      "units": null
+    },
+    {
+      "observation_date": "2022-09-01",
+      "driver_name": "PPI Energy",
+      "value": 224.193,
+      "units": null
+    },
+    {
+      "observation_date": "2022-10-01",
+      "driver_name": "PPI Energy",
+      "value": 212.474,
+      "units": null
+    },
+    {
+      "observation_date": "2022-11-01",
+      "driver_name": "PPI Energy",
+      "value": 204.206,
+      "units": null
+    },
+    {
+      "observation_date": "2022-12-01",
+      "driver_name": "PPI Energy",
+      "value": 206.029,
+      "units": null
+    },
+    {
+      "observation_date": "2023-01-01",
+      "driver_name": "PPI Energy",
+      "value": 216.015,
+      "units": null
+    },
+    {
+      "observation_date": "2023-02-01",
+      "driver_name": "PPI Energy",
+      "value": 215.82,
+      "units": null
+    },
+    {
+      "observation_date": "2023-03-01",
+      "driver_name": "PPI Energy",
+      "value": 213.808,
+      "units": null
+    },
+    {
+      "observation_date": "2023-04-01",
+      "driver_name": "PPI Energy",
+      "value": 209.919,
+      "units": null
+    },
+    {
+      "observation_date": "2023-05-01",
+      "driver_name": "PPI Energy",
+      "value": 212.66,
+      "units": null
+    },
+    {
+      "observation_date": "2023-06-01",
+      "driver_name": "PPI Energy",
+      "value": 230.643,
+      "units": null
+    },
+    {
+      "observation_date": "2023-07-01",
+      "driver_name": "PPI Energy",
+      "value": 231.942,
+      "units": null
+    },
+    {
+      "observation_date": "2023-08-01",
+      "driver_name": "PPI Energy",
+      "value": 232.171,
+      "units": null
+    },
+    {
+      "observation_date": "2023-09-01",
+      "driver_name": "PPI Energy",
+      "value": 233.12,
+      "units": null
+    },
+    {
+      "observation_date": "2023-10-01",
+      "driver_name": "PPI Energy",
+      "value": 219.927,
+      "units": null
+    },
+    {
+      "observation_date": "2023-11-01",
+      "driver_name": "PPI Energy",
+      "value": 214.199,
+      "units": null
+    },
+    {
+      "observation_date": "2023-12-01",
+      "driver_name": "PPI Energy",
+      "value": 214.194,
+      "units": null
+    },
+    {
+      "observation_date": "2024-01-01",
+      "driver_name": "PPI Energy",
+      "value": 217.17,
+      "units": null
+    },
+    {
+      "observation_date": "2024-02-01",
+      "driver_name": "PPI Energy",
+      "value": 218.451,
+      "units": null
+    },
+    {
+      "observation_date": "2024-03-01",
+      "driver_name": "PPI Energy",
+      "value": 222.656,
+      "units": null
+    },
+    {
+      "observation_date": "2024-04-01",
+      "driver_name": "PPI Energy",
+      "value": 220.898,
+      "units": null
+    },
+    {
+      "observation_date": "2024-05-01",
+      "driver_name": "PPI Energy",
+      "value": 220.951,
+      "units": null
+    },
+    {
+      "observation_date": "2024-06-01",
+      "driver_name": "PPI Energy",
+      "value": 240.416,
+      "units": null
+    },
+    {
+      "observation_date": "2024-07-01",
+      "driver_name": "PPI Energy",
+      "value": 238.412,
+      "units": null
+    },
+    {
+      "observation_date": "2024-08-01",
+      "driver_name": "PPI Energy",
+      "value": 235.818,
+      "units": null
+    },
+    {
+      "observation_date": "2024-09-01",
+      "driver_name": "PPI Energy",
+      "value": 236.444,
+      "units": null
+    },
+    {
+      "observation_date": "2024-10-01",
+      "driver_name": "PPI Energy",
+      "value": 225.382,
+      "units": null
+    },
+    {
+      "observation_date": "2024-11-01",
+      "driver_name": "PPI Energy",
+      "value": 219.412,
+      "units": null
+    },
+    {
+      "observation_date": "2024-12-01",
+      "driver_name": "PPI Energy",
+      "value": 218.395,
+      "units": null
+    },
+    {
+      "observation_date": "2025-01-01",
+      "driver_name": "PPI Energy",
+      "value": 223.227,
+      "units": null
+    },
+    {
+      "observation_date": "2025-02-01",
+      "driver_name": "PPI Energy",
+      "value": 227.328,
+      "units": null
+    },
+    {
+      "observation_date": "2025-03-01",
+      "driver_name": "PPI Energy",
+      "value": 227.17,
+      "units": null
+    },
+    {
+      "observation_date": "2025-04-01",
+      "driver_name": "PPI Energy",
+      "value": 227.723,
+      "units": null
+    },
+    {
+      "observation_date": "2025-05-01",
+      "driver_name": "PPI Energy",
+      "value": 227.723,
+      "units": null
+    },
+    {
+      "observation_date": "2025-06-01",
+      "driver_name": "PPI Energy",
+      "value": 227.723,
+      "units": null
+    },
+    {
+      "observation_date": "2020-01-01",
+      "driver_name": "PPI Tech",
+      "value": 113.3,
+      "units": null
+    },
+    {
+      "observation_date": "2020-02-01",
+      "driver_name": "PPI Tech",
+      "value": 113.5,
+      "units": null
+    },
+    {
+      "observation_date": "2020-03-01",
+      "driver_name": "PPI Tech",
+      "value": 113.6,
+      "units": null
+    },
+    {
+      "observation_date": "2020-04-01",
+      "driver_name": "PPI Tech",
+      "value": 113.5,
+      "units": null
+    },
+    {
+      "observation_date": "2020-05-01",
+      "driver_name": "PPI Tech",
+      "value": 113.4,
+      "units": null
+    },
+    {
+      "observation_date": "2020-06-01",
+      "driver_name": "PPI Tech",
+      "value": 114.1,
+      "units": null
+    },
+    {
+      "observation_date": "2020-07-01",
+      "driver_name": "PPI Tech",
+      "value": 114.2,
+      "units": null
+    },
+    {
+      "observation_date": "2020-08-01",
+      "driver_name": "PPI Tech",
+      "value": 114.4,
+      "units": null
+    },
+    {
+      "observation_date": "2020-09-01",
+      "driver_name": "PPI Tech",
+      "value": 114.6,
+      "units": null
+    },
+    {
+      "observation_date": "2020-10-01",
+      "driver_name": "PPI Tech",
+      "value": 114.6,
+      "units": null
+    },
+    {
+      "observation_date": "2020-11-01",
+      "driver_name": "PPI Tech",
+      "value": 114.6,
+      "units": null
+    },
+    {
+      "observation_date": "2020-12-01",
+      "driver_name": "PPI Tech",
+      "value": 114.8,
+      "units": null
+    },
+    {
+      "observation_date": "2021-01-01",
+      "driver_name": "PPI Tech",
+      "value": 114.7,
+      "units": null
+    },
+    {
+      "observation_date": "2021-02-01",
+      "driver_name": "PPI Tech",
+      "value": 114.8,
+      "units": null
+    },
+    {
+      "observation_date": "2021-03-01",
+      "driver_name": "PPI Tech",
+      "value": 115.2,
+      "units": null
+    },
+    {
+      "observation_date": "2021-04-01",
+      "driver_name": "PPI Tech",
+      "value": 115.1,
+      "units": null
+    },
+    {
+      "observation_date": "2021-05-01",
+      "driver_name": "PPI Tech",
+      "value": 115.1,
+      "units": null
+    },
+    {
+      "observation_date": "2021-06-01",
+      "driver_name": "PPI Tech",
+      "value": 115.1,
+      "units": null
+    },
+    {
+      "observation_date": "2021-07-01",
+      "driver_name": "PPI Tech",
+      "value": 115.372,
+      "units": null
+    },
+    {
+      "observation_date": "2021-08-01",
+      "driver_name": "PPI Tech",
+      "value": 115.331,
+      "units": null
+    },
+    {
+      "observation_date": "2021-09-01",
+      "driver_name": "PPI Tech",
+      "value": 115.177,
+      "units": null
+    },
+    {
+      "observation_date": "2021-10-01",
+      "driver_name": "PPI Tech",
+      "value": 115.381,
+      "units": null
+    },
+    {
+      "observation_date": "2021-11-01",
+      "driver_name": "PPI Tech",
+      "value": 115.375,
+      "units": null
+    },
+    {
+      "observation_date": "2021-12-01",
+      "driver_name": "PPI Tech",
+      "value": 115.346,
+      "units": null
+    },
+    {
+      "observation_date": "2022-01-01",
+      "driver_name": "PPI Tech",
+      "value": 115.023,
+      "units": null
+    },
+    {
+      "observation_date": "2022-02-01",
+      "driver_name": "PPI Tech",
+      "value": 115.136,
+      "units": null
+    },
+    {
+      "observation_date": "2022-03-01",
+      "driver_name": "PPI Tech",
+      "value": 114.494,
+      "units": null
+    },
+    {
+      "observation_date": "2022-04-01",
+      "driver_name": "PPI Tech",
+      "value": 117.091,
+      "units": null
+    },
+    {
+      "observation_date": "2022-05-01",
+      "driver_name": "PPI Tech",
+      "value": 117.176,
+      "units": null
+    },
+    {
+      "observation_date": "2022-06-01",
+      "driver_name": "PPI Tech",
+      "value": 116.825,
+      "units": null
+    },
+    {
+      "observation_date": "2022-07-01",
+      "driver_name": "PPI Tech",
+      "value": 116.778,
+      "units": null
+    },
+    {
+      "observation_date": "2022-08-01",
+      "driver_name": "PPI Tech",
+      "value": 116.702,
+      "units": null
+    },
+    {
+      "observation_date": "2022-09-01",
+      "driver_name": "PPI Tech",
+      "value": 116.566,
+      "units": null
+    },
+    {
+      "observation_date": "2022-10-01",
+      "driver_name": "PPI Tech",
+      "value": 116.678,
+      "units": null
+    },
+    {
+      "observation_date": "2022-11-01",
+      "driver_name": "PPI Tech",
+      "value": 116.684,
+      "units": null
+    },
+    {
+      "observation_date": "2022-12-01",
+      "driver_name": "PPI Tech",
+      "value": 117.038,
+      "units": null
+    },
+    {
+      "observation_date": "2023-01-01",
+      "driver_name": "PPI Tech",
+      "value": 117.19,
+      "units": null
+    },
+    {
+      "observation_date": "2023-02-01",
+      "driver_name": "PPI Tech",
+      "value": 117.529,
+      "units": null
+    },
+    {
+      "observation_date": "2023-03-01",
+      "driver_name": "PPI Tech",
+      "value": 117.766,
+      "units": null
+    },
+    {
+      "observation_date": "2023-04-01",
+      "driver_name": "PPI Tech",
+      "value": 117.726,
+      "units": null
+    },
+    {
+      "observation_date": "2023-05-01",
+      "driver_name": "PPI Tech",
+      "value": 117.818,
+      "units": null
+    },
+    {
+      "observation_date": "2023-06-01",
+      "driver_name": "PPI Tech",
+      "value": 118.064,
+      "units": null
+    },
+    {
+      "observation_date": "2023-07-01",
+      "driver_name": "PPI Tech",
+      "value": 118.355,
+      "units": null
+    },
+    {
+      "observation_date": "2023-08-01",
+      "driver_name": "PPI Tech",
+      "value": 118.474,
+      "units": null
+    },
+    {
+      "observation_date": "2023-09-01",
+      "driver_name": "PPI Tech",
+      "value": 118.297,
+      "units": null
+    },
+    {
+      "observation_date": "2023-10-01",
+      "driver_name": "PPI Tech",
+      "value": 118.513,
+      "units": null
+    },
+    {
+      "observation_date": "2023-11-01",
+      "driver_name": "PPI Tech",
+      "value": 118.752,
+      "units": null
+    },
+    {
+      "observation_date": "2023-12-01",
+      "driver_name": "PPI Tech",
+      "value": 119.029,
+      "units": null
+    },
+    {
+      "observation_date": "2024-01-01",
+      "driver_name": "PPI Tech",
+      "value": 119.403,
+      "units": null
+    },
+    {
+      "observation_date": "2024-02-01",
+      "driver_name": "PPI Tech",
+      "value": 119.519,
+      "units": null
+    },
+    {
+      "observation_date": "2024-03-01",
+      "driver_name": "PPI Tech",
+      "value": 119.248,
+      "units": null
+    },
+    {
+      "observation_date": "2024-04-01",
+      "driver_name": "PPI Tech",
+      "value": 119.662,
+      "units": null
+    },
+    {
+      "observation_date": "2024-05-01",
+      "driver_name": "PPI Tech",
+      "value": 120.079,
+      "units": null
+    },
+    {
+      "observation_date": "2024-06-01",
+      "driver_name": "PPI Tech",
+      "value": 119.644,
+      "units": null
+    },
+    {
+      "observation_date": "2024-07-01",
+      "driver_name": "PPI Tech",
+      "value": 119.863,
+      "units": null
+    },
+    {
+      "observation_date": "2024-08-01",
+      "driver_name": "PPI Tech",
+      "value": 119.762,
+      "units": null
+    },
+    {
+      "observation_date": "2024-09-01",
+      "driver_name": "PPI Tech",
+      "value": 119.622,
+      "units": null
+    },
+    {
+      "observation_date": "2024-10-01",
+      "driver_name": "PPI Tech",
+      "value": 119.637,
+      "units": null
+    },
+    {
+      "observation_date": "2024-11-01",
+      "driver_name": "PPI Tech",
+      "value": 119.398,
+      "units": null
+    },
+    {
+      "observation_date": "2024-12-01",
+      "driver_name": "PPI Tech",
+      "value": 119.349,
+      "units": null
+    },
+    {
+      "observation_date": "2025-01-01",
+      "driver_name": "PPI Tech",
+      "value": 120.806,
+      "units": null
+    },
+    {
+      "observation_date": "2025-02-01",
+      "driver_name": "PPI Tech",
+      "value": 122.218,
+      "units": null
+    },
+    {
+      "observation_date": "2025-03-01",
+      "driver_name": "PPI Tech",
+      "value": 121.88,
+      "units": null
+    },
+    {
+      "observation_date": "2025-04-01",
+      "driver_name": "PPI Tech",
+      "value": 122.102,
+      "units": null
+    },
+    {
+      "observation_date": "2025-05-01",
+      "driver_name": "PPI Tech",
+      "value": 122.102,
+      "units": null
+    },
+    {
+      "observation_date": "2025-06-01",
+      "driver_name": "PPI Tech",
+      "value": 122.102,
+      "units": null
+    },
+    {
+      "observation_date": "2020-01-01",
+      "driver_name": "Unemployment",
+      "value": 3.6,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2020-02-01",
+      "driver_name": "Unemployment",
+      "value": 3.5,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2020-03-01",
+      "driver_name": "Unemployment",
+      "value": 4.4,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2020-04-01",
+      "driver_name": "Unemployment",
+      "value": 14.8,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2020-05-01",
+      "driver_name": "Unemployment",
+      "value": 13.2,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2020-06-01",
+      "driver_name": "Unemployment",
+      "value": 11.0,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2020-07-01",
+      "driver_name": "Unemployment",
+      "value": 10.2,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2020-08-01",
+      "driver_name": "Unemployment",
+      "value": 8.4,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2020-09-01",
+      "driver_name": "Unemployment",
+      "value": 7.8,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2020-10-01",
+      "driver_name": "Unemployment",
+      "value": 6.9,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2020-11-01",
+      "driver_name": "Unemployment",
+      "value": 6.7,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2020-12-01",
+      "driver_name": "Unemployment",
+      "value": 6.7,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2021-01-01",
+      "driver_name": "Unemployment",
+      "value": 6.4,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2021-02-01",
+      "driver_name": "Unemployment",
+      "value": 6.2,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2021-03-01",
+      "driver_name": "Unemployment",
+      "value": 6.1,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2021-04-01",
+      "driver_name": "Unemployment",
+      "value": 6.1,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2021-05-01",
+      "driver_name": "Unemployment",
+      "value": 5.8,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2021-06-01",
+      "driver_name": "Unemployment",
+      "value": 5.9,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2021-07-01",
+      "driver_name": "Unemployment",
+      "value": 5.4,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2021-08-01",
+      "driver_name": "Unemployment",
+      "value": 5.1,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2021-09-01",
+      "driver_name": "Unemployment",
+      "value": 4.7,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2021-10-01",
+      "driver_name": "Unemployment",
+      "value": 4.5,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2021-11-01",
+      "driver_name": "Unemployment",
+      "value": 4.2,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2021-12-01",
+      "driver_name": "Unemployment",
+      "value": 3.9,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2022-01-01",
+      "driver_name": "Unemployment",
+      "value": 4.0,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2022-02-01",
+      "driver_name": "Unemployment",
+      "value": 3.8,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2022-03-01",
+      "driver_name": "Unemployment",
+      "value": 3.7,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2022-04-01",
+      "driver_name": "Unemployment",
+      "value": 3.7,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2022-05-01",
+      "driver_name": "Unemployment",
+      "value": 3.6,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2022-06-01",
+      "driver_name": "Unemployment",
+      "value": 3.6,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2022-07-01",
+      "driver_name": "Unemployment",
+      "value": 3.5,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2022-08-01",
+      "driver_name": "Unemployment",
+      "value": 3.6,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2022-09-01",
+      "driver_name": "Unemployment",
+      "value": 3.5,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2022-10-01",
+      "driver_name": "Unemployment",
+      "value": 3.6,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2022-11-01",
+      "driver_name": "Unemployment",
+      "value": 3.6,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2022-12-01",
+      "driver_name": "Unemployment",
+      "value": 3.5,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2023-01-01",
+      "driver_name": "Unemployment",
+      "value": 3.5,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2023-02-01",
+      "driver_name": "Unemployment",
+      "value": 3.6,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2023-03-01",
+      "driver_name": "Unemployment",
+      "value": 3.5,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2023-04-01",
+      "driver_name": "Unemployment",
+      "value": 3.4,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2023-05-01",
+      "driver_name": "Unemployment",
+      "value": 3.6,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2023-06-01",
+      "driver_name": "Unemployment",
+      "value": 3.6,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2023-07-01",
+      "driver_name": "Unemployment",
+      "value": 3.5,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2023-08-01",
+      "driver_name": "Unemployment",
+      "value": 3.7,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2023-09-01",
+      "driver_name": "Unemployment",
+      "value": 3.8,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2023-10-01",
+      "driver_name": "Unemployment",
+      "value": 3.9,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2023-11-01",
+      "driver_name": "Unemployment",
+      "value": 3.7,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2023-12-01",
+      "driver_name": "Unemployment",
+      "value": 3.8,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2024-01-01",
+      "driver_name": "Unemployment",
+      "value": 3.7,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2024-02-01",
+      "driver_name": "Unemployment",
+      "value": 3.9,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2024-03-01",
+      "driver_name": "Unemployment",
+      "value": 3.9,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2024-04-01",
+      "driver_name": "Unemployment",
+      "value": 3.9,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2024-05-01",
+      "driver_name": "Unemployment",
+      "value": 4.0,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2024-06-01",
+      "driver_name": "Unemployment",
+      "value": 4.1,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2024-07-01",
+      "driver_name": "Unemployment",
+      "value": 4.2,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2024-08-01",
+      "driver_name": "Unemployment",
+      "value": 4.2,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2024-09-01",
+      "driver_name": "Unemployment",
+      "value": 4.1,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2024-10-01",
+      "driver_name": "Unemployment",
+      "value": 4.1,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2024-11-01",
+      "driver_name": "Unemployment",
+      "value": 4.2,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2024-12-01",
+      "driver_name": "Unemployment",
+      "value": 4.1,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2025-01-01",
+      "driver_name": "Unemployment",
+      "value": 4.0,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2025-02-01",
+      "driver_name": "Unemployment",
+      "value": 4.1,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2025-03-01",
+      "driver_name": "Unemployment",
+      "value": 4.2,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2025-04-01",
+      "driver_name": "Unemployment",
+      "value": 4.2,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2025-05-01",
+      "driver_name": "Unemployment",
+      "value": 4.2,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2025-06-01",
+      "driver_name": "Unemployment",
+      "value": 4.2,
+      "units": "percent"
+    },
+    {
+      "observation_date": "2020-01-01",
+      "driver_name": "PNFI",
+      "value": 2965.479,
+      "units": null
+    },
+    {
+      "observation_date": "2020-02-01",
+      "driver_name": "PNFI",
+      "value": 2889.148333,
+      "units": null
+    },
+    {
+      "observation_date": "2020-03-01",
+      "driver_name": "PNFI",
+      "value": 2812.817667,
+      "units": null
+    },
+    {
+      "observation_date": "2020-04-01",
+      "driver_name": "PNFI",
+      "value": 2736.487,
+      "units": null
+    },
+    {
+      "observation_date": "2020-05-01",
+      "driver_name": "PNFI",
+      "value": 2775.160667,
+      "units": null
+    },
+    {
+      "observation_date": "2020-06-01",
+      "driver_name": "PNFI",
+      "value": 2813.834333,
+      "units": null
+    },
+    {
+      "observation_date": "2020-07-01",
+      "driver_name": "PNFI",
+      "value": 2852.508,
+      "units": null
+    },
+    {
+      "observation_date": "2020-08-01",
+      "driver_name": "PNFI",
+      "value": 2881.263667,
+      "units": null
+    },
+    {
+      "observation_date": "2020-09-01",
+      "driver_name": "PNFI",
+      "value": 2910.019333,
+      "units": null
+    },
+    {
+      "observation_date": "2020-10-01",
+      "driver_name": "PNFI",
+      "value": 2938.775,
+      "units": null
+    },
+    {
+      "observation_date": "2020-11-01",
+      "driver_name": "PNFI",
+      "value": 2960.120333,
+      "units": null
+    },
+    {
+      "observation_date": "2020-12-01",
+      "driver_name": "PNFI",
+      "value": 2981.465667,
+      "units": null
+    },
+    {
+      "observation_date": "2021-01-01",
+      "driver_name": "PNFI",
+      "value": 3002.811,
+      "units": null
+    },
+    {
+      "observation_date": "2021-02-01",
+      "driver_name": "PNFI",
+      "value": 3028.007667,
+      "units": null
+    },
+    {
+      "observation_date": "2021-03-01",
+      "driver_name": "PNFI",
+      "value": 3053.204333,
+      "units": null
+    },
+    {
+      "observation_date": "2021-04-01",
+      "driver_name": "PNFI",
+      "value": 3078.401,
+      "units": null
+    },
+    {
+      "observation_date": "2021-05-01",
+      "driver_name": "PNFI",
+      "value": 3084.331667,
+      "units": null
+    },
+    {
+      "observation_date": "2021-06-01",
+      "driver_name": "PNFI",
+      "value": 3090.262333,
+      "units": null
+    },
+    {
+      "observation_date": "2021-07-01",
+      "driver_name": "PNFI",
+      "value": 3096.193,
+      "units": null
+    },
+    {
+      "observation_date": "2021-08-01",
+      "driver_name": "PNFI",
+      "value": 3121.315,
+      "units": null
+    },
+    {
+      "observation_date": "2021-09-01",
+      "driver_name": "PNFI",
+      "value": 3146.437,
+      "units": null
+    },
+    {
+      "observation_date": "2021-10-01",
+      "driver_name": "PNFI",
+      "value": 3171.559,
+      "units": null
+    },
+    {
+      "observation_date": "2021-11-01",
+      "driver_name": "PNFI",
+      "value": 3219.358,
+      "units": null
+    },
+    {
+      "observation_date": "2021-12-01",
+      "driver_name": "PNFI",
+      "value": 3267.157,
+      "units": null
+    },
+    {
+      "observation_date": "2022-01-01",
+      "driver_name": "PNFI",
+      "value": 3314.956,
+      "units": null
+    },
+    {
+      "observation_date": "2022-02-01",
+      "driver_name": "PNFI",
+      "value": 3356.210667,
+      "units": null
+    },
+    {
+      "observation_date": "2022-03-01",
+      "driver_name": "PNFI",
+      "value": 3397.465333,
+      "units": null
+    },
+    {
+      "observation_date": "2022-04-01",
+      "driver_name": "PNFI",
+      "value": 3438.72,
+      "units": null
+    },
+    {
+      "observation_date": "2022-05-01",
+      "driver_name": "PNFI",
+      "value": 3475.016,
+      "units": null
+    },
+    {
+      "observation_date": "2022-06-01",
+      "driver_name": "PNFI",
+      "value": 3511.312,
+      "units": null
+    },
+    {
+      "observation_date": "2022-07-01",
+      "driver_name": "PNFI",
+      "value": 3547.608,
+      "units": null
+    },
+    {
+      "observation_date": "2022-08-01",
+      "driver_name": "PNFI",
+      "value": 3577.392,
+      "units": null
+    },
+    {
+      "observation_date": "2022-09-01",
+      "driver_name": "PNFI",
+      "value": 3607.176,
+      "units": null
+    },
+    {
+      "observation_date": "2022-10-01",
+      "driver_name": "PNFI",
+      "value": 3636.96,
+      "units": null
+    },
+    {
+      "observation_date": "2022-11-01",
+      "driver_name": "PNFI",
+      "value": 3676.831667,
+      "units": null
+    },
+    {
+      "observation_date": "2022-12-01",
+      "driver_name": "PNFI",
+      "value": 3716.703333,
+      "units": null
+    },
+    {
+      "observation_date": "2023-01-01",
+      "driver_name": "PNFI",
+      "value": 3756.575,
+      "units": null
+    },
+    {
+      "observation_date": "2023-02-01",
+      "driver_name": "PNFI",
+      "value": 3789.139,
+      "units": null
+    },
+    {
+      "observation_date": "2023-03-01",
+      "driver_name": "PNFI",
+      "value": 3821.703,
+      "units": null
+    },
+    {
+      "observation_date": "2023-04-01",
+      "driver_name": "PNFI",
+      "value": 3854.267,
+      "units": null
+    },
+    {
+      "observation_date": "2023-05-01",
+      "driver_name": "PNFI",
+      "value": 3860.059333,
+      "units": null
+    },
+    {
+      "observation_date": "2023-06-01",
+      "driver_name": "PNFI",
+      "value": 3865.851667,
+      "units": null
+    },
+    {
+      "observation_date": "2023-07-01",
+      "driver_name": "PNFI",
+      "value": 3871.644,
+      "units": null
+    },
+    {
+      "observation_date": "2023-08-01",
+      "driver_name": "PNFI",
+      "value": 3894.877,
+      "units": null
+    },
+    {
+      "observation_date": "2023-09-01",
+      "driver_name": "PNFI",
+      "value": 3918.11,
+      "units": null
+    },
+    {
+      "observation_date": "2023-10-01",
+      "driver_name": "PNFI",
+      "value": 3941.343,
+      "units": null
+    },
+    {
+      "observation_date": "2023-11-01",
+      "driver_name": "PNFI",
+      "value": 3948.812667,
+      "units": null
+    },
+    {
+      "observation_date": "2023-12-01",
+      "driver_name": "PNFI",
+      "value": 3956.282333,
+      "units": null
+    },
+    {
+      "observation_date": "2024-01-01",
+      "driver_name": "PNFI",
+      "value": 3963.752,
+      "units": null
+    },
+    {
+      "observation_date": "2024-02-01",
+      "driver_name": "PNFI",
+      "value": 3979.971667,
+      "units": null
+    },
+    {
+      "observation_date": "2024-03-01",
+      "driver_name": "PNFI",
+      "value": 3996.191333,
+      "units": null
+    },
+    {
+      "observation_date": "2024-04-01",
+      "driver_name": "PNFI",
+      "value": 4012.411,
+      "units": null
+    },
+    {
+      "observation_date": "2024-05-01",
+      "driver_name": "PNFI",
+      "value": 4031.336,
+      "units": null
+    },
+    {
+      "observation_date": "2024-06-01",
+      "driver_name": "PNFI",
+      "value": 4050.261,
+      "units": null
+    },
+    {
+      "observation_date": "2024-07-01",
+      "driver_name": "PNFI",
+      "value": 4069.186,
+      "units": null
+    },
+    {
+      "observation_date": "2024-08-01",
+      "driver_name": "PNFI",
+      "value": 4061.587333,
+      "units": null
+    },
+    {
+      "observation_date": "2024-09-01",
+      "driver_name": "PNFI",
+      "value": 4053.988667,
+      "units": null
+    },
+    {
+      "observation_date": "2024-10-01",
+      "driver_name": "PNFI",
+      "value": 4046.39,
+      "units": null
+    },
+    {
+      "observation_date": "2024-11-01",
+      "driver_name": "PNFI",
+      "value": 4076.866333,
+      "units": null
+    },
+    {
+      "observation_date": "2024-12-01",
+      "driver_name": "PNFI",
+      "value": 4107.342667,
+      "units": null
+    },
+    {
+      "observation_date": "2025-01-01",
+      "driver_name": "PNFI",
+      "value": 4137.819,
+      "units": null
+    },
+    {
+      "observation_date": "2025-02-01",
+      "driver_name": "PNFI",
+      "value": 4161.05,
+      "units": null
+    },
+    {
+      "observation_date": "2025-03-01",
+      "driver_name": "PNFI",
+      "value": 4184.281,
+      "units": null
+    },
+    {
+      "observation_date": "2025-04-01",
+      "driver_name": "PNFI",
+      "value": 4207.512,
+      "units": null
+    },
+    {
+      "observation_date": "2025-05-01",
+      "driver_name": "PNFI",
+      "value": 4207.512,
+      "units": null
+    },
+    {
+      "observation_date": "2025-06-01",
+      "driver_name": "PNFI",
+      "value": 4207.512,
+      "units": null
+    },
+    {
+      "observation_date": "2020-01-01",
+      "driver_name": "UMCSENT",
+      "value": 99.8,
+      "units": null
+    },
+    {
+      "observation_date": "2020-02-01",
+      "driver_name": "UMCSENT",
+      "value": 101.0,
+      "units": null
+    },
+    {
+      "observation_date": "2020-03-01",
+      "driver_name": "UMCSENT",
+      "value": 89.1,
+      "units": null
+    },
+    {
+      "observation_date": "2020-04-01",
+      "driver_name": "UMCSENT",
+      "value": 71.8,
+      "units": null
+    },
+    {
+      "observation_date": "2020-05-01",
+      "driver_name": "UMCSENT",
+      "value": 72.3,
+      "units": null
+    },
+    {
+      "observation_date": "2020-06-01",
+      "driver_name": "UMCSENT",
+      "value": 78.1,
+      "units": null
+    },
+    {
+      "observation_date": "2020-07-01",
+      "driver_name": "UMCSENT",
+      "value": 72.5,
+      "units": null
+    },
+    {
+      "observation_date": "2020-08-01",
+      "driver_name": "UMCSENT",
+      "value": 74.1,
+      "units": null
+    },
+    {
+      "observation_date": "2020-09-01",
+      "driver_name": "UMCSENT",
+      "value": 80.4,
+      "units": null
+    },
+    {
+      "observation_date": "2020-10-01",
+      "driver_name": "UMCSENT",
+      "value": 81.8,
+      "units": null
+    },
+    {
+      "observation_date": "2020-11-01",
+      "driver_name": "UMCSENT",
+      "value": 76.9,
+      "units": null
+    },
+    {
+      "observation_date": "2020-12-01",
+      "driver_name": "UMCSENT",
+      "value": 80.7,
+      "units": null
+    },
+    {
+      "observation_date": "2021-01-01",
+      "driver_name": "UMCSENT",
+      "value": 79.0,
+      "units": null
+    },
+    {
+      "observation_date": "2021-02-01",
+      "driver_name": "UMCSENT",
+      "value": 76.8,
+      "units": null
+    },
+    {
+      "observation_date": "2021-03-01",
+      "driver_name": "UMCSENT",
+      "value": 84.9,
+      "units": null
+    },
+    {
+      "observation_date": "2021-04-01",
+      "driver_name": "UMCSENT",
+      "value": 88.3,
+      "units": null
+    },
+    {
+      "observation_date": "2021-05-01",
+      "driver_name": "UMCSENT",
+      "value": 82.9,
+      "units": null
+    },
+    {
+      "observation_date": "2021-06-01",
+      "driver_name": "UMCSENT",
+      "value": 85.5,
+      "units": null
+    },
+    {
+      "observation_date": "2021-07-01",
+      "driver_name": "UMCSENT",
+      "value": 81.2,
+      "units": null
+    },
+    {
+      "observation_date": "2021-08-01",
+      "driver_name": "UMCSENT",
+      "value": 70.3,
+      "units": null
+    },
+    {
+      "observation_date": "2021-09-01",
+      "driver_name": "UMCSENT",
+      "value": 72.8,
+      "units": null
+    },
+    {
+      "observation_date": "2021-10-01",
+      "driver_name": "UMCSENT",
+      "value": 71.7,
+      "units": null
+    },
+    {
+      "observation_date": "2021-11-01",
+      "driver_name": "UMCSENT",
+      "value": 67.4,
+      "units": null
+    },
+    {
+      "observation_date": "2021-12-01",
+      "driver_name": "UMCSENT",
+      "value": 70.6,
+      "units": null
+    },
+    {
+      "observation_date": "2022-01-01",
+      "driver_name": "UMCSENT",
+      "value": 67.2,
+      "units": null
+    },
+    {
+      "observation_date": "2022-02-01",
+      "driver_name": "UMCSENT",
+      "value": 62.8,
+      "units": null
+    },
+    {
+      "observation_date": "2022-03-01",
+      "driver_name": "UMCSENT",
+      "value": 59.4,
+      "units": null
+    },
+    {
+      "observation_date": "2022-04-01",
+      "driver_name": "UMCSENT",
+      "value": 65.2,
+      "units": null
+    },
+    {
+      "observation_date": "2022-05-01",
+      "driver_name": "UMCSENT",
+      "value": 58.4,
+      "units": null
+    },
+    {
+      "observation_date": "2022-06-01",
+      "driver_name": "UMCSENT",
+      "value": 50.0,
+      "units": null
+    },
+    {
+      "observation_date": "2022-07-01",
+      "driver_name": "UMCSENT",
+      "value": 51.5,
+      "units": null
+    },
+    {
+      "observation_date": "2022-08-01",
+      "driver_name": "UMCSENT",
+      "value": 58.2,
+      "units": null
+    },
+    {
+      "observation_date": "2022-09-01",
+      "driver_name": "UMCSENT",
+      "value": 58.6,
+      "units": null
+    },
+    {
+      "observation_date": "2022-10-01",
+      "driver_name": "UMCSENT",
+      "value": 59.9,
+      "units": null
+    },
+    {
+      "observation_date": "2022-11-01",
+      "driver_name": "UMCSENT",
+      "value": 56.7,
+      "units": null
+    },
+    {
+      "observation_date": "2022-12-01",
+      "driver_name": "UMCSENT",
+      "value": 59.8,
+      "units": null
+    },
+    {
+      "observation_date": "2023-01-01",
+      "driver_name": "UMCSENT",
+      "value": 64.9,
+      "units": null
+    },
+    {
+      "observation_date": "2023-02-01",
+      "driver_name": "UMCSENT",
+      "value": 66.9,
+      "units": null
+    },
+    {
+      "observation_date": "2023-03-01",
+      "driver_name": "UMCSENT",
+      "value": 62.0,
+      "units": null
+    },
+    {
+      "observation_date": "2023-04-01",
+      "driver_name": "UMCSENT",
+      "value": 63.7,
+      "units": null
+    },
+    {
+      "observation_date": "2023-05-01",
+      "driver_name": "UMCSENT",
+      "value": 59.0,
+      "units": null
+    },
+    {
+      "observation_date": "2023-06-01",
+      "driver_name": "UMCSENT",
+      "value": 64.2,
+      "units": null
+    },
+    {
+      "observation_date": "2023-07-01",
+      "driver_name": "UMCSENT",
+      "value": 71.5,
+      "units": null
+    },
+    {
+      "observation_date": "2023-08-01",
+      "driver_name": "UMCSENT",
+      "value": 69.4,
+      "units": null
+    },
+    {
+      "observation_date": "2023-09-01",
+      "driver_name": "UMCSENT",
+      "value": 67.8,
+      "units": null
+    },
+    {
+      "observation_date": "2023-10-01",
+      "driver_name": "UMCSENT",
+      "value": 63.8,
+      "units": null
+    },
+    {
+      "observation_date": "2023-11-01",
+      "driver_name": "UMCSENT",
+      "value": 61.3,
+      "units": null
+    },
+    {
+      "observation_date": "2023-12-01",
+      "driver_name": "UMCSENT",
+      "value": 69.7,
+      "units": null
+    },
+    {
+      "observation_date": "2024-01-01",
+      "driver_name": "UMCSENT",
+      "value": 79.0,
+      "units": null
+    },
+    {
+      "observation_date": "2024-02-01",
+      "driver_name": "UMCSENT",
+      "value": 76.9,
+      "units": null
+    },
+    {
+      "observation_date": "2024-03-01",
+      "driver_name": "UMCSENT",
+      "value": 79.4,
+      "units": null
+    },
+    {
+      "observation_date": "2024-04-01",
+      "driver_name": "UMCSENT",
+      "value": 77.2,
+      "units": null
+    },
+    {
+      "observation_date": "2024-05-01",
+      "driver_name": "UMCSENT",
+      "value": 69.1,
+      "units": null
+    },
+    {
+      "observation_date": "2024-06-01",
+      "driver_name": "UMCSENT",
+      "value": 68.2,
+      "units": null
+    },
+    {
+      "observation_date": "2024-07-01",
+      "driver_name": "UMCSENT",
+      "value": 66.4,
+      "units": null
+    },
+    {
+      "observation_date": "2024-08-01",
+      "driver_name": "UMCSENT",
+      "value": 67.9,
+      "units": null
+    },
+    {
+      "observation_date": "2024-09-01",
+      "driver_name": "UMCSENT",
+      "value": 70.1,
+      "units": null
+    },
+    {
+      "observation_date": "2024-10-01",
+      "driver_name": "UMCSENT",
+      "value": 70.5,
+      "units": null
+    },
+    {
+      "observation_date": "2024-11-01",
+      "driver_name": "UMCSENT",
+      "value": 71.8,
+      "units": null
+    },
+    {
+      "observation_date": "2024-12-01",
+      "driver_name": "UMCSENT",
+      "value": 74.0,
+      "units": null
+    },
+    {
+      "observation_date": "2025-01-01",
+      "driver_name": "UMCSENT",
+      "value": 71.7,
+      "units": null
+    },
+    {
+      "observation_date": "2025-02-01",
+      "driver_name": "UMCSENT",
+      "value": 64.7,
+      "units": null
+    },
+    {
+      "observation_date": "2025-03-01",
+      "driver_name": "UMCSENT",
+      "value": 57.0,
+      "units": null
+    },
+    {
+      "observation_date": "2025-04-01",
+      "driver_name": "UMCSENT",
+      "value": 52.2,
+      "units": null
+    },
+    {
+      "observation_date": "2025-05-01",
+      "driver_name": "UMCSENT",
+      "value": 52.2,
+      "units": null
+    },
+    {
+      "observation_date": "2025-06-01",
+      "driver_name": "UMCSENT",
+      "value": 52.2,
+      "units": null
+    },
+    {
+      "observation_date": "2020-01-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2228.5,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2020-02-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2234.1,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2020-03-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2219.8,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2020-04-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2165.8,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2020-05-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2166.1,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2020-06-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2167.7,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2020-07-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2167.2,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2020-08-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2180.6,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2020-09-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2191.3,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2020-10-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2202.5,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2020-11-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2208.3,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2020-12-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2222.1,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2021-01-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2238.1,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2021-02-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2254.2,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2021-03-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2258.7,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2021-04-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2270.9,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2021-05-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2278.3,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2021-06-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2295.6,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2021-07-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2316.5,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2021-08-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2332.0,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2021-09-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2349.0,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2021-10-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2360.7,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2021-11-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2377.6,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2021-12-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2389.7,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2022-01-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2405.8,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2022-02-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2418.6,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2022-03-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2434.4,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2022-04-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2440.4,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2022-05-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2452.5,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2022-06-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2458.2,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2022-07-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2454.7,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2022-08-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2462.1,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2022-09-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2469.3,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2022-10-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2478.4,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2022-11-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2482.1,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2022-12-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2483.7,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2023-01-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2478.1,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2023-02-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2480.9,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2023-03-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2481.1,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2023-04-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2482.2,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2023-05-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2477.4,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2023-06-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2472.4,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2023-07-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2468.5,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2023-08-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2467.4,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2023-09-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2456.5,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2023-10-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2453.4,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2023-11-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2451.3,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2023-12-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2451.9,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2024-01-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2447.0,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2024-02-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2443.5,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2024-03-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2437.3,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2024-04-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2442.7,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2024-05-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2444.2,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2024-06-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2447.3,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2024-07-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2447.5,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2024-08-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2446.9,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2024-09-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2447.8,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2024-10-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2444.7,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2024-11-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2444.7,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2024-12-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2446.1,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2025-01-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2446.7,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2025-02-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2438.4,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2025-03-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2429.9,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2025-04-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2432.6,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2025-05-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2432.51,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2025-06-01",
+      "driver_name": "All Employees, Computer Systems Design and Related Services",
+      "value": 2432.42,
+      "units": "CES6054150001"
+    },
+    {
+      "observation_date": "2020-01-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 72.8903,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2020-02-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 72.1258,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2020-03-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 72.7389,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2020-04-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 70.5967,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2020-05-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 69.626,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2020-06-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 70.4803,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2020-07-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 71.6679,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2020-08-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 72.0239,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2020-09-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 73.7936,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2020-10-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 75.955,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2020-11-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 77.0236,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2020-12-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 77.6959,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2021-01-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 77.968,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2021-02-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 78.1984,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2021-03-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 79.0086,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2021-04-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 80.743,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2021-05-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 81.8947,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2021-06-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 80.8223,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2021-07-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 79.0526,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2021-08-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 79.1502,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2021-09-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 79.6455,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2021-10-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 81.1347,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2021-11-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 82.8079,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2021-12-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 84.0535,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2022-01-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 84.4258,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2022-02-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 86.2999,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2022-03-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 86.6454,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2022-04-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 86.1008,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2022-05-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 86.7002,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2022-06-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 88.0833,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2022-07-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 88.159,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2022-08-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 88.1878,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2022-09-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 87.889,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2022-10-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 86.1758,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2022-11-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 85.1127,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2022-12-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 82.4143,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2023-01-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 80.8388,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2023-02-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 81.0679,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2023-03-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 80.1187,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2023-04-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 80.4455,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2023-05-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 79.6823,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2023-06-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 78.7479,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2023-07-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 78.3481,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2023-08-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 77.2829,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2023-09-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 76.2565,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2023-10-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 76.536,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2023-11-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 76.5959,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2023-12-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 76.1904,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2024-01-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 75.4193,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2024-02-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 74.1534,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2024-03-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 73.7434,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2024-04-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 75.2571,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2024-05-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 75.1524,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2024-06-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 74.5463,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2024-07-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 74.31,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2024-08-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 75.9972,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2024-09-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 75.012,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2024-10-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 75.0722,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2024-11-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 74.1447,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2024-12-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 74.4618,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2025-01-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 76.484,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2025-02-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 76.3524,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2025-03-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 75.3971,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2025-04-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 75.1176,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2025-05-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 75.07784,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2025-06-01",
+      "driver_name": "Capacity Utilization: Manufacturing: Durable Goods: Computers, Communications Equipment, and Semiconductors",
+      "value": 75.03808,
+      "units": "(CAPUTLHITEK2S)"
+    },
+    {
+      "observation_date": "2020-01-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.376,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2020-02-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.374,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2020-03-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.357,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2020-04-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.365,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2020-05-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.352,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2020-06-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.33,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2020-07-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.316,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2020-08-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.314,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2020-09-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.26,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2020-10-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.246,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2020-11-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.284,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2020-12-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.289,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2021-01-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.28,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2021-02-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.26,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2021-03-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.244,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2021-04-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.362,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2021-05-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.36,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2021-06-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.339,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2021-07-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.361,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2021-08-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.418,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2021-09-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.465,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2021-10-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.446,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2021-11-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.424,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2021-12-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.428,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2022-01-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.426,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2022-02-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.404,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2022-03-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.379,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2022-04-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.301,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2022-05-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.258,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2022-06-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.255,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2022-07-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.191,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2022-08-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.163,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2022-09-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.146,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2022-10-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.135,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2022-11-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.122,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2022-12-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.086,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2023-01-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.121,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2023-02-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.125,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2023-03-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.156,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2023-04-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.134,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2023-05-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.129,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2023-06-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.14,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2023-07-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.099,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2023-08-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.082,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2023-09-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.084,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2023-10-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.062,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2023-11-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 6.995,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2023-12-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 6.976,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2024-01-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.044,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2024-02-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.101,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2024-03-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.103,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2024-04-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.11,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2024-05-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.06,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2024-06-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.031,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2024-07-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 7.031,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2024-08-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 6.99,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2024-09-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 6.908,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2024-10-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 6.86,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2024-11-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 6.75,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2024-12-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 6.724,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2025-01-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 6.766,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2025-02-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 6.805,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2025-03-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 6.829,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2025-04-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 6.782,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2025-05-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 6.7816,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2025-06-01",
+      "driver_name": "Consumer Price Index for All Urban Consumers: Information Technology, Hardware and Services in U.S. City Average",
+      "value": 6.7812,
+      "units": "CUSR0000SEEE"
+    },
+    {
+      "observation_date": "2020-01-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 57.71543478,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2020-02-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 50.61875,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2020-03-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 29.20772727,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2020-04-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 16.82409091,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2020-05-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 28.82595238,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2020-06-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 38.30727273,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2020-07-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 40.70304348,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2020-08-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 42.33904762,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2020-09-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 39.57272727,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2020-10-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 39.39590909,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2020-11-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 41.36142857,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2020-12-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 47.06043478,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2021-01-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 51.83952381,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2021-02-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 59.08325,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2021-03-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 62.33304348,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2021-04-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 61.64181818,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2021-05-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 65.25928571,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2021-06-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 71.37818182,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2021-07-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 72.57659091,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2021-08-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 67.73045455,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2021-09-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 71.52204545,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2021-10-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 81.47666667,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2021-11-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 78.68863636,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2021-12-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 71.84130435,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2022-01-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 83.28857143,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2022-02-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 91.64325,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2022-03-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 108.5026087,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2022-04-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 102.0519048,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2022-05-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 109.785,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2022-06-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 114.6184091,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2022-07-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 101.8240476,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2022-08-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 93.66521739,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2022-09-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 84.39727273,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2022-10-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 87.5547619,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2022-11-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 84.04409091,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2022-12-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 76.57681818,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2023-01-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 78.22954545,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2023-02-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 76.80575,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2023-03-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 73.27782609,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2023-04-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 79.48625,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2023-05-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 71.54869565,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2023-06-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 70.29931818,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2023-07-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 75.81595238,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2023-08-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 81.38608696,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2023-09-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 89.26809524,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2023-10-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 85.58136364,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2023-11-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 77.59613636,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2023-12-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 72.02690476,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2024-01-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 73.96695652,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2024-02-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 77.34119048,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2024-03-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 81.41952381,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2024-04-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 85.34727273,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2024-05-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 80.01,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2024-06-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 79.92925,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2024-07-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 81.93152174,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2024-08-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 76.68318182,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2024-09-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 70.36285714,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2024-10-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 72.05804348,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2024-11-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 69.86928571,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2024-12-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 70.14113636,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2025-01-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 75.7073913,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2025-02-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 71.538,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2025-03-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 68.23904762,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2025-04-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 63.57022727,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2025-05-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 62.17136364,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2025-06-01",
+      "driver_name": "Crude Oil Prices: West Texas Intermediate",
+      "value": 68.53261905,
+      "units": "WTI) - Cushing, Oklahoma (DCOILWTICO"
+    },
+    {
+      "observation_date": "2020-01-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 37.728,
+      "units": null
+    },
+    {
+      "observation_date": "2020-02-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 38.247,
+      "units": null
+    },
+    {
+      "observation_date": "2020-03-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 38.706,
+      "units": null
+    },
+    {
+      "observation_date": "2020-04-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 39.015,
+      "units": null
+    },
+    {
+      "observation_date": "2020-05-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 38.629,
+      "units": null
+    },
+    {
+      "observation_date": "2020-06-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 38.778,
+      "units": null
+    },
+    {
+      "observation_date": "2020-07-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 38.686,
+      "units": null
+    },
+    {
+      "observation_date": "2020-08-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 38.866,
+      "units": null
+    },
+    {
+      "observation_date": "2020-09-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 37.459,
+      "units": null
+    },
+    {
+      "observation_date": "2020-10-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 37.201,
+      "units": null
+    },
+    {
+      "observation_date": "2020-11-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 37.964,
+      "units": null
+    },
+    {
+      "observation_date": "2020-12-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 38.315,
+      "units": null
+    },
+    {
+      "observation_date": "2021-01-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 38.316,
+      "units": null
+    },
+    {
+      "observation_date": "2021-02-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 38.204,
+      "units": null
+    },
+    {
+      "observation_date": "2021-03-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 37.453,
+      "units": null
+    },
+    {
+      "observation_date": "2021-04-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 39.358,
+      "units": null
+    },
+    {
+      "observation_date": "2021-05-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 39.611,
+      "units": null
+    },
+    {
+      "observation_date": "2021-06-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 39.662,
+      "units": null
+    },
+    {
+      "observation_date": "2021-07-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 40.135,
+      "units": null
+    },
+    {
+      "observation_date": "2021-08-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 40.184,
+      "units": null
+    },
+    {
+      "observation_date": "2021-09-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 40.649,
+      "units": null
+    },
+    {
+      "observation_date": "2021-10-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 40.31,
+      "units": null
+    },
+    {
+      "observation_date": "2021-11-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 39.78,
+      "units": null
+    },
+    {
+      "observation_date": "2021-12-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 39.401,
+      "units": null
+    },
+    {
+      "observation_date": "2022-01-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 39.651,
+      "units": null
+    },
+    {
+      "observation_date": "2022-02-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 39.958,
+      "units": null
+    },
+    {
+      "observation_date": "2022-03-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 40.302,
+      "units": null
+    },
+    {
+      "observation_date": "2022-04-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 39.446,
+      "units": null
+    },
+    {
+      "observation_date": "2022-05-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 38.909,
+      "units": null
+    },
+    {
+      "observation_date": "2022-06-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 39.421,
+      "units": null
+    },
+    {
+      "observation_date": "2022-07-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 38.719,
+      "units": null
+    },
+    {
+      "observation_date": "2022-08-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 38.469,
+      "units": null
+    },
+    {
+      "observation_date": "2022-09-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 39.175,
+      "units": null
+    },
+    {
+      "observation_date": "2022-10-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 39.076,
+      "units": null
+    },
+    {
+      "observation_date": "2022-11-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 38.02,
+      "units": null
+    },
+    {
+      "observation_date": "2022-12-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 37.115,
+      "units": null
+    },
+    {
+      "observation_date": "2023-01-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 37.21,
+      "units": null
+    },
+    {
+      "observation_date": "2023-02-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 37.712,
+      "units": null
+    },
+    {
+      "observation_date": "2023-03-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 37.957,
+      "units": null
+    },
+    {
+      "observation_date": "2023-04-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 37.449,
+      "units": null
+    },
+    {
+      "observation_date": "2023-05-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 37.289,
+      "units": null
+    },
+    {
+      "observation_date": "2023-06-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 37.357,
+      "units": null
+    },
+    {
+      "observation_date": "2023-07-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 36.82,
+      "units": null
+    },
+    {
+      "observation_date": "2023-08-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 36.529,
+      "units": null
+    },
+    {
+      "observation_date": "2023-09-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 37.146,
+      "units": null
+    },
+    {
+      "observation_date": "2023-10-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 36.845,
+      "units": null
+    },
+    {
+      "observation_date": "2023-11-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 36.258,
+      "units": null
+    },
+    {
+      "observation_date": "2023-12-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 35.773,
+      "units": null
+    },
+    {
+      "observation_date": "2024-01-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 36.441,
+      "units": null
+    },
+    {
+      "observation_date": "2024-02-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 36.695,
+      "units": null
+    },
+    {
+      "observation_date": "2024-03-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 36.528,
+      "units": null
+    },
+    {
+      "observation_date": "2024-04-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 36.865,
+      "units": null
+    },
+    {
+      "observation_date": "2024-05-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 36.476,
+      "units": null
+    },
+    {
+      "observation_date": "2024-06-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 35.778,
+      "units": null
+    },
+    {
+      "observation_date": "2024-07-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 35.929,
+      "units": null
+    },
+    {
+      "observation_date": "2024-08-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 35.792,
+      "units": null
+    },
+    {
+      "observation_date": "2024-09-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 35.406,
+      "units": null
+    },
+    {
+      "observation_date": "2024-10-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 34.849,
+      "units": null
+    },
+    {
+      "observation_date": "2024-11-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 34.259,
+      "units": null
+    },
+    {
+      "observation_date": "2024-12-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 33.942,
+      "units": null
+    },
+    {
+      "observation_date": "2025-01-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 34.237,
+      "units": null
+    },
+    {
+      "observation_date": "2025-02-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 34.477,
+      "units": null
+    },
+    {
+      "observation_date": "2025-03-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 34.547,
+      "units": null
+    },
+    {
+      "observation_date": "2025-04-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 34.805,
+      "units": null
+    },
+    {
+      "observation_date": "2025-05-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 35.202,
+      "units": null
+    },
+    {
+      "observation_date": "2025-06-01",
+      "driver_name": "CPI \ufffd Computers, Peripheral Devices & Smart Home Electronics",
+      "value": 35.685,
+      "units": null
+    },
+    {
+      "observation_date": "2020-01-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.43,
+      "units": null
+    },
+    {
+      "observation_date": "2020-02-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.43,
+      "units": null
+    },
+    {
+      "observation_date": "2020-03-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.51,
+      "units": null
+    },
+    {
+      "observation_date": "2020-04-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.74,
+      "units": null
+    },
+    {
+      "observation_date": "2020-05-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.56,
+      "units": null
+    },
+    {
+      "observation_date": "2020-06-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.42,
+      "units": null
+    },
+    {
+      "observation_date": "2020-07-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.37,
+      "units": null
+    },
+    {
+      "observation_date": "2020-08-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.36,
+      "units": null
+    },
+    {
+      "observation_date": "2020-09-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.36,
+      "units": null
+    },
+    {
+      "observation_date": "2020-10-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.36,
+      "units": null
+    },
+    {
+      "observation_date": "2020-11-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.36,
+      "units": null
+    },
+    {
+      "observation_date": "2020-12-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.34,
+      "units": null
+    },
+    {
+      "observation_date": "2021-01-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.31,
+      "units": null
+    },
+    {
+      "observation_date": "2021-02-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.34,
+      "units": null
+    },
+    {
+      "observation_date": "2021-03-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.28,
+      "units": null
+    },
+    {
+      "observation_date": "2021-04-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.26,
+      "units": null
+    },
+    {
+      "observation_date": "2021-05-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.27,
+      "units": null
+    },
+    {
+      "observation_date": "2021-06-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.26,
+      "units": null
+    },
+    {
+      "observation_date": "2021-07-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.27,
+      "units": null
+    },
+    {
+      "observation_date": "2021-08-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.28,
+      "units": null
+    },
+    {
+      "observation_date": "2021-09-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.29,
+      "units": null
+    },
+    {
+      "observation_date": "2021-10-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.28,
+      "units": null
+    },
+    {
+      "observation_date": "2021-11-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.28,
+      "units": null
+    },
+    {
+      "observation_date": "2021-12-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.31,
+      "units": null
+    },
+    {
+      "observation_date": "2022-01-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.3,
+      "units": null
+    },
+    {
+      "observation_date": "2022-02-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.31,
+      "units": null
+    },
+    {
+      "observation_date": "2022-03-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.31,
+      "units": null
+    },
+    {
+      "observation_date": "2022-04-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.32,
+      "units": null
+    },
+    {
+      "observation_date": "2022-05-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.34,
+      "units": null
+    },
+    {
+      "observation_date": "2022-06-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.34,
+      "units": null
+    },
+    {
+      "observation_date": "2022-07-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.37,
+      "units": null
+    },
+    {
+      "observation_date": "2022-08-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.38,
+      "units": null
+    },
+    {
+      "observation_date": "2022-09-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.39,
+      "units": null
+    },
+    {
+      "observation_date": "2022-10-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.39,
+      "units": null
+    },
+    {
+      "observation_date": "2022-11-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.41,
+      "units": null
+    },
+    {
+      "observation_date": "2022-12-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.43,
+      "units": null
+    },
+    {
+      "observation_date": "2023-01-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.4,
+      "units": null
+    },
+    {
+      "observation_date": "2023-02-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.41,
+      "units": null
+    },
+    {
+      "observation_date": "2023-03-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.43,
+      "units": null
+    },
+    {
+      "observation_date": "2023-04-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.42,
+      "units": null
+    },
+    {
+      "observation_date": "2023-05-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.42,
+      "units": null
+    },
+    {
+      "observation_date": "2023-06-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.42,
+      "units": null
+    },
+    {
+      "observation_date": "2023-07-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.41,
+      "units": null
+    },
+    {
+      "observation_date": "2023-08-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.4,
+      "units": null
+    },
+    {
+      "observation_date": "2023-09-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.38,
+      "units": null
+    },
+    {
+      "observation_date": "2023-10-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.4,
+      "units": null
+    },
+    {
+      "observation_date": "2023-11-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.4,
+      "units": null
+    },
+    {
+      "observation_date": "2023-12-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.4,
+      "units": null
+    },
+    {
+      "observation_date": "2024-01-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.41,
+      "units": null
+    },
+    {
+      "observation_date": "2024-02-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.4,
+      "units": null
+    },
+    {
+      "observation_date": "2024-03-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.4,
+      "units": null
+    },
+    {
+      "observation_date": "2024-04-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.4,
+      "units": null
+    },
+    {
+      "observation_date": "2024-05-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.41,
+      "units": null
+    },
+    {
+      "observation_date": "2024-06-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.41,
+      "units": null
+    },
+    {
+      "observation_date": "2024-07-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.4,
+      "units": null
+    },
+    {
+      "observation_date": "2024-08-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.41,
+      "units": null
+    },
+    {
+      "observation_date": "2024-09-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.4,
+      "units": null
+    },
+    {
+      "observation_date": "2024-10-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.41,
+      "units": null
+    },
+    {
+      "observation_date": "2024-11-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.4,
+      "units": null
+    },
+    {
+      "observation_date": "2024-12-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.39,
+      "units": null
+    },
+    {
+      "observation_date": "2025-01-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.4,
+      "units": null
+    },
+    {
+      "observation_date": "2025-02-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.39,
+      "units": null
+    },
+    {
+      "observation_date": "2025-03-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.38,
+      "units": null
+    },
+    {
+      "observation_date": "2025-04-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.38,
+      "units": null
+    },
+    {
+      "observation_date": "2025-05-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.39,
+      "units": null
+    },
+    {
+      "observation_date": "2025-06-01",
+      "driver_name": "Total Business: Inventories to Sales Ratio",
+      "value": 1.38,
+      "units": null
+    },
+    {
+      "observation_date": "2020-01-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 76.3936,
+      "units": null
+    },
+    {
+      "observation_date": "2020-02-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 75.0445,
+      "units": null
+    },
+    {
+      "observation_date": "2020-03-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 75.8552,
+      "units": null
+    },
+    {
+      "observation_date": "2020-04-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 74.8278,
+      "units": null
+    },
+    {
+      "observation_date": "2020-05-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 74.9479,
+      "units": null
+    },
+    {
+      "observation_date": "2020-06-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 76.8261,
+      "units": null
+    },
+    {
+      "observation_date": "2020-07-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 79.0645,
+      "units": null
+    },
+    {
+      "observation_date": "2020-08-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 79.9724,
+      "units": null
+    },
+    {
+      "observation_date": "2020-09-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 82.8602,
+      "units": null
+    },
+    {
+      "observation_date": "2020-10-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 86.2359,
+      "units": null
+    },
+    {
+      "observation_date": "2020-11-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 87.5956,
+      "units": null
+    },
+    {
+      "observation_date": "2020-12-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 87.9388,
+      "units": null
+    },
+    {
+      "observation_date": "2021-01-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 87.7715,
+      "units": null
+    },
+    {
+      "observation_date": "2021-02-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 87.1846,
+      "units": null
+    },
+    {
+      "observation_date": "2021-03-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 87.8126,
+      "units": null
+    },
+    {
+      "observation_date": "2021-04-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 89.6946,
+      "units": null
+    },
+    {
+      "observation_date": "2021-05-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 91.244,
+      "units": null
+    },
+    {
+      "observation_date": "2021-06-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 89.2552,
+      "units": null
+    },
+    {
+      "observation_date": "2021-07-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 86.5625,
+      "units": null
+    },
+    {
+      "observation_date": "2021-08-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 86.4536,
+      "units": null
+    },
+    {
+      "observation_date": "2021-09-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 86.4326,
+      "units": null
+    },
+    {
+      "observation_date": "2021-10-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 87.4663,
+      "units": null
+    },
+    {
+      "observation_date": "2021-11-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 88.9092,
+      "units": null
+    },
+    {
+      "observation_date": "2021-12-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 90.1473,
+      "units": null
+    },
+    {
+      "observation_date": "2022-01-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 90.4398,
+      "units": null
+    },
+    {
+      "observation_date": "2022-02-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 92.195,
+      "units": null
+    },
+    {
+      "observation_date": "2022-03-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 92.0453,
+      "units": null
+    },
+    {
+      "observation_date": "2022-04-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 90.2749,
+      "units": null
+    },
+    {
+      "observation_date": "2022-05-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 90.1815,
+      "units": null
+    },
+    {
+      "observation_date": "2022-06-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 91.1662,
+      "units": null
+    },
+    {
+      "observation_date": "2022-07-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 90.6743,
+      "units": null
+    },
+    {
+      "observation_date": "2022-08-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 90.5711,
+      "units": null
+    },
+    {
+      "observation_date": "2022-09-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 90.4573,
+      "units": null
+    },
+    {
+      "observation_date": "2022-10-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 88.6988,
+      "units": null
+    },
+    {
+      "observation_date": "2022-11-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 88.0015,
+      "units": null
+    },
+    {
+      "observation_date": "2022-12-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 85.2342,
+      "units": null
+    },
+    {
+      "observation_date": "2023-01-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 83.6464,
+      "units": null
+    },
+    {
+      "observation_date": "2023-02-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 84.8008,
+      "units": null
+    },
+    {
+      "observation_date": "2023-03-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 83.7076,
+      "units": null
+    },
+    {
+      "observation_date": "2023-04-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 84.0728,
+      "units": null
+    },
+    {
+      "observation_date": "2023-05-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 83.1636,
+      "units": null
+    },
+    {
+      "observation_date": "2023-06-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 81.7729,
+      "units": null
+    },
+    {
+      "observation_date": "2023-07-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 81.5733,
+      "units": null
+    },
+    {
+      "observation_date": "2023-08-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 80.0458,
+      "units": null
+    },
+    {
+      "observation_date": "2023-09-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 78.5069,
+      "units": null
+    },
+    {
+      "observation_date": "2023-10-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 78.8734,
+      "units": null
+    },
+    {
+      "observation_date": "2023-11-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 78.9469,
+      "units": null
+    },
+    {
+      "observation_date": "2023-12-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 78.8761,
+      "units": null
+    },
+    {
+      "observation_date": "2024-01-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 78.484,
+      "units": null
+    },
+    {
+      "observation_date": "2024-02-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 77.1831,
+      "units": null
+    },
+    {
+      "observation_date": "2024-03-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 76.6549,
+      "units": null
+    },
+    {
+      "observation_date": "2024-04-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 79.1091,
+      "units": null
+    },
+    {
+      "observation_date": "2024-05-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 78.7269,
+      "units": null
+    },
+    {
+      "observation_date": "2024-06-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 77.6408,
+      "units": null
+    },
+    {
+      "observation_date": "2024-07-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 76.9937,
+      "units": null
+    },
+    {
+      "observation_date": "2024-08-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 79.1812,
+      "units": null
+    },
+    {
+      "observation_date": "2024-09-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 77.1757,
+      "units": null
+    },
+    {
+      "observation_date": "2024-10-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 77.5763,
+      "units": null
+    },
+    {
+      "observation_date": "2024-11-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 76.4462,
+      "units": null
+    },
+    {
+      "observation_date": "2024-12-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 76.5679,
+      "units": null
+    },
+    {
+      "observation_date": "2025-01-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 79.5424,
+      "units": null
+    },
+    {
+      "observation_date": "2025-02-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 79.2698,
+      "units": null
+    },
+    {
+      "observation_date": "2025-03-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 77.916,
+      "units": null
+    },
+    {
+      "observation_date": "2025-04-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 78.2049,
+      "units": null
+    },
+    {
+      "observation_date": "2025-05-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 78.01,
+      "units": null
+    },
+    {
+      "observation_date": "2025-06-01",
+      "driver_name": "Capacity Utilization \ufffd Semiconductor & Electronic Component",
+      "value": 76.224,
+      "units": null
+    },
+    {
+      "observation_date": "2020-01-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 131.0,
+      "units": null
+    },
+    {
+      "observation_date": "2020-02-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 135.0,
+      "units": null
+    },
+    {
+      "observation_date": "2020-03-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 117.0,
+      "units": null
+    },
+    {
+      "observation_date": "2020-04-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 130.0,
+      "units": null
+    },
+    {
+      "observation_date": "2020-05-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 74.0,
+      "units": null
+    },
+    {
+      "observation_date": "2020-06-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 91.0,
+      "units": null
+    },
+    {
+      "observation_date": "2020-07-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 100.0,
+      "units": null
+    },
+    {
+      "observation_date": "2020-08-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 83.0,
+      "units": null
+    },
+    {
+      "observation_date": "2020-09-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 124.0,
+      "units": null
+    },
+    {
+      "observation_date": "2020-10-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 128.0,
+      "units": null
+    },
+    {
+      "observation_date": "2020-11-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 97.0,
+      "units": null
+    },
+    {
+      "observation_date": "2020-12-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 123.0,
+      "units": null
+    },
+    {
+      "observation_date": "2021-01-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 174.0,
+      "units": null
+    },
+    {
+      "observation_date": "2021-02-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 112.0,
+      "units": null
+    },
+    {
+      "observation_date": "2021-03-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 106.0,
+      "units": null
+    },
+    {
+      "observation_date": "2021-04-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 141.0,
+      "units": null
+    },
+    {
+      "observation_date": "2021-05-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 137.0,
+      "units": null
+    },
+    {
+      "observation_date": "2021-06-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 153.0,
+      "units": null
+    },
+    {
+      "observation_date": "2021-07-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 226.0,
+      "units": null
+    },
+    {
+      "observation_date": "2021-08-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 203.0,
+      "units": null
+    },
+    {
+      "observation_date": "2021-09-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 220.0,
+      "units": null
+    },
+    {
+      "observation_date": "2021-10-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 210.0,
+      "units": null
+    },
+    {
+      "observation_date": "2021-11-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 194.0,
+      "units": null
+    },
+    {
+      "observation_date": "2021-12-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 247.0,
+      "units": null
+    },
+    {
+      "observation_date": "2022-01-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 246.0,
+      "units": null
+    },
+    {
+      "observation_date": "2022-02-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 262.0,
+      "units": null
+    },
+    {
+      "observation_date": "2022-03-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 263.0,
+      "units": null
+    },
+    {
+      "observation_date": "2022-04-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 298.0,
+      "units": null
+    },
+    {
+      "observation_date": "2022-05-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 224.0,
+      "units": null
+    },
+    {
+      "observation_date": "2022-06-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 221.0,
+      "units": null
+    },
+    {
+      "observation_date": "2022-07-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 267.0,
+      "units": null
+    },
+    {
+      "observation_date": "2022-08-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 187.0,
+      "units": null
+    },
+    {
+      "observation_date": "2022-09-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 230.0,
+      "units": null
+    },
+    {
+      "observation_date": "2022-10-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 215.0,
+      "units": null
+    },
+    {
+      "observation_date": "2022-11-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 198.0,
+      "units": null
+    },
+    {
+      "observation_date": "2022-12-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 82.0,
+      "units": null
+    },
+    {
+      "observation_date": "2023-01-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 108.0,
+      "units": null
+    },
+    {
+      "observation_date": "2023-02-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 156.0,
+      "units": null
+    },
+    {
+      "observation_date": "2023-03-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 147.0,
+      "units": null
+    },
+    {
+      "observation_date": "2023-04-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 160.0,
+      "units": null
+    },
+    {
+      "observation_date": "2023-05-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 144.0,
+      "units": null
+    },
+    {
+      "observation_date": "2023-06-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 135.0,
+      "units": null
+    },
+    {
+      "observation_date": "2023-07-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 174.0,
+      "units": null
+    },
+    {
+      "observation_date": "2023-08-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 141.0,
+      "units": null
+    },
+    {
+      "observation_date": "2023-09-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 101.0,
+      "units": null
+    },
+    {
+      "observation_date": "2023-10-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 102.0,
+      "units": null
+    },
+    {
+      "observation_date": "2023-11-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 131.0,
+      "units": null
+    },
+    {
+      "observation_date": "2023-12-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 143.0,
+      "units": null
+    },
+    {
+      "observation_date": "2024-01-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 168.0,
+      "units": null
+    },
+    {
+      "observation_date": "2024-02-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 139.0,
+      "units": null
+    },
+    {
+      "observation_date": "2024-03-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 147.0,
+      "units": null
+    },
+    {
+      "observation_date": "2024-04-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 102.0,
+      "units": null
+    },
+    {
+      "observation_date": "2024-05-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 118.0,
+      "units": null
+    },
+    {
+      "observation_date": "2024-06-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 92.0,
+      "units": null
+    },
+    {
+      "observation_date": "2024-07-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 127.0,
+      "units": null
+    },
+    {
+      "observation_date": "2024-08-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 131.0,
+      "units": null
+    },
+    {
+      "observation_date": "2024-09-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 122.0,
+      "units": null
+    },
+    {
+      "observation_date": "2024-10-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 191.0,
+      "units": null
+    },
+    {
+      "observation_date": "2024-11-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 109.0,
+      "units": null
+    },
+    {
+      "observation_date": "2024-12-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 105.0,
+      "units": null
+    },
+    {
+      "observation_date": "2025-01-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 143.0,
+      "units": null
+    },
+    {
+      "observation_date": "2025-02-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 136.0,
+      "units": null
+    },
+    {
+      "observation_date": "2025-03-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 160.0,
+      "units": null
+    },
+    {
+      "observation_date": "2025-04-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 184.0,
+      "units": null
+    },
+    {
+      "observation_date": "2025-05-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 165.0,
+      "units": null
+    },
+    {
+      "observation_date": "2025-06-01",
+      "driver_name": "Job Openings: Information Sector",
+      "value": 165.0,
+      "units": null
+    },
+    {
+      "observation_date": "2020-01-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13737.79625,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2020-02-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13737.79625,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2020-03-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13737.79625,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2020-04-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13737.79625,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2020-05-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13737.79625,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2020-06-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13737.79625,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2020-07-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13737.79625,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2020-08-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13737.79625,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2020-09-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13737.79625,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2020-10-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13737.79625,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2020-11-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13737.79625,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2020-12-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13737.79625,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2021-01-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13737.79625,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2021-02-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13737.79625,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2021-03-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13168.8113,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2021-04-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13886.45682,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2021-05-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13530.81857,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2021-06-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 14097.16909,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2021-07-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 14639.63705,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2021-08-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 14856.51773,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2021-09-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 15039.23795,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2021-10-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 14879.01238,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2021-11-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 15808.27432,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2021-12-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 15486.94848,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2022-01-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 14539.42262,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2022-02-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13877.03175,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2022-03-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13623.26304,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2022-04-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13391.66571,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2022-05-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 11842.29909,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2022-06-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 11396.86932,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2022-07-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 11603.69881,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2022-08-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 12570.26043,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2022-09-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 11411.26068,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2022-10-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 10801.49429,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2022-11-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 10986.46545,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2022-12-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 10820.2025,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2023-01-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 10990.62205,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2023-02-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 11777.80975,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2023-03-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 11637.09217,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2023-04-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 12074.0995,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2023-05-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 12470.44478,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2023-06-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13473.53455,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2023-07-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 14022.1919,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2023-08-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13739.49652,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2023-09-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13606.81952,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2023-10-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13199.42773,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2023-11-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 13928.85114,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2023-12-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 14706.83952,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2024-01-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 15067.66739,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2024-02-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 15803.90071,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2024-03-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 16224.47881,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2024-04-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 15950.86364,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2024-05-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 16555.18761,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2024-06-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 17510.6925,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2024-07-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 17976.64913,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2024-08-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 17268.26864,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2024-09-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 17590.93143,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2024-10-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 18316.11565,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2024-11-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 18969.87262,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2024-12-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 19747.79932,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2025-01-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 19548.27891,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2025-02-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 19571.61775,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2025-03-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 17828.02619,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2025-04-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 16651.19659,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2025-05-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 18657.17795,
+      "units": "Tech-Heavy Stock Market Index"
+    },
+    {
+      "observation_date": "2025-06-01",
+      "driver_name": "NASDAQ Composite Index",
+      "value": 19664.89762,
+      "units": "Tech-Heavy Stock Market Index"
+    }
+  ],
+  "data_version": 1
+}
