@@ -3,8 +3,8 @@
     "tenant_1": {
       "configs": {
         "payloads": {
-          "kpi": ["all.json"],
-          "pnl": ["all.json"]
+          "kpi": ["ROOT:All.json"],
+          "pnl": ["ROOT:All.json"]
         },
         "lighthouse": ["lh.yml"],
         "chat": ["chat.yml"]

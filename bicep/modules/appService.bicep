@@ -85,7 +85,8 @@ var backendFrontendUrl = !empty(frontendPublicBaseUrl) ? frontendPublicBaseUrl :
 var backendFrontendUrlAppSettings = [
   { name: 'FRONTEND_URL', value: backendFrontendUrl }
 ]
-var sharedAppSettings = [ { name: 'AZURE_APP_CONFIG_CONNECTION_STRING', value: appConfigConnectionString }, { name: 'KEY_VAULT_URI', value: keyVaultUri } ]
+var azureAppConfigConnectionStringQuoted = '"${appConfigConnectionString}"'
+var sharedAppSettings = [ { name: 'AZURE_APP_CONFIG_CONNECTION_STRING', value: azureAppConfigConnectionStringQuoted }, { name: 'KEY_VAULT_URI', value: keyVaultUri } ]
 
 var microsoftAuthEnabled = !empty(microsoftIdentityClientId) && !empty(microsoftIdentityTenantId) && !empty(frontendPublicBaseUrl)
 // Easy Auth (Microsoft provider) needs a client secret and an app setting name referenced by authsettingsV2.
