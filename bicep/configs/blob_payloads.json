@@ -6,7 +6,7 @@
           "kpi": ["ROOT:All.json"],
           "pnl": ["ROOT:All.json"]
         },
-        "frontend": ["configs.json"],
+        "frontend": ["config.json"],
         "lighthouse": ["lh.yml"],
         "chat": ["chat.yml"]
       }
