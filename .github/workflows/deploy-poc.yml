@@ -385,7 +385,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          INIT_SQL="ey-ai-finance/db/${{ inputs.appChoice }}/init.sql"
+          INIT_SQL="ey-ai-finance/resources/${{ inputs.appChoice }}/db/init.sql"
           PG_HOST="${{ needs.deploy-main-resources.outputs.postgresHost }}"
           PG_DB="${{ needs.deploy-main-resources.outputs.postgresDatabaseName }}"
           WS="${GITHUB_WORKSPACE}"
@@ -403,6 +403,8 @@ jobs:
 
           SCHEMA_SRC=""
           for d in \
+            "${WS}/ey-ai-finance/resources/${APP_CHOICE}/db/schemas" \
+            "${WS}/ey-ai-finance/resources/${APP_CHOICE}/schemas" \
             "${WS}/ey-ai-finance/schemas" \
             "${WS}/ey-ai-finance/db/${APP_CHOICE}/schemas" \
             "${WS}/ey-ai-finance/db/schemas"
@@ -422,7 +424,7 @@ jobs:
             sudo ln -sfn "${SCHEMA_SRC}" /schemas
             echo "Linked /schemas -> ${SCHEMA_SRC}"
           else
-            echo "::error::Could not find schema SQL layout for \\i /schemas/... — expected a directory containing forecasts/ (e.g. ey-ai-finance/schemas or ey-ai-finance/db/${APP_CHOICE}/schemas) with forecasts/create_schema.sql. Commit those files in ey-ai-finance or change \\i to repo-relative paths."
+            echo "::error::Could not find schema SQL layout for \\i /schemas/... — expected a directory containing forecasts/ (e.g. ey-ai-finance/resources/${APP_CHOICE}/db/schemas, ey-ai-finance/schemas, or ey-ai-finance/db/${APP_CHOICE}/schemas) with forecasts/create_schema.sql. Commit those files in ey-ai-finance or change \\i to repo-relative paths."
             exit 1
           fi
 
