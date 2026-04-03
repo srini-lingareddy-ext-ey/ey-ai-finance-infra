@@ -4,7 +4,7 @@ param location string
 param acrManagedIdentityResourceId string
 @description('Client ID (applicationId) of the user-assigned managed identity used for ACR pull. Required for acrUseManagedIdentityCreds.')
 param acrManagedIdentityClientId string
-@description('Primary read-write App Configuration connection string. Deploy POC: az deployment sub show --query properties.outputs.appConfigConnectionString.value, or portal Access keys → Primary.')
+@description('Primary read-write App Configuration connection string. Deploy POC: scripts/app_configuration_connection_string.sh (secure deployment outputs are not readable via az deployment show). Portal: Access keys → Primary.')
 @secure()
 param appConfigConnectionString string
 param keyVaultUri string

@@ -50,8 +50,8 @@ on:
         default: false
 
       preapprovedUserEmails:
-        description: "Comma-separated admin emails upserted into preapproved_users (is_admin true). Example: John.Doe@ey.com,Jane.Smith@ey.com. Leave empty only if you will add admins via SQL in PostgreSQL — empty logs a workflow warning and skips the upsert."
-        required: false
+        description: "Pre Approved User Admin Emails - Comma-separated admin emails upserted into preapproved_users (is_admin true). Example: John.Doe@ey.com,Jane.Smith@ey.com. Leave empty only if you will add admins via SQL in PostgreSQL — empty logs a workflow warning and skips the upsert."
+        required: true
         type: string
         default: ""
       frontendImage:
@@ -690,8 +690,8 @@ jobs:
           RG="${{ needs.deploy-main-resources.outputs.resourceGroupName }}"
           KV="${{ needs.deploy-main-resources.outputs.keyVaultName }}"
           ST_NAME="${{ needs.deploy-main-resources.outputs.storageAccountName }}"
+          APP_CFG_STORE="${{ needs.deploy-main-resources.outputs.appConfigStoreName }}"
           POC_SLUG="${{ inputs.pocSlug }}"
-          MAIN_DEPLOY_NAME="main-${POC_SLUG}-${{ github.run_number }}"
           FRONTEND_BASE="https://eyaifinance-${POC_SLUG}.azurewebsites.net"
 
           MS_APP_ID="${MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID}"
@@ -700,12 +700,9 @@ jobs:
           FRONTEND_AUTH_BASE="$FRONTEND_BASE"
           echo "Microsoft Entra: Easy Auth on frontend (MICROSOFT_PROVIDER_CLIENT_SECRET on frontend plus shared App Config / Key Vault)."
 
-          APP_CFG_CONN=$(az deployment sub show --name "$MAIN_DEPLOY_NAME" --query "properties.outputs.appConfigConnectionString.value" -o tsv)
-          if [[ -z "${APP_CFG_CONN:-}" || "$APP_CFG_CONN" == "null" ]]; then
-            echo "::error::Could not read appConfigConnectionString from subscription deployment ${MAIN_DEPLOY_NAME} (same output as main.bicep)."
-            exit 1
-          fi
-          echo "App Configuration: connection string from main.bicep deployment output ${MAIN_DEPLOY_NAME} (secret not logged)."
+          # @secure() outputs are not returned by az deployment sub show — fetch Primary key via App Configuration API (same string Bicep listKeys uses).
+          APP_CFG_CONN=$(bash scripts/app_configuration_connection_string.sh "$APP_CFG_STORE" "$RG")
+          echo "App Configuration: Primary connection string via credential list (matches Bicep; secret not logged)."
 
           PG_HOST="${{ needs.deploy-main-resources.outputs.postgresHost }}"
           PG_DB="${{ needs.deploy-main-resources.outputs.postgresDatabaseName }}"

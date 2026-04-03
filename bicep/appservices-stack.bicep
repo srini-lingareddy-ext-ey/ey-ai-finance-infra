@@ -8,7 +8,7 @@ param pocSlug string
 @description('Azure region for all resources.')
 param location string = resourceGroup().location
 
-@description('Primary read-write connection string. Use main.bicep output appConfigConnectionString, or portal Access keys → Primary.')
+@description('Primary read-write connection string. Pipelines: scripts/app_configuration_connection_string.sh (ARM omits @secure() values from deployment show). Portal: Access keys → Primary.')
 @secure()
 param appConfigConnectionString string
 
