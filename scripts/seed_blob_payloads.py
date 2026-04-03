@@ -3,6 +3,7 @@
 Seed blob paths from blob_payloads.json into Azure Storage (tenants container).
 
 - Under configs/payloads/*.json: uploads minimal "{}" as application/json (placeholders).
+- Under configs/frontend/*.json: same "{}" placeholders (blob path only; not synced to App Configuration).
 - Under configs/lighthouse/*.yml and configs/chat/*.yml: uploads files from --config-dir
   (default bicep/configs) by matching the manifest filename (e.g. lh.yml -> config-dir/lh.yml).
 
@@ -57,6 +58,15 @@ def collect_uploads(manifest: dict, poc_slug: str) -> list[tuple[str, str, str, 
                         fname_res = subst_poc_slug(fname, poc_slug)
                         blob = f"{prefix}/configs/payloads/{folder_res}/{fname_res}"
                         out.append((container_name, blob, "application/json", None))
+
+            frontend = configs.get("frontend")
+            if isinstance(frontend, list):
+                for fname in frontend:
+                    if not isinstance(fname, str):
+                        continue
+                    fname_res = subst_poc_slug(fname, poc_slug)
+                    blob = f"{prefix}/configs/frontend/{fname_res}"
+                    out.append((container_name, blob, "application/json", None))
 
             for segment in ("lighthouse", "chat"):
                 files = configs.get(segment)

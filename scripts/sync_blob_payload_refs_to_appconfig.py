@@ -3,7 +3,9 @@
 Set Azure App Configuration keys to blob paths (relative to the storage container) from blob_payloads.json.
 
 Manifest shape matches scripts/seed_blob_payloads.py:
-  <container> -> <tenantKey> -> configs -> payloads (folder -> file list), lighthouse (file list), chat (file list).
+  <container> -> <tenantKey> -> configs -> payloads (folder -> file list), frontend (json list), lighthouse (file list), chat (file list).
+
+  **frontend** blobs are seeded by seed_blob_payloads.py but are **not** registered here (no App Configuration keys for frontend paths).
 
 Every "{pocSlug}" in the manifest is replaced by --poc-slug (full-file text substitution before JSON parse).
 
