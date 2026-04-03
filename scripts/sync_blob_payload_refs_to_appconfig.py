@@ -11,8 +11,10 @@ Every "{pocSlug}" in the manifest is replaced by --poc-slug (full-file text subs
 
 Key: path under **configs/** only, **/** → **:**, last segment = filename **without** extension.
   configs/payloads/kpi/all.json   -> payloads:kpi:all
-  configs/lighthouse/lh.yml       -> lighthouse:lh
-  configs/chat/chat.yml           -> chat:chat
+
+**Exception:** **chat** and **lighthouse** use a single-segment key (the folder name only), not ``folder:fileStem``:
+  configs/lighthouse/lh.yml       -> lighthouse
+  configs/chat/chat.yml             -> chat
 
 Value: blob name inside the container (same layout as seed_blob_payloads): **{tenantPrefix}/configs/...**
 """
@@ -41,7 +43,10 @@ def app_config_key_from_configs_relative(relative_under_configs: str) -> str:
 
 
 def collect_key_value_pairs(manifest: dict, poc_slug: str) -> list[tuple[str, str]]:
-    """Return (app_config_key, blob_path) for each payload / lighthouse / chat file."""
+    """Return (app_config_key, blob_path) for each payload / lighthouse / chat file.
+
+    Lighthouse and chat use keys ``lighthouse`` and ``chat`` (one key per segment; last file wins if several).
+    """
     pairs: list[tuple[str, str]] = []
     for _container_name, container_content in manifest.items():
         if not isinstance(container_content, dict):
@@ -77,10 +82,9 @@ def collect_key_value_pairs(manifest: dict, poc_slug: str) -> list[tuple[str, st
                     if not isinstance(fname, str):
                         continue
                     fname_res = subst_poc_slug(fname, poc_slug)
-                    rel = f"{segment}/{fname_res}"
-                    key = app_config_key_from_configs_relative(rel)
                     blob = f"{prefix}/configs/{segment}/{fname_res}"
-                    pairs.append((key, blob))
+                    # App expects keys "lighthouse" and "chat", not lighthouse:lh / chat:chat.
+                    pairs.append((segment, blob))
 
     return pairs
 

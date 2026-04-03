@@ -150,7 +150,7 @@ var backendMongoAppSettings = !empty(mongoConnStr)
   : []
 var backendStorageConnectionAppSettings = !empty(storageConnectionString)
   ? [
-      { name: 'STORAGE_ACCOUNT', value: storageConnectionString }
+      { name: 'STORAGE_ACCOUNT', value: '"${storageConnectionString}"' }
     ]
   : []
 var backendOpenAiLegacyAppSettings = !empty(openAiAccountEus2Legacy)
