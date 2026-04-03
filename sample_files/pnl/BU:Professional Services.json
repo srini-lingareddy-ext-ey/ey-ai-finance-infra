@@ -91,7 +91,7 @@
     },
 
     {
-      "tenant_id": 2,
+      "tenant_id": 1,
       "table_label": "Managed Support Subscribers",
       "cache_table": false,
       "root_entity_code": "BU:Professional Services",
@@ -172,7 +172,7 @@
     },
 
     {
-      "tenant_id": 2,
+      "tenant_id": 1,
       "table_label": "Professional Services Overall Revenue",
       "cache_table": false,
       "root_entity_code": "BU:Professional Services",
