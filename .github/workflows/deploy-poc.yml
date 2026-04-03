@@ -439,23 +439,6 @@ jobs:
 
           echo "Database initialization completed successfully."
 
-      - name: Clear tenants after init
-        if: ${{ inputs.appChoice == 'aifinance-next' }}
-        env:
-          PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
-        run: |
-          set -euo pipefail
-          PG_HOST="${{ needs.deploy-main-resources.outputs.postgresHost }}"
-          PG_DB="${{ needs.deploy-main-resources.outputs.postgresDatabaseName }}"
-
-          psql "host=${PG_HOST} port=5432 dbname=${PG_DB} user=citus sslmode=require" \
-            -v ON_ERROR_STOP=1 <<'SQL'
-          DELETE FROM tenant_version;
-          DELETE FROM tenant;
-          SQL
-
-          echo "Cleared tenant_version and tenant."
-
       - name: Insert preapproved admin users
         env:
           PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}

@@ -11,7 +11,7 @@
 #   - Verify tables were created: connect to DB and run \dt to list tables
 #   - preapproved_users is upserted after init.sql via scripts/upsert_preapproved_users.py when preapprovedUserEmails is non-empty (same as Deploy POC; empty logs a warning and skips; no built-in default list)
 #
-# Matches Deploy POC job init-postgres: resources/<appChoice>/db/init.sql, /schemas symlink for \i /schemas/..., clear tenant tables when appChoice is aifinance-next, then upsert_preapproved_users.py.
+# Matches Deploy POC job init-postgres: resources/<appChoice>/db/init.sql, /schemas symlink for \i /schemas/..., then upsert_preapproved_users.py.
 
 # SECRETS: EY_AI_FINANCE_REPO_TOKEN: Provides access to ey-ai-finance repo | POSTGRES_ADMIN_PASSWORD: PostgreSQL citus user password
 
@@ -126,23 +126,6 @@ jobs:
             -f "${INIT_SQL}"
 
           echo "Database initialization completed successfully."
-
-      - name: Clear tenants after init
-        if: ${{ inputs.appChoice == 'aifinance-next' }}
-        env:
-          PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
-        run: |
-          set -euo pipefail
-          PG_HOST="${{ inputs.postgresHost }}"
-          PG_DB="${{ inputs.databaseName }}"
-
-          psql "host=${PG_HOST} port=5432 dbname=${PG_DB} user=citus sslmode=require" \
-            -v ON_ERROR_STOP=1 <<'SQL'
-          DELETE FROM tenant_version;
-          DELETE FROM tenant;
-          SQL
-
-          echo "Cleared tenant_version and tenant."
 
       - name: Insert preapproved admin users
         env:
