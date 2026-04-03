@@ -37,7 +37,7 @@
   "pages": {
     "financialOverview": {
       "filters": {
-        "show": ["year", "period", "businessUnit", "geography"]
+        "show": ["year", "period", "businessUnit", "geography", "lineItem"]
       },
       "components": {
         "kpiBar": {
