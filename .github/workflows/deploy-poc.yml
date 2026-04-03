@@ -296,7 +296,7 @@ jobs:
             TOTAL_SLEEP=$((TOTAL_SLEEP + actual))
           }
 
-          CONN=$(az storage account show-connection-string --name "$SA" --resource-group "$RG" --query connectionString -o tsv)
+          CONN=$(bash scripts/storage_account_connection_string.sh "$RG" "$SA")
           # Validate data-plane reachability before uploading many blobs.
           for i in {1..10}; do
             if az storage container list --connection-string "$CONN" --num-results 1 --output none; then
@@ -689,9 +689,9 @@ jobs:
           echo "Backend container image: ${BACKEND_IMAGE}"
           RG="${{ needs.deploy-main-resources.outputs.resourceGroupName }}"
           KV="${{ needs.deploy-main-resources.outputs.keyVaultName }}"
-          APP_CFG_STORE="${{ needs.deploy-main-resources.outputs.appConfigStoreName }}"
           ST_NAME="${{ needs.deploy-main-resources.outputs.storageAccountName }}"
           POC_SLUG="${{ inputs.pocSlug }}"
+          MAIN_DEPLOY_NAME="main-${POC_SLUG}-${{ github.run_number }}"
           FRONTEND_BASE="https://eyaifinance-${POC_SLUG}.azurewebsites.net"
 
           MS_APP_ID="${MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID}"
@@ -700,13 +700,12 @@ jobs:
           FRONTEND_AUTH_BASE="$FRONTEND_BASE"
           echo "Microsoft Entra: Easy Auth on frontend (MICROSOFT_PROVIDER_CLIENT_SECRET on frontend plus shared App Config / Key Vault)."
 
-          APP_CFG_RAW=$(az appconfig credential list --name "$APP_CFG_STORE" --resource-group "$RG" -o json)
-          APP_CFG_CONN=$(echo "$APP_CFG_RAW" | jq -r '(if type == "array" then . elif .value then .value else [] end) | map(select(.readOnly==true)) | .[0].connectionString // empty')
-          if [[ -z "$APP_CFG_CONN" || "$APP_CFG_CONN" == "null" ]]; then
-            echo "::error::Could not read App Configuration read-only connection string for store $APP_CFG_STORE (check az appconfig credential list and store RBAC)."
+          APP_CFG_CONN=$(az deployment sub show --name "$MAIN_DEPLOY_NAME" --query "properties.outputs.appConfigConnectionString.value" -o tsv)
+          if [[ -z "${APP_CFG_CONN:-}" || "$APP_CFG_CONN" == "null" ]]; then
+            echo "::error::Could not read appConfigConnectionString from subscription deployment ${MAIN_DEPLOY_NAME} (same output as main.bicep)."
             exit 1
           fi
-          echo "App Configuration: read-only connection string resolved for store $APP_CFG_STORE (secret not logged)."
+          echo "App Configuration: connection string from main.bicep deployment output ${MAIN_DEPLOY_NAME} (secret not logged)."
 
           PG_HOST="${{ needs.deploy-main-resources.outputs.postgresHost }}"
           PG_DB="${{ needs.deploy-main-resources.outputs.postgresDatabaseName }}"
@@ -729,9 +728,9 @@ jobs:
             OPENAI_ACCOUNT_EUS2_JSON=""
             echo "Skipping OPENAI_ACCOUNT_EUS2 (no POC OpenAI deploy; set AZURE_OPENAI_ACCOUNT_NAME and AZURE_OPENAI_ACCOUNT_SECRET to use a shared account)."
           fi
-          STORAGE_CONN=$(az storage account show-connection-string --resource-group "$RG" --name "$ST_NAME" --query connectionString -o tsv)
-          # Raw connection string; appservices-stack / appService.bicep wraps STORAGE_ACCOUNT in double quotes.
-          echo "Backend STORAGE_ACCOUNT: retrieved for storage account name=$ST_NAME (secret not logged)."
+          STORAGE_CONN=$(bash scripts/storage_account_connection_string.sh "$RG" "$ST_NAME")
+          # Portal-style string (EndpointSuffix; no BlobEndpoint=) — matches Storage account → Access keys → Connection string.
+          echo "Backend STORAGE_ACCOUNT: portal-format connection string for storage account name=$ST_NAME (secret not logged)."
 
           OPENAI_PARAM_FILE=$(mktemp)
           trap 'rm -f "$OPENAI_PARAM_FILE"' EXIT

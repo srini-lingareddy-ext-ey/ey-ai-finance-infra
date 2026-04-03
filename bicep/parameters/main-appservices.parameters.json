@@ -6,7 +6,7 @@
     "location": { "value": "eastus" },
     "keyVaultName": { "value": "kv-mypoc" },
     "appConfigConnectionString": {
-      "value": "Endpoint=https://appconfig-mypoc-poc.azconfig.io;Id=<read-only-key-id>;Secret=<read-only-key-secret>"
+      "value": "Endpoint=https://appconfig-mypoc-poc.azconfig.io;Id=<primary-key-id>;Secret=<primary-key-secret>"
     },
     "frontendImage": {
       "value": "DOCKER|creyaifinmain.azurecr.io/aifinance-frontend:latest"

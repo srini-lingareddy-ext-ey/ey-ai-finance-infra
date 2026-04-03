@@ -1,5 +1,5 @@
 // App Services only (resource-group scope). Deploy after poc-stack-core and after Key Vault is populated.
-// Use outputs from the core deployment (or main.bicep) for keyVaultName and appConfigConnectionString (read-only; Endpoint=...;Id=...;Secret=...).
+// Use outputs from the core deployment (or main.bicep) for keyVaultName and appConfigConnectionString (Endpoint=...;Id=...;Secret=...).
 targetScope = 'resourceGroup'
 
 @description('POC identifier used in resource names (e.g. mypoc).')
@@ -8,7 +8,7 @@ param pocSlug string
 @description('Azure region for all resources.')
 param location string = resourceGroup().location
 
-@description('Primary read-only Connection string from the store Access keys (Endpoint=...;Id=...;Secret=...). Same as portal copy or main.bicep output appConfigConnectionString, or az appconfig credential list readOnly credential.')
+@description('Primary read-write connection string. Use main.bicep output appConfigConnectionString, or portal Access keys → Primary.')
 @secure()
 param appConfigConnectionString string
 
@@ -67,7 +67,7 @@ param openAiAccountEus2Json string = ''
 @secure()
 param mongoConnStr string = ''
 
-@description('Backend-only: POC Blob Storage connection string (no surrounding quotes). STORAGE_ACCOUNT app setting is emitted with double quotes around the string. Empty = omit.')
+@description('Backend-only: POC Blob Storage connection string. Portal / Access keys shape (EndpointSuffix only). Deploy POC: scripts/storage_account_connection_string.sh. Empty = omit.')
 @secure()
 param storageConnectionString string = ''
 

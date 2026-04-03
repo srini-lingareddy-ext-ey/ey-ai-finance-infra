@@ -10,7 +10,8 @@ Every occurrence of the literal "{pocSlug}" is replaced by --poc-slug in:
   the manifest file itself (entire text, before JSON parse), tenant keys, paths/filenames derived
   from the manifest, and the full UTF-8 text of each file read from --config-dir before upload.
 
-Uses Azure CLI: az storage blob upload --connection-string (same as deploy-poc workflow).
+Uses Azure CLI: az storage blob upload --connection-string. Deploy POC supplies a portal-style
+connection string from scripts/storage_account_connection_string.sh (EndpointSuffix form).
 """
 from __future__ import annotations
 

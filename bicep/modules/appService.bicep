@@ -4,7 +4,7 @@ param location string
 param acrManagedIdentityResourceId string
 @description('Client ID (applicationId) of the user-assigned managed identity used for ACR pull. Required for acrUseManagedIdentityCreds.')
 param acrManagedIdentityClientId string
-@description('Read-only connection string from the store Access keys (Connection string column): Endpoint=https://...;Id=...;Secret=...')
+@description('Primary read-write App Configuration connection string. Deploy POC: az deployment sub show --query properties.outputs.appConfigConnectionString.value, or portal Access keys → Primary.')
 @secure()
 param appConfigConnectionString string
 param keyVaultUri string
@@ -55,7 +55,7 @@ param openAiAccountEus2Json string = ''
 @secure()
 param mongoConnStr string = ''
 
-@description('Backend-only: POC Blob Storage connection string (no surrounding quotes). Empty = omit. App setting STORAGE_ACCOUNT is stored as double-quoted value. Visible to authorized portal users.')
+@description('Backend-only: POC Blob Storage connection string. Use portal shape: DefaultEndpointsProtocol=https;AccountName=...;AccountKey=...;EndpointSuffix=... (not the expanded CLI form with BlobEndpoint=). Empty = omit.')
 @secure()
 param storageConnectionString string = ''
 
@@ -148,10 +148,9 @@ var backendMongoAppSettings = !empty(mongoConnStr)
       { name: 'MONGO_CONN_STR', value: mongoConnStr }
     ]
   : []
-var storageAccountConnectionQuoted = '"${storageConnectionString}"'
 var backendStorageConnectionAppSettings = !empty(storageConnectionString)
   ? [
-      { name: 'STORAGE_ACCOUNT', value: storageAccountConnectionQuoted }
+      { name: 'STORAGE_ACCOUNT', value: storageConnectionString }
     ]
   : []
 var backendOpenAiLegacyAppSettings = !empty(openAiAccountEus2Legacy)
