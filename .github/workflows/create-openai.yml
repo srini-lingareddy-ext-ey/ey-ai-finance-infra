@@ -1,0 +1,117 @@
+# Deploys an Azure OpenAI (Cognitive Services) account using bicep/modules/openAI.bicep with no model deployments (openAIDeployments=[]).
+# Account name: openai-<pocSlug>-poc (see module). Add models later via portal, CLI, or deploy_openai_deployments.sh.
+# pocSlug: leave blank when resourceGroupName is rg-<pocSlug>-poc — derived automatically.
+# Secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID
+
+name: Create Azure OpenAI
+
+on:
+  workflow_dispatch:
+    inputs:
+      resourceGroupName:
+        description: "Resource Group Name: Existing Azure resource group name (e.g. rg-testmain-poc)."
+        required: true
+        type: string
+      pocSlug:
+        description: "pocSlug: Optional. If empty, derived when resourceGroupName matches rg-<pocSlug>-poc."
+        required: false
+        type: string
+        default: ""
+      location:
+        description: "Location: Azure region (must support OpenAI; should match the resource group when possible)."
+        required: true
+        type: string
+        default: "eastus"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  validate-azure-secrets:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check secrets are non-empty
+        env:
+          AZURE_POC_CLIENT_ID: ${{ secrets.AZURE_POC_CLIENT_ID }}
+          AZURE_POC_TENANT_ID: ${{ secrets.AZURE_POC_TENANT_ID }}
+          AZURE_POC_SUBSCRIPTION_ID: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          missing=()
+          [[ -n "${AZURE_POC_CLIENT_ID:-}" ]] || missing+=("AZURE_POC_CLIENT_ID")
+          [[ -n "${AZURE_POC_TENANT_ID:-}" ]] || missing+=("AZURE_POC_TENANT_ID")
+          [[ -n "${AZURE_POC_SUBSCRIPTION_ID:-}" ]] || missing+=("AZURE_POC_SUBSCRIPTION_ID")
+          if (( ${#missing[@]} > 0 )); then
+            echo "::error::Missing or empty repository secrets: ${missing[*]}"
+            exit 1
+          fi
+
+  create-openai:
+    needs: validate-azure-secrets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout infra repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Azure login (OIDC)
+        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        with:
+          client-id: ${{ secrets.AZURE_POC_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_POC_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
+
+      - name: Verify resource group exists
+        run: |
+          set -euo pipefail
+          RG="${{ inputs.resourceGroupName }}"
+          RG_TRIM=$(printf '%s' "$RG" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          if [[ -z "$RG_TRIM" ]]; then
+            echo "::error::resourceGroupName is empty."
+            exit 1
+          fi
+          if ! az group show --name "$RG_TRIM" --output none 2>/dev/null; then
+            echo "::error::Resource group '$RG_TRIM' was not found in the current subscription."
+            exit 1
+          fi
+          echo "Resource group exists: $RG_TRIM"
+
+      - name: Resolve POC slug
+        id: slug
+        run: |
+          set -euo pipefail
+          RG=$(printf '%s' "${{ inputs.resourceGroupName }}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          MANUAL=$(printf '%s' "${{ inputs.pocSlug }}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          if [[ -n "$MANUAL" ]]; then
+            echo "Using pocSlug from workflow input: $MANUAL"
+            echo "poc_slug=$MANUAL" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ "$RG" =~ ^rg-(.+)-poc$ ]]; then
+            DERIVED="${BASH_REMATCH[1]}"
+            echo "Derived pocSlug from resource group name: $DERIVED"
+            echo "poc_slug=$DERIVED" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "::error::pocSlug is empty and resourceGroupName does not match rg-<pocSlug>-poc. Enter pocSlug explicitly."
+          exit 1
+
+      - name: Deploy Azure OpenAI (Bicep)
+        run: |
+          set -euo pipefail
+          RG=$(printf '%s' "${{ inputs.resourceGroupName }}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          POC_SLUG="${{ steps.slug.outputs.poc_slug }}"
+          LOCATION="${{ inputs.location }}"
+          NAME="openai-create-${POC_SLUG}-${{ github.run_number }}"
+          az deployment group create \
+            --resource-group "$RG" \
+            --name "$NAME" \
+            --template-file bicep/modules/openAI.bicep \
+            --parameters \
+              pocSlug="$POC_SLUG" \
+              location="$LOCATION" \
+              openAIDeployments='[]'
+          echo "Deployment name: $NAME"
+          az deployment group show --resource-group "$RG" --name "$NAME" --query properties.outputs -o json

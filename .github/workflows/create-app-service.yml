@@ -1,0 +1,180 @@
+# Deploys App Service plan + frontend + backend using bicep/modules/appService.bicep into an existing resource group.
+# Supply full container refs for frontendImage and backendImage (e.g. DOCKER|registry/image:tag). This workflow does not build images.
+# Expects Key Vault and App Configuration in that resource group. Resolves App Config primary connection string via scripts/app_configuration_connection_string.sh (same as Deploy POC).
+# No Postgres / Mongo / OpenAI / storage app settings unless you extend this workflow — minimal “shell” Web Apps with ACR pull + App Config + Key Vault URI.
+# pocSlug: leave blank when resourceGroupName is rg-<pocSlug>-poc — derived automatically.
+# ACR pull identity resource ID is hardcoded (same as bicep/appservices-stack.bicep — acr-managed-identity in rg-eyaifin-acr).
+# Secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, ACR_MANAGED_IDENTITY_CLIENT_ID
+
+name: Create App Service
+
+on:
+  workflow_dispatch:
+    inputs:
+      resourceGroupName:
+        description: "Resource Group Name: Existing Azure resource group name (e.g. rg-testmain-poc)."
+        required: true
+        type: string
+      pocSlug:
+        description: "pocSlug: Optional. If empty, derived when resourceGroupName matches rg-<pocSlug>-poc."
+        required: false
+        type: string
+        default: ""
+      location:
+        description: "Location: Azure region (should match the resource group)."
+        required: true
+        type: string
+        default: "eastus"
+      keyVaultName:
+        description: "Key Vault Name: Key Vault name in this resource group (i.e kv-<pocSlug>-poc)."
+        required: true
+        type: string
+      appConfigStoreName:
+        description: "App Configuration store name in this resource group (i.e appconfig-<pocSlug>-poc)."
+        required: true
+        type: string
+      frontendImage:
+        description: "Frontend Image: Build frontend image for your POC slug first and use that string here. (i.e DOCKER|creyaifinmain.azurecr.io/aifinance-next-frontend:<pocSlug>)"
+        required: true
+        type: string
+        default: "DOCKER|creyaifinmain.azurecr.io/aifinance-next-frontend:latest"
+      backendImage:
+        description: "Backend Image (i.e DOCKER|creyaifinmain.azurecr.io/aifinance-next-backend:latest)."
+        required: false
+        type: string
+        default: "DOCKER|creyaifinmain.azurecr.io/aifinance-next-backend:latest"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  validate-secrets:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check secrets are non-empty
+        env:
+          AZURE_POC_CLIENT_ID: ${{ secrets.AZURE_POC_CLIENT_ID }}
+          AZURE_POC_TENANT_ID: ${{ secrets.AZURE_POC_TENANT_ID }}
+          AZURE_POC_SUBSCRIPTION_ID: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
+          ACR_MANAGED_IDENTITY_CLIENT_ID: ${{ secrets.ACR_MANAGED_IDENTITY_CLIENT_ID }}
+        run: |
+          set -euo pipefail
+          missing=()
+          [[ -n "${AZURE_POC_CLIENT_ID:-}" ]] || missing+=("AZURE_POC_CLIENT_ID")
+          [[ -n "${AZURE_POC_TENANT_ID:-}" ]] || missing+=("AZURE_POC_TENANT_ID")
+          [[ -n "${AZURE_POC_SUBSCRIPTION_ID:-}" ]] || missing+=("AZURE_POC_SUBSCRIPTION_ID")
+          [[ -n "${ACR_MANAGED_IDENTITY_CLIENT_ID:-}" ]] || missing+=("ACR_MANAGED_IDENTITY_CLIENT_ID")
+          if (( ${#missing[@]} > 0 )); then
+            echo "::error::Missing or empty repository secrets: ${missing[*]}"
+            exit 1
+          fi
+
+  create-app-service:
+    needs: validate-secrets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout infra repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Azure login (OIDC)
+        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        with:
+          client-id: ${{ secrets.AZURE_POC_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_POC_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
+
+      - name: Verify resource group exists
+        run: |
+          set -euo pipefail
+          RG="${{ inputs.resourceGroupName }}"
+          RG_TRIM=$(printf '%s' "$RG" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          if [[ -z "$RG_TRIM" ]]; then
+            echo "::error::resourceGroupName is empty."
+            exit 1
+          fi
+          if ! az group show --name "$RG_TRIM" --output none 2>/dev/null; then
+            echo "::error::Resource group '$RG_TRIM' was not found in the current subscription."
+            exit 1
+          fi
+          echo "Resource group exists: $RG_TRIM"
+
+      - name: Resolve POC slug
+        id: slug
+        run: |
+          set -euo pipefail
+          RG=$(printf '%s' "${{ inputs.resourceGroupName }}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          MANUAL=$(printf '%s' "${{ inputs.pocSlug }}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          if [[ -n "$MANUAL" ]]; then
+            echo "Using pocSlug from workflow input: $MANUAL"
+            echo "poc_slug=$MANUAL" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ "$RG" =~ ^rg-(.+)-poc$ ]]; then
+            DERIVED="${BASH_REMATCH[1]}"
+            echo "Derived pocSlug from resource group name: $DERIVED"
+            echo "poc_slug=$DERIVED" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "::error::pocSlug is empty and resourceGroupName does not match rg-<pocSlug>-poc. Enter pocSlug explicitly."
+          exit 1
+
+      - name: Deploy App Service (Bicep)
+        env:
+          ACR_CLIENT_ID: ${{ secrets.ACR_MANAGED_IDENTITY_CLIENT_ID }}
+          KEYVAULT_NAME: ${{ inputs.keyVaultName }}
+          APP_CFG_STORE: ${{ inputs.appConfigStoreName }}
+          FE_IN: ${{ inputs.frontendImage }}
+          BE_IN: ${{ inputs.backendImage }}
+        run: |
+          set -euo pipefail
+          MI_RESOURCE_ID='/subscriptions/08d343af-2a3c-4f13-86a5-d9bde4948ae8/resourceGroups/rg-eyaifin-acr/providers/Microsoft.ManagedIdentity/userAssignedIdentities/acr-managed-identity'
+          RG=$(printf '%s' "${{ inputs.resourceGroupName }}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          POC_SLUG="${{ steps.slug.outputs.poc_slug }}"
+          LOCATION="${{ inputs.location }}"
+
+          KV_TRIM=$(printf '%s' "$KEYVAULT_NAME" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          if ! az keyvault show --name "$KV_TRIM" --resource-group "$RG" --output none 2>/dev/null; then
+            echo "::error::Key Vault '$KV_TRIM' not found in resource group '$RG'."
+            exit 1
+          fi
+          KV_URI=$(az keyvault show --name "$KV_TRIM" --resource-group "$RG" --query properties.vaultUri -o tsv)
+
+          STORE_TRIM=$(printf '%s' "$APP_CFG_STORE" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          if ! az appconfig show --name "$STORE_TRIM" --resource-group "$RG" --output none 2>/dev/null; then
+            echo "::error::App Configuration store '$STORE_TRIM' not found in resource group '$RG'."
+            exit 1
+          fi
+          APP_CFG_CONN=$(bash scripts/app_configuration_connection_string.sh "$STORE_TRIM" "$RG")
+          echo "::add-mask::${APP_CFG_CONN}"
+
+          trim() { printf '%s' "$1" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'; }
+          FE=$(trim "${FE_IN:-}")
+          BE=$(trim "${BE_IN:-}")
+          if [[ -z "$FE" ]]; then
+            echo "::error::frontendImage is empty after trim."
+            exit 1
+          fi
+          if [[ -z "$BE" ]]; then
+            echo "::error::backendImage is empty after trim."
+            exit 1
+          fi
+
+          NAME="appservice-create-${POC_SLUG}-${{ github.run_number }}"
+          az deployment group create \
+            --resource-group "$RG" \
+            --name "$NAME" \
+            --template-file bicep/modules/appService.bicep \
+            --parameters \
+              pocSlug="$POC_SLUG" \
+              location="$LOCATION" \
+              acrManagedIdentityResourceId="$MI_RESOURCE_ID" \
+              acrManagedIdentityClientId="$ACR_CLIENT_ID" \
+              appConfigConnectionString="$APP_CFG_CONN" \
+              keyVaultUri="$KV_URI" \
+              frontendImage="$FE" \
+              backendImage="$BE"
+          echo "Deployment name: $NAME"
+          az deployment group show --resource-group "$RG" --name "$NAME" --query properties.outputs -o json
