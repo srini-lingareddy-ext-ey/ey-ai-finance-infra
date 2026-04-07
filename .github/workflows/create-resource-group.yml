@@ -1,0 +1,73 @@
+# Creates an empty POC resource group (rg-<pocSlug>-poc) using bicep/modules/resourceGroup.bicep at subscription scope.
+# Does not deploy Key Vault, databases, or App Services. For the full stack use Deploy POC.
+# Secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID
+
+name: Create resource group
+
+on:
+  workflow_dispatch:
+    inputs:
+      pocSlug:
+        description: "POC identifier (e.g. test-main1). Resource group will be rg-<pocSlug>-poc."
+        required: true
+        type: string
+      location:
+        description: "Azure region (e.g. eastus)"
+        required: true
+        type: string
+        default: "eastus"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  validate-azure-secrets:
+    name: Verify Azure OIDC secrets
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check secrets are non-empty
+        env:
+          AZURE_POC_CLIENT_ID: ${{ secrets.AZURE_POC_CLIENT_ID }}
+          AZURE_POC_TENANT_ID: ${{ secrets.AZURE_POC_TENANT_ID }}
+          AZURE_POC_SUBSCRIPTION_ID: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          missing=()
+          [[ -n "${AZURE_POC_CLIENT_ID:-}" ]] || missing+=("AZURE_POC_CLIENT_ID")
+          [[ -n "${AZURE_POC_TENANT_ID:-}" ]] || missing+=("AZURE_POC_TENANT_ID")
+          [[ -n "${AZURE_POC_SUBSCRIPTION_ID:-}" ]] || missing+=("AZURE_POC_SUBSCRIPTION_ID")
+          if (( ${#missing[@]} > 0 )); then
+            echo "::error::Missing or empty repository secrets: ${missing[*]}"
+            exit 1
+          fi
+
+  create-resource-group:
+    needs: validate-azure-secrets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout infra repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Azure login (OIDC)
+        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        with:
+          client-id: ${{ secrets.AZURE_POC_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_POC_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
+
+      - name: Deploy resource group (Bicep)
+        run: |
+          set -euo pipefail
+          POC_SLUG="${{ inputs.pocSlug }}"
+          LOCATION="${{ inputs.location }}"
+          NAME="rg-create-${POC_SLUG}-${{ github.run_number }}"
+          az deployment sub create \
+            --location "$LOCATION" \
+            --name "$NAME" \
+            --template-file bicep/modules/resourceGroup.bicep \
+            --parameters pocSlug="$POC_SLUG" location="$LOCATION"
+          echo "Deployment name: $NAME"
+          az deployment sub show --name "$NAME" --query properties.outputs -o json

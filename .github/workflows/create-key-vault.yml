@@ -1,0 +1,117 @@
+# Deploys an empty Key Vault using bicep/modules/keyVault.bicep into an existing resource group you specify.
+# Vault name follows the module: kv-<pocSlug truncated to 17 chars>-poc (Azure global name limit).
+# pocSlug: leave blank when resourceGroupName is rg-<pocSlug>-poc — the slug is derived automatically.
+# If you enter pocSlug, that value is always used (e.g. custom RG name or override).
+# Does not populate secrets or assign RBAC beyond what the template defines.
+# Secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID
+
+name: Create Key Vault
+
+on:
+  workflow_dispatch:
+    inputs:
+      resourceGroupName:
+        description: "Existing Azure resource group name (i.e rg-testmain-poc)."
+        required: true
+        type: string
+      pocSlug:
+        description: "Optional. If set, used for vault name kv-<slug>-poc. If empty, derived from resourceGroupName when it matches rg-<pocSlug>-poc."
+        required: false
+        type: string
+        default: ""
+      location:
+        description: "Azure region for the Key Vault (should ideally match the resource group)."
+        required: true
+        type: string
+        default: "eastus"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  validate-azure-secrets:
+    name: Verify Azure OIDC secrets
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check secrets are non-empty
+        env:
+          AZURE_POC_CLIENT_ID: ${{ secrets.AZURE_POC_CLIENT_ID }}
+          AZURE_POC_TENANT_ID: ${{ secrets.AZURE_POC_TENANT_ID }}
+          AZURE_POC_SUBSCRIPTION_ID: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          missing=()
+          [[ -n "${AZURE_POC_CLIENT_ID:-}" ]] || missing+=("AZURE_POC_CLIENT_ID")
+          [[ -n "${AZURE_POC_TENANT_ID:-}" ]] || missing+=("AZURE_POC_TENANT_ID")
+          [[ -n "${AZURE_POC_SUBSCRIPTION_ID:-}" ]] || missing+=("AZURE_POC_SUBSCRIPTION_ID")
+          if (( ${#missing[@]} > 0 )); then
+            echo "::error::Missing or empty repository secrets: ${missing[*]}"
+            exit 1
+          fi
+
+  create-key-vault:
+    needs: validate-azure-secrets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout infra repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Azure login (OIDC)
+        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        with:
+          client-id: ${{ secrets.AZURE_POC_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_POC_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
+
+      - name: Verify resource group exists
+        run: |
+          set -euo pipefail
+          RG="${{ inputs.resourceGroupName }}"
+          RG_TRIM=$(printf '%s' "$RG" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          if [[ -z "$RG_TRIM" ]]; then
+            echo "::error::resourceGroupName is empty."
+            exit 1
+          fi
+          if ! az group show --name "$RG_TRIM" --output none 2>/dev/null; then
+            echo "::error::Resource group '$RG_TRIM' was not found in the current subscription. Create it first or fix the name."
+            exit 1
+          fi
+          echo "Resource group exists: $RG_TRIM"
+
+      - name: Resolve POC slug
+        id: slug
+        run: |
+          set -euo pipefail
+          RG=$(printf '%s' "${{ inputs.resourceGroupName }}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          MANUAL=$(printf '%s' "${{ inputs.pocSlug }}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          if [[ -n "$MANUAL" ]]; then
+            echo "Using pocSlug from workflow input: $MANUAL"
+            echo "poc_slug=$MANUAL" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ "$RG" =~ ^rg-(.+)-poc$ ]]; then
+            DERIVED="${BASH_REMATCH[1]}"
+            echo "Derived pocSlug from resource group name: $DERIVED"
+            echo "poc_slug=$DERIVED" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "::error::pocSlug is empty and resourceGroupName does not match rg-<pocSlug>-poc. Enter pocSlug explicitly."
+          exit 1
+
+      - name: Deploy Key Vault (Bicep)
+        run: |
+          set -euo pipefail
+          RG=$(printf '%s' "${{ inputs.resourceGroupName }}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          POC_SLUG="${{ steps.slug.outputs.poc_slug }}"
+          LOCATION="${{ inputs.location }}"
+          NAME="kv-create-${POC_SLUG}-${{ github.run_number }}"
+          az deployment group create \
+            --resource-group "$RG" \
+            --name "$NAME" \
+            --template-file bicep/modules/keyVault.bicep \
+            --parameters pocSlug="$POC_SLUG" location="$LOCATION"
+          echo "Deployment name: $NAME"
+          az deployment group show --resource-group "$RG" --name "$NAME" --query properties.outputs -o json
