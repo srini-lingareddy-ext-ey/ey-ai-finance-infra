@@ -2,17 +2,17 @@
 # Does not deploy Key Vault, databases, or App Services. For the full stack use Deploy POC.
 # Secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID
 
-name: Create resource group
+name: Create Resource Group
 
 on:
   workflow_dispatch:
     inputs:
       pocSlug:
-        description: "POC identifier (e.g. test-main1). Resource group will be rg-<pocSlug>-poc."
+        description: "pocSlug: POC identifier (e.g. testmain1). Resource group will be rg-<pocSlug>-poc."
         required: true
         type: string
       location:
-        description: "Azure region (e.g. eastus)"
+        description: "location: Azure region (e.g. eastus)"
         required: true
         type: string
         default: "eastus"
@@ -23,7 +23,6 @@ permissions:
 
 jobs:
   validate-azure-secrets:
-    name: Verify Azure OIDC secrets
     runs-on: ubuntu-latest
     permissions:
       contents: read

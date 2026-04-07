@@ -1,26 +1,25 @@
-# Deploys an empty Key Vault using bicep/modules/keyVault.bicep into an existing resource group you specify.
-# Vault name follows the module: kv-<pocSlug truncated to 17 chars>-poc (Azure global name limit).
+# Deploys an App Configuration store using bicep/modules/appConfiguration.bicep with no key-values (empty store).
+# Store name: appconfig-<pocSlug>-poc (see module).
 # pocSlug: leave blank when resourceGroupName is rg-<pocSlug>-poc — the slug is derived automatically.
-# If you enter pocSlug, that value is always used (e.g. custom RG name or override).
-# Does not populate secrets or assign RBAC beyond what the template defines.
+# If you enter pocSlug, that value is always used.
 # Secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID
 
-name: Create Key Vault
+name: Create App Configuration
 
 on:
   workflow_dispatch:
     inputs:
       resourceGroupName:
-        description: "Resource Group Name: Existing Azure resource group name (i.e rg-testmain-poc)."
+        description: "Resource Group Name: Existing Azure resource group name (e.g. rg-testmain-poc)."
         required: true
         type: string
       pocSlug:
-        description: "pocSlug: Optional. If set, used for vault name kv-<slug>-poc. If empty, derived from resourceGroupName when it matches rg-<pocSlug>-poc."
+        description: "pocSlug: Optional. If set, used for store name appconfig-<slug>-poc. If empty, derived when resourceGroupName matches rg-<pocSlug>-poc."
         required: false
         type: string
         default: ""
       location:
-        description: "Location: Azure region for the Key Vault (should ideally match the resource group)."
+        description: "Location: Azure region for the store (should ideally match the resource group)."
         required: true
         type: string
         default: "eastus"
@@ -51,7 +50,7 @@ jobs:
             exit 1
           fi
 
-  create-key-vault:
+  create-app-config:
     needs: validate-azure-secrets
     runs-on: ubuntu-latest
     steps:
@@ -100,17 +99,20 @@ jobs:
           echo "::error::pocSlug is empty and resourceGroupName does not match rg-<pocSlug>-poc. Enter pocSlug explicitly."
           exit 1
 
-      - name: Deploy Key Vault (Bicep)
+      - name: Deploy App Configuration (Bicep)
         run: |
           set -euo pipefail
           RG=$(printf '%s' "${{ inputs.resourceGroupName }}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
           POC_SLUG="${{ steps.slug.outputs.poc_slug }}"
           LOCATION="${{ inputs.location }}"
-          NAME="kv-create-${POC_SLUG}-${{ github.run_number }}"
+          NAME="appconfig-create-${POC_SLUG}-${{ github.run_number }}"
           az deployment group create \
             --resource-group "$RG" \
             --name "$NAME" \
-            --template-file bicep/modules/keyVault.bicep \
-            --parameters pocSlug="$POC_SLUG" location="$LOCATION"
+            --template-file bicep/modules/appConfiguration.bicep \
+            --parameters \
+              pocSlug="$POC_SLUG" \
+              location="$LOCATION" \
+              pocAppConfigKeyValues='[]'
           echo "Deployment name: $NAME"
           az deployment group show --resource-group "$RG" --name "$NAME" --query properties.outputs -o json

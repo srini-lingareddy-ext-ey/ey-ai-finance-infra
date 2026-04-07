@@ -22,11 +22,7 @@ on:
       postgresHost:
         description: "PostgreSQL host"
         required: true
-        type: choice
-        options:
-          - c-pg-testing.xjsfsppadu6346.postgres.cosmos.azure.com
-          - c-pg-testing-poc.jyzqkluxm3liya.postgres.cosmos.azure.com
-        default: "c-pg-testing.xjsfsppadu6346.postgres.cosmos.azure.com"
+        default: ""
       databaseName:
         description: "Database name"
         required: true
@@ -40,14 +36,13 @@ on:
           - aifinance
         default: "aifinance-next"
       preapprovedUserEmails:
-        description: "Comma-separated emails upserted into preapproved_users (is_admin true). Leave empty only if you will add admins via SQL — empty logs a workflow warning and skips the upsert. No built-in default list."
-        required: false
+        description: "Preapproved Admin Emails: Comma-separated emails upserted into preapproved_users (is_admin true)."
+        required: true
         type: string
         default: ""
 
 jobs:
   init-database:
-    name: "Run init.sql"
     runs-on: ubuntu-latest
     permissions:
       contents: read

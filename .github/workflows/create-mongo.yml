@@ -1,26 +1,24 @@
-# Deploys an empty Key Vault using bicep/modules/keyVault.bicep into an existing resource group you specify.
-# Vault name follows the module: kv-<pocSlug truncated to 17 chars>-poc (Azure global name limit).
-# pocSlug: leave blank when resourceGroupName is rg-<pocSlug>-poc — the slug is derived automatically.
-# If you enter pocSlug, that value is always used (e.g. custom RG name or override).
-# Does not populate secrets or assign RBAC beyond what the template defines.
-# Secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID
+# Deploys Azure Cosmos DB for MongoDB (vCore cluster) using bicep/modules/mongo.bicep into an existing resource group.
+# Cluster name: mongo-<pocSlug>-poc. Administrator password from repository secret MONGO_ADMIN_PASSWORD.
+# pocSlug: leave blank when resourceGroupName is rg-<pocSlug>-poc — derived automatically; otherwise set explicitly.
+# Secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, MONGO_ADMIN_PASSWORD
 
-name: Create Key Vault
+name: Create MongoDB
 
 on:
   workflow_dispatch:
     inputs:
       resourceGroupName:
-        description: "Resource Group Name: Existing Azure resource group name (i.e rg-testmain-poc)."
+        description: "Resource Group Name: Existing Azure resource group name (e.g. rg-testmain-poc)."
         required: true
         type: string
       pocSlug:
-        description: "pocSlug: Optional. If set, used for vault name kv-<slug>-poc. If empty, derived from resourceGroupName when it matches rg-<pocSlug>-poc."
+        description: "pocSlug: Optional. If set, used in cluster name mongo-<slug>-poc. If empty, derived when resourceGroupName matches rg-<pocSlug>-poc."
         required: false
         type: string
         default: ""
       location:
-        description: "Location: Azure region for the Key Vault (should ideally match the resource group)."
+        description: "Azure region (should match the resource group)."
         required: true
         type: string
         default: "eastus"
@@ -30,7 +28,7 @@ permissions:
   contents: read
 
 jobs:
-  validate-azure-secrets:
+  validate-secrets:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -40,19 +38,21 @@ jobs:
           AZURE_POC_CLIENT_ID: ${{ secrets.AZURE_POC_CLIENT_ID }}
           AZURE_POC_TENANT_ID: ${{ secrets.AZURE_POC_TENANT_ID }}
           AZURE_POC_SUBSCRIPTION_ID: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
+          MONGO_ADMIN_PASSWORD: ${{ secrets.MONGO_ADMIN_PASSWORD }}
         run: |
           set -euo pipefail
           missing=()
           [[ -n "${AZURE_POC_CLIENT_ID:-}" ]] || missing+=("AZURE_POC_CLIENT_ID")
           [[ -n "${AZURE_POC_TENANT_ID:-}" ]] || missing+=("AZURE_POC_TENANT_ID")
           [[ -n "${AZURE_POC_SUBSCRIPTION_ID:-}" ]] || missing+=("AZURE_POC_SUBSCRIPTION_ID")
+          [[ -n "${MONGO_ADMIN_PASSWORD:-}" ]] || missing+=("MONGO_ADMIN_PASSWORD")
           if (( ${#missing[@]} > 0 )); then
             echo "::error::Missing or empty repository secrets: ${missing[*]}"
             exit 1
           fi
 
-  create-key-vault:
-    needs: validate-azure-secrets
+  create-mongo:
+    needs: validate-secrets
     runs-on: ubuntu-latest
     steps:
       - name: Checkout infra repo
@@ -75,7 +75,7 @@ jobs:
             exit 1
           fi
           if ! az group show --name "$RG_TRIM" --output none 2>/dev/null; then
-            echo "::error::Resource group '$RG_TRIM' was not found in the current subscription. Create it first or fix the name."
+            echo "::error::Resource group '$RG_TRIM' was not found in the current subscription."
             exit 1
           fi
           echo "Resource group exists: $RG_TRIM"
@@ -100,17 +100,22 @@ jobs:
           echo "::error::pocSlug is empty and resourceGroupName does not match rg-<pocSlug>-poc. Enter pocSlug explicitly."
           exit 1
 
-      - name: Deploy Key Vault (Bicep)
+      - name: Deploy MongoDB (Bicep)
+        env:
+          MONGO_PASSWORD: ${{ secrets.MONGO_ADMIN_PASSWORD }}
         run: |
           set -euo pipefail
           RG=$(printf '%s' "${{ inputs.resourceGroupName }}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
           POC_SLUG="${{ steps.slug.outputs.poc_slug }}"
           LOCATION="${{ inputs.location }}"
-          NAME="kv-create-${POC_SLUG}-${{ github.run_number }}"
+          NAME="mongo-create-${POC_SLUG}-${{ github.run_number }}"
           az deployment group create \
             --resource-group "$RG" \
             --name "$NAME" \
-            --template-file bicep/modules/keyVault.bicep \
-            --parameters pocSlug="$POC_SLUG" location="$LOCATION"
+            --template-file bicep/modules/mongo.bicep \
+            --parameters \
+              administratorLoginPassword="$MONGO_PASSWORD" \
+              pocSlug="$POC_SLUG" \
+              location="$LOCATION"
           echo "Deployment name: $NAME"
           az deployment group show --resource-group "$RG" --name "$NAME" --query properties.outputs -o json
