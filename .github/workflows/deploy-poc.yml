@@ -1,5 +1,6 @@
 # Deploy main.bicep: resource group + Key Vault, App Configuration, optional Azure OpenAI account (no model deployments in Bicep), Postgres, Blob Storage; then optional best-effort OpenAI model deployments from bicep/configs/openai_default_deployments.json; run init.sql; then App Services.
 # After App Services deploy: POC storage account network ACLs Deny with allow rules for frontend + backend Web App outbound IPs (plus AzureServices bypass). The deploy-main-resources job resets storage to default Allow before blob seeding so GitHub-hosted runners can upload on the next run.
+# deploy-app-services merges frontend outbound IPs into OpenAI ipRules using scripts/whitelist_openai_ip_addresses.py (per-host rules; /14 when two or more hosts share a /14).
 # Trigger manually and pass pocSlug (and optionally location, frontend/backend images, appChoice, preapprovedUserEmails). Empty preapprovedUserEmails logs a warning and skips preapproved_users upsert — add admins via SQL in Postgres. Password and pipeline principal from GitHub secrets.
 # Required secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID, POSTGRES_ADMIN_PASSWORD, MONGO_ADMIN_PASSWORD,
 # EY_AI_FINANCE_REPO_TOKEN, ACR_MANAGED_IDENTITY_CLIENT_ID, MICROSOFT_PROVIDER_AUTHENTICATION_APP_ID, MICROSOFT_PROVIDER_AUTHENTICATION_SECRET,
@@ -845,9 +846,13 @@ jobs:
             exit 1
           fi
 
-          echo "Collecting possibleOutboundIpAddresses for frontend ${FE_APP} only (merge into OpenAI ipRules for account ${OAI_NAME} in RG ${OAI_RG})."
+          echo "Collecting possibleOutboundIpAddresses for frontend ${FE_APP} only (OpenAI ipRules via scripts/whitelist_openai_ip_addresses.py — host entries, /14 when 2+ hosts align; account ${OAI_NAME} in RG ${OAI_RG})."
           FE_IPS=$(az webapp show --resource-group "$RG" --name "$FE_APP" --query possibleOutboundIpAddresses -o tsv)
-          export MERGED="${FE_IPS}"
+          IPS_COMPACT=$(printf '%s' "$FE_IPS" | tr -d '[:space:]')
+          if [[ -z "$IPS_COMPACT" ]]; then
+            echo "::error::No outbound IPs from frontend Web App; refusing to patch OpenAI network ACLs."
+            exit 1
+          fi
 
           SUB=$(az account show --query id -o tsv)
           OAI_API_VER="2025-06-01"
@@ -855,7 +860,9 @@ jobs:
           OAI_URL="https://management.azure.com${OAI_RES_ID}?api-version=${OAI_API_VER}"
 
           OAI_GET_JSON=$(mktemp)
-          trap 'rm -f "$OAI_GET_JSON"' EXIT
+          RESULT_JSON=$(mktemp)
+          PATCH_FILE=$(mktemp)
+          trap 'rm -f "$OAI_GET_JSON" "$RESULT_JSON" "$PATCH_FILE"' EXIT
 
           if ! az rest --method get --url "$OAI_URL" > "$OAI_GET_JSON"; then
             echo "::error::GET Cognitive Services account failed (name, resource group, or subscription)."
@@ -880,84 +887,27 @@ jobs:
             fi
           fi
 
-          MAIN_FLAG=$([[ "$CREATE_FLAG" == "false" ]] && echo 1 || echo 0)
           set +e
-          PATCH_BODY=$(MERGED="$MERGED" MAIN_SHARED_OPENAI="$MAIN_FLAG" OAI_GET_JSON="$OAI_GET_JSON" python3 <<'PY'
-          import copy
-          import json
-          import os
-          import sys
-
-          merged = os.environ.get("MERGED", "")
-          new_ips = {p.strip() for p in merged.split(",") if p.strip()}
-          if not new_ips:
-              raise SystemExit("No outbound IPs from frontend Web App; refusing to patch OpenAI network ACLs")
-
-          main_shared = os.environ.get("MAIN_SHARED_OPENAI", "0") == "1"
-          with open(os.environ["OAI_GET_JSON"], encoding="utf-8") as f:
-              current = json.load(f)
-          props = current.get("properties") or {}
-          na = props.get("networkAcls")
-
-          if na is None:
-              if main_shared:
-                  raise SystemExit("internal error: main account path expected networkAcls")
-              na = {
-                  "bypass": "AzureServices",
-                  "defaultAction": "Allow",
-                  "virtualNetworkRules": [],
-                  "ipRules": [],
-              }
-
-          original_rules = na.get("ipRules") or []
-          existing_values = {
-              r["value"]
-              for r in original_rules
-              if isinstance(r, dict) and r.get("value")
-          }
-
-          na_out = copy.deepcopy(na)
-
-          if main_shared:
-              if new_ips <= existing_values:
-                  sys.exit(10)
-              ordered = []
-              seen = set()
-              for r in original_rules:
-                  if isinstance(r, dict) and r.get("value"):
-                      v = r["value"]
-                      if v not in seen:
-                          ordered.append(copy.deepcopy(r))
-                          seen.add(v)
-              for ip in sorted(new_ips):
-                  if ip not in seen:
-                      ordered.append({"value": ip})
-                      seen.add(ip)
-              na_out["ipRules"] = ordered
-          else:
-              by_value = {}
-              for r in na_out.get("ipRules") or []:
-                  if isinstance(r, dict) and r.get("value"):
-                      by_value[r["value"]] = copy.deepcopy(r)
-              for ip in new_ips:
-                  if ip not in by_value:
-                      by_value[ip] = {"value": ip}
-              na_out["ipRules"] = [by_value[k] for k in sorted(by_value.keys())]
-
-          print(json.dumps({"properties": {"networkAcls": na_out}}))
-          PY
-          )
+          python3 scripts/whitelist_openai_ip_addresses.py \
+            --account-json "$OAI_GET_JSON" \
+            --ips "$FE_IPS" > "$RESULT_JSON"
           py_exit=$?
           set -e
-          if [[ "$py_exit" -eq 10 ]]; then
-            echo "Main OpenAI account ipRules already include all frontend outbound IPs; no PATCH sent."
-            exit 0
-          fi
           if [[ "$py_exit" -ne 0 ]]; then
+            echo "::error::scripts/whitelist_openai_ip_addresses.py failed (exit ${py_exit})."
             exit "$py_exit"
           fi
 
-          RULE_COUNT=$(echo "$PATCH_BODY" | jq '.properties.networkAcls.ipRules | length')
-          echo "Patching Cognitive Services account ${OAI_NAME}: PATCH body contains only properties.networkAcls; ipRules merged (add-only). All other networkAcls fields copied from the resource as-is."
-          az rest --method patch --url "$OAI_URL" --headers "Content-Type=application/json" --body "$PATCH_BODY"
-          echo "Azure OpenAI network ACLs updated (existing ipRules preserved; frontend Web App outbound IPs added)."
+          CHANGED=$(jq -r '.changed' "$RESULT_JSON")
+          jq -r '.message // empty' "$RESULT_JSON" || true
+
+          if [[ "$CHANGED" != "true" ]]; then
+            echo "No OpenAI network ACL PATCH needed (frontend outbound IPs already allowed or no rule change)."
+            exit 0
+          fi
+
+          jq -c '.patch' "$RESULT_JSON" > "$PATCH_FILE"
+          RULE_COUNT=$(jq '.patch.properties.networkAcls.ipRules | length' "$RESULT_JSON")
+          echo "Patching Cognitive Services account ${OAI_NAME}: properties.networkAcls only, ${RULE_COUNT} ipRule(s) (whitelist_openai_ip_addresses.py)."
+          az rest --method patch --url "$OAI_URL" --headers "Content-Type=application/json" --body @"$PATCH_FILE"
+          echo "Azure OpenAI network ACLs updated."
