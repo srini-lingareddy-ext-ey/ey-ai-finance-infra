@@ -1,7 +1,7 @@
 # Manually whitelist IPv4 addresses on an Azure OpenAI (Cognitive Services) account.
-# For each input IP: if it already lies inside an existing ipRules CIDR, it is skipped;
-# otherwise the script expands an existing rule to the smallest valid supernet that includes
-# the IP, adds a /32, and/or consolidates adjacent blocks (scripts/whitelist_openai_ip_addresses.py).
+# Each new IP is added as a single host (no CIDR). When two or more hosts fall in the same /14,
+# they are replaced by that /14 (e.g. 136.226.60.86 + 136.226.60.87 -> 136.224.0.0/14).
+# See scripts/whitelist_openai_ip_addresses.py.
 #
 # Secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID
 
@@ -16,7 +16,7 @@ on:
         type: string
         default: "oai-eyaifin-main-eus2"
       ipAddresses:
-        description: "IP Addresses: comma-separated IPv4 addresses (i.e: 20.1.2.3, 20.1.2.4)"
+        description: "Ip Addresses: Comma-separated IPv4 addresses. Each adds a host rule; two+ hosts in the same /14 become one /14 rule (e.g. two 136.226.* hosts -> 136.224.0.0/14)."
         required: true
         type: string
 
