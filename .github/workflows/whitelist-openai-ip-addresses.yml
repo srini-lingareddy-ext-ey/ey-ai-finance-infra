@@ -1,0 +1,124 @@
+# Manually whitelist IPv4 addresses on an Azure OpenAI (Cognitive Services) account.
+# For each input IP: if it already lies inside an existing ipRules CIDR, it is skipped;
+# otherwise the script expands an existing rule to the smallest valid supernet that includes
+# the IP, adds a /32, and/or consolidates adjacent blocks (scripts/whitelist_openai_ip_addresses.py).
+#
+# Secrets: AZURE_POC_CLIENT_ID, AZURE_POC_TENANT_ID, AZURE_POC_SUBSCRIPTION_ID
+
+name: Whitelist OpenAI IP Addresses
+
+on:
+  workflow_dispatch:
+    inputs:
+      openaiResourceName:
+        description: "OpenAI Resource Name (e.g. openai-<pocSlug>-poc or shared account name)."
+        required: true
+        type: string
+        default: "oai-eyaifin-main-eus2"
+      ipAddresses:
+        description: "IP Addresses: comma-separated IPv4 addresses (i.e: 20.1.2.3, 20.1.2.4)"
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  validate-azure-secrets:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check secrets are non-empty
+        env:
+          AZURE_POC_CLIENT_ID: ${{ secrets.AZURE_POC_CLIENT_ID }}
+          AZURE_POC_TENANT_ID: ${{ secrets.AZURE_POC_TENANT_ID }}
+          AZURE_POC_SUBSCRIPTION_ID: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          missing=()
+          [[ -n "${AZURE_POC_CLIENT_ID:-}" ]] || missing+=("AZURE_POC_CLIENT_ID")
+          [[ -n "${AZURE_POC_TENANT_ID:-}" ]] || missing+=("AZURE_POC_TENANT_ID")
+          [[ -n "${AZURE_POC_SUBSCRIPTION_ID:-}" ]] || missing+=("AZURE_POC_SUBSCRIPTION_ID")
+          if (( ${#missing[@]} > 0 )); then
+            echo "::error::Missing or empty repository secrets: ${missing[*]}"
+            exit 1
+          fi
+
+  whitelist:
+    needs: validate-azure-secrets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout infra repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Azure login (OIDC)
+        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        with:
+          client-id: ${{ secrets.AZURE_POC_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_POC_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_POC_SUBSCRIPTION_ID }}
+
+      - name: Resolve resource group and PATCH network rules
+        env:
+          OAI_NAME: ${{ inputs.openaiResourceName }}
+          IP_LIST: ${{ inputs.ipAddresses }}
+        run: |
+          set -euo pipefail
+          NAME_TRIM=$(printf '%s' "$OAI_NAME" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          if [[ -z "$NAME_TRIM" ]]; then
+            echo "::error::openaiResourceName is empty."
+            exit 1
+          fi
+
+          OAI_RG=$(OAI_NAME="$NAME_TRIM" python3 -c "
+          import json, os, subprocess
+          name = os.environ['OAI_NAME']
+          raw = subprocess.check_output(['az', 'cognitiveservices', 'account', 'list', '-o', 'json'], text=True)
+          rg = ''
+          for a in json.loads(raw):
+              if a.get('name') == name:
+                  rg = a.get('resourceGroup', '') or ''
+                  break
+          if not rg:
+              raise SystemExit('account not found in subscription')
+          print(rg)
+          ")
+
+          echo "OpenAI account: $NAME_TRIM (resource group: $OAI_RG)"
+
+          SUB=$(az account show --query id -o tsv)
+          OAI_API_VER="2025-06-01"
+          OAI_RES_ID="/subscriptions/${SUB}/resourceGroups/${OAI_RG}/providers/Microsoft.CognitiveServices/accounts/${NAME_TRIM}"
+          OAI_URL="https://management.azure.com${OAI_RES_ID}?api-version=${OAI_API_VER}"
+
+          OAI_GET_JSON=$(mktemp)
+          RESULT_JSON=$(mktemp)
+          PATCH_FILE=$(mktemp)
+          trap 'rm -f "$OAI_GET_JSON" "$RESULT_JSON" "$PATCH_FILE"' EXIT
+
+          if ! az rest --method get --url "$OAI_URL" > "$OAI_GET_JSON"; then
+            echo "::error::GET Cognitive Services account failed (name, subscription, or permissions)."
+            exit 1
+          fi
+
+          python3 scripts/whitelist_openai_ip_addresses.py \
+            --account-json "$OAI_GET_JSON" \
+            --ips "$IP_LIST" > "$RESULT_JSON"
+
+          CHANGED=$(jq -r '.changed' "$RESULT_JSON")
+          MSG=$(jq -r '.message // empty' "$RESULT_JSON")
+
+          echo "$MSG"
+
+          if [[ "$CHANGED" != "true" ]]; then
+            echo "No PATCH applied."
+            exit 0
+          fi
+
+          jq -c '.patch' "$RESULT_JSON" > "$PATCH_FILE"
+
+          echo "Patching Cognitive Services account (properties.networkAcls only)..."
+          az rest --method patch --url "$OAI_URL" --headers "Content-Type=application/json" --body @"$PATCH_FILE"
+          echo "Done."
