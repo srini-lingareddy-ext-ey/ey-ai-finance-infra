@@ -85,6 +85,10 @@ var backendFrontendUrl = !empty(frontendPublicBaseUrl) ? frontendPublicBaseUrl :
 var backendFrontendUrlAppSettings = [
   { name: 'FRONTEND_URL', value: backendFrontendUrl }
 ]
+var backendDbPoolAppSettings = [
+  { name: 'DB_POOL_MIN_CONN', value: '2' }
+  { name: 'DB_POOL_MAX_CONN', value: '20' }
+]
 var sharedAppSettings = [ { name: 'AZURE_APP_CONFIG_CONNECTION_STRING', value: appConfigConnectionString }, { name: 'KEY_VAULT_URI', value: keyVaultUri } ]
 
 var microsoftAuthEnabled = !empty(microsoftIdentityClientId) && !empty(microsoftIdentityTenantId) && !empty(frontendPublicBaseUrl)
@@ -182,6 +186,7 @@ var backendEntraAppSettings = !empty(microsoftIdentityClientId) && !empty(micros
 var backendAppSettings = concat(
   sharedAppSettings,
   backendFrontendUrlAppSettings,
+  backendDbPoolAppSettings,
   backendPostgresAppSettings,
   backendMongoAppSettings,
   backendStorageConnectionAppSettings,
