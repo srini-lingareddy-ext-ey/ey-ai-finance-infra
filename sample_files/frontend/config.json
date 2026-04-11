@@ -16,7 +16,8 @@
       "period",
       "businessUnit",
       "productGroup",
-      "geography"
+      "geography",
+      "lineItem"
     ],
     "periodType": "quarters",
     "entities": [
@@ -32,12 +33,20 @@
         "level": 2,
         "includeRoot": false
       }
+    ],
+    "geographies": [
+      {
+        "id": "geography",
+        "label": "Geography",
+        "level": 0,
+        "includeRoot": true
+      }
     ]
   },
   "pages": {
     "financialOverview": {
       "filters": {
-        "show": ["year", "period", "businessUnit", "geography", "lineItem"]
+        "show": ["year", "period", "businessUnit", "geography"]
       },
       "components": {
         "kpiBar": {
