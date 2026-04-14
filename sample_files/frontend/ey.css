@@ -1,0 +1,369 @@
+[data-theme='ey'] {
+    /* --------------------------------------------
+     * FOUNDATIONS — RAW COLORS
+    ---------------------------------------------*/
+
+    /* Brand color.  */
+    --color-brand: rgba(255, 230, 0, 1);
+
+    /* Neutral. */
+    --color-neutral-1000: rgba(26, 26, 36, 1);
+    --color-neutral-900: rgba(46, 46, 56, 1);
+    --color-neutral-800: rgba(63, 63, 76, 1);
+    --color-neutral-700: rgba(78, 78, 93, 1);
+    --color-neutral-600: rgba(101, 101, 121, 1);
+    --color-neutral-500: rgba(127, 127, 145, 1);
+    --color-neutral-400: rgba(152, 151, 166, 1);
+    --color-neutral-300: rgba(175, 174, 186, 1);
+    --color-neutral-200: rgba(195, 195, 203, 1);
+    --color-neutral-100: rgba(222, 222, 226, 1);
+    --color-neutral-50: rgba(243, 243, 245, 1);
+    --color-neutral-10: rgba(255, 255, 255, 1);
+
+    /* Orange. */
+    --color-orange-900: rgba(70, 38, 2, 1);
+    --color-orange-800: rgba(98, 51, 0, 1);
+    --color-orange-700: rgba(123, 65, 0, 1);
+    --color-orange-600: rgba(151, 81, 0, 1);
+    --color-orange-500: rgba(178, 97, 0, 1);
+    --color-orange-400: rgba(208, 114, 0, 1);
+    --color-orange-300: rgba(238, 131, 0, 1);
+    --color-orange-200: rgba(255, 152, 49, 1);
+    --color-orange-100: rgba(253, 188, 132, 1);
+    --color-orange-50: rgba(252, 217, 188, 1);
+    --color-orange-25: rgba(252, 245, 240, 1);
+
+    /* Red. */
+    --color-red-900: rgba(97, 4, 2, 1);
+    --color-red-800: rgba(131, 0, 11, 1);
+    --color-red-700: rgba(164, 0, 17, 1);
+    --color-red-600: rgba(199, 1, 23, 1);
+    --color-red-500: rgba(234, 1, 29, 1);
+    --color-red-400: rgba(255, 67, 54, 1);
+    --color-red-300: rgba(255, 115, 94, 1);
+    --color-red-200: rgba(255, 151, 131, 1);
+    --color-red-100: rgba(253, 186, 171, 1);
+    --color-red-50: rgba(252, 215, 207, 1);
+    --color-red-25: rgba(252, 245, 243, 1);
+
+    /* Maroon. */
+    --color-maroon-900: rgba(76, 28, 61, 1);
+    --color-maroon-800: rgba(104, 39, 84, 1);
+    --color-maroon-700: rgba(130, 51, 106, 1);
+    --color-maroon-600: rgba(160, 64, 130, 1);
+    --color-maroon-500: rgba(177, 72, 145, 1);
+    --color-maroon-400: rgba(218, 91, 179, 1);
+    --color-maroon-300: rgba(225, 128, 192, 1);
+    --color-maroon-200: rgba(231, 158, 205, 1);
+    --color-maroon-100: rgba(236, 189, 218, 1);
+    --color-maroon-50: rgba(245, 219, 235, 1);
+    --color-maroon-25: rgba(250, 245, 248, 1);
+
+    /* Purple. */
+    --color-purple-900: rgba(54, 28, 117, 1);
+    --color-purple-800: rgba(74, 39, 159, 1);
+    --color-purple-700: rgba(94, 54, 188, 1);
+    --color-purple-600: rgba(114, 75, 195, 1);
+    --color-purple-500: rgba(137, 101, 204, 1);
+    --color-purple-400: rgba(157, 124, 212, 1);
+    --color-purple-300: rgba(176, 148, 220, 1);
+    --color-purple-200: rgba(194, 171, 227, 1);
+    --color-purple-100: rgba(212, 196, 234, 1);
+    --color-purple-50: rgba(229, 220, 241, 1);
+    --color-purple-25: rgba(248, 246, 250, 1);
+
+    /* Blue. */
+    --color-blue-900: rgba(8, 49, 83, 1);
+    --color-blue-800: rgba(6, 67, 114, 1);
+    --color-blue-700: rgba(10, 85, 142, 1);
+    --color-blue-600: rgba(15, 105, 174, 1);
+    --color-blue-500: rgba(18, 117, 193, 1);
+    --color-blue-400: rgba(24, 140, 229, 1);
+    --color-blue-300: rgba(85, 166, 252, 1);
+    --color-blue-200: rgba(133, 185, 253, 1);
+    --color-blue-100: rgba(175, 205, 251, 1);
+    --color-blue-50: rgba(216, 229, 253, 1);
+    --color-blue-25: rgba(244, 247, 252, 1);
+
+    /* Green. */
+    --color-green-900: rgba(10, 54, 22, 1);
+    --color-green-800: rgba(12, 74, 31, 1);
+    --color-green-700: rgba(18, 94, 41, 1);
+    --color-green-600: rgba(25, 115, 53, 1);
+    --color-green-500: rgba(31, 137, 63, 1);
+    --color-green-400: rgba(38, 160, 75, 1);
+    --color-green-300: rgba(45, 183, 87, 1);
+    --color-green-200: rgba(52, 206, 99, 1);
+    --color-green-100: rgba(72, 230, 116, 1);
+    --color-green-50: rgba(139, 249, 162, 1);
+    --color-green-25: rgba(231, 252, 232, 1);
+
+    /* Teal. */
+    --color-teal-900: rgba(9, 52, 52, 1);
+    --color-teal-800: rgba(11, 72, 71, 1);
+    --color-teal-700: rgba(16, 91, 90, 1);
+    --color-teal-600: rgba(23, 112, 111, 1);
+    --color-teal-500: rgba(29, 133, 131, 1);
+    --color-teal-400: rgba(34, 155, 154, 1);
+    --color-teal-300: rgba(39, 172, 170, 1);
+    --color-teal-200: rgba(47, 201, 199, 1);
+    --color-teal-100: rgba(68, 224, 222, 1);
+    --color-teal-50: rgba(139, 244, 241, 1);
+    --color-teal-25: rgba(225, 252, 251, 1);
+
+    /* --------------------------------------------
+     * SEMANTIC TOKENS
+    ---------------------------------------------*/
+
+    /* Brand. */
+    --color-brand-primary: var(--color-neutral-800);
+    --color-brand-secondary: var(--color-neutral-600);
+    --color-brand-tertiary: var(--color-neutral-400);
+    --color-brand-extra-a: var(--color-neutral-50);
+    --color-brand-extra-b: var(--color-neutral-100);
+    --color-brand-extra-c: var(--color-neutral-200);
+    --color-brand-extra-d: var(--color-neutral-900);
+    --color-brand-extra-e: var(--color-brand);
+
+    /* Neutral. */
+    --color-neutral-primary: var(--color-neutral-1000);
+    --color-neutral-secondary: var(--color-neutral-800);
+    --color-neutral-tertiary: var(--color-neutral-700);
+    --color-neutral-inverse: var(--color-neutral-10);
+    --color-neutral-extra-a: var(--color-neutral-50);
+    --color-neutral-extra-b: var(--color-neutral-100);
+    --color-neutral-extra-c: var(--color-neutral-200);
+    --color-neutral-extra-d: var(--color-neutral-300);
+    --color-neutral-extra-e: var(--color-neutral-400);
+
+    /* Success state. */
+    --color-success-primary: var(--color-green-600);
+    --color-success-secondary: var(--color-green-400);
+    --color-success-tertiary: var(--color-green-300);
+    --color-success-extra-a: var(--color-green-25);
+    --color-success-extra-b: var(--color-green-50);
+    --color-success-extra-c: var(--color-green-100);
+
+    /* Warning state. */
+    --color-warning-primary: var(--color-orange-600);
+    --color-warning-secondary: var(--color-orange-400);
+    --color-warning-tertiary: var(--color-orange-300);
+    --color-warning-extra-a: var(--color-orange-25);
+    --color-warning-extra-b: var(--color-orange-50);
+    --color-warning-extra-c: var(--color-orange-100);
+
+    /* Error state. */
+    --color-error-primary: var(--color-red-600);
+    --color-error-secondary: var(--color-red-400);
+    --color-error-tertiary: var(--color-red-300);
+    --color-error-extra-a: var(--color-red-25);
+    --color-error-extra-b: var(--color-red-50);
+    --color-error-extra-c: var(--color-red-100);
+    --color-error-extra-d: var(--color-red-500);
+    --color-error-extra-e: var(--color-red-700);
+
+    /* Info state. */
+    --color-info-primary: var(--color-blue-600);
+    --color-info-secondary: var(--color-blue-500);
+    --color-info-tertiary: var(--color-blue-400);
+    --color-info-extra-a: var(--color-blue-25);
+    --color-info-extra-b: var(--color-blue-50);
+    --color-info-extra-c: var(--color-blue-100);
+    --color-info-extra-d: var(--color-blue-700);
+    --color-info-extra-e: var(--color-blue-800);
+
+    /* Surface. */
+    --color-surface-primary: var(--color-neutral-50);
+    --color-surface-secondary: var(--color-neutral-10);
+    --color-surface-brand-light: var(--color-brand-extra-b);
+    --color-surface-brand-hover: var(--color-brand-extra-c);
+    --color-surface-brand: var(--color-brand-primary);
+
+    /* Stroke. */
+    --color-stroke-primary: var(--color-neutral-100);
+    --color-stroke-secondary: var(--color-neutral-200);
+    --color-stroke-tertiary: var(--color-neutral-300);
+    --color-stroke-light: var(--color-neutral-50);
+    --color-stroke-semibold: var(--color-neutral-700);
+    --color-stroke-bold: var(--color-neutral-1000);
+    --color-stroke-inverse: var(--color-neutral-10);
+    --color-stroke-brand: var(--color-brand-primary);
+
+    /* --------------------------------------------
+     * COMPONENT TOKENS
+    ---------------------------------------------*/
+
+    /* Accordion. */
+
+    /* AI Chat. */
+
+    --color-ai-chat-thinking-gradient-start: rgba(134, 134, 134, 1);
+    --color-ai-chat-thinking-gradient-middle: rgba(192, 196, 198, 1);
+    --color-ai-chat-thinking-gradient-end: rgba(134, 134, 134, 1);
+
+    --color-ai-chat-insight-gradient-start: var(--color-surface-primary);
+    --color-ai-chat-insight-gradient-end: var(--color-surface-primary);
+    --color-ai-chat-insight-hover-bg: rgba(195, 195, 203, 0.5); /* neutral-200 with opacity */
+
+    /* Alerts. */
+
+    --color-alert-gradient-start: var(--color-brand);
+    --color-alert-gradient-middle: var(--color-brand);
+    --color-alert-gradient-end: var(--color-brand);
+
+    /* Avatar. */
+
+    /* Badges. */
+
+    /* Banners. */
+
+    --color-banner-bg: rgba(172, 172, 185, 1);
+
+    /* Breadcrumbs. */
+
+    /* Buttons. */
+
+    --color-button-primary-bg: var(--color-brand-primary);
+    --color-button-primary-bg-hover: var(--color-brand-secondary);
+    --color-button-primary-bg-disabled: var(--color-brand-tertiary);
+
+    /* Cards. */
+
+    /* Charts. */
+
+    --color-chart-bar-segment-1: var(--color-blue-900);
+    --color-chart-bar-segment-2: var(--color-blue-400);
+    --color-chart-bar-segment-3: var(--color-purple-800);
+    --color-chart-bar-segment-4: var(--color-purple-400);
+    --color-chart-bar-segment-5: var(--color-teal-800);
+    --color-chart-bar-segment-6: var(--color-teal-400);
+
+    --color-chart-bar-segment-pair-1: var(--color-blue-900);
+    --color-chart-bar-segment-pair-2: var(--color-blue-400);
+
+    --color-chart-bar-series-1: var(--color-blue-400);
+    --color-chart-bar-series-2: var(--color-blue-100);
+
+    --color-chart-gridline: var(--color-neutral-100);
+
+    --color-chart-line-series-0: var(--color-neutral-1000);
+    --color-chart-line-series-1: var(--color-blue-900);
+    --color-chart-line-series-2: var(--color-blue-400);
+    --color-chart-line-series-3: var(--color-purple-800);
+    --color-chart-line-series-4: var(--color-purple-400);
+    --color-chart-line-series-5: var(--color-teal-800);
+    --color-chart-line-series-6: var(--color-teal-400);
+
+    /* TODO */
+    --color-chart-line-series-1-linear-gradient-stop-1: rgba(53, 92, 237, 0.51);
+    --color-chart-line-series-1-linear-gradient-stop-2: rgba(236, 241, 251, 0.45);
+    --color-chart-line-series-2-linear-gradient-stop-1: rgba(67, 226, 255, 0.44);
+    --color-chart-line-series-2-linear-gradient-stop-2: rgba(218, 249, 255, 0.47);
+    --color-chart-line-series-3-linear-gradient-stop-1: rgba(255, 214, 2, 0.53);
+    --color-chart-line-series-3-linear-gradient-stop-2: rgba(255, 245, 193, 0.34);
+
+    --color-chart-river-series-actuals: var(--color-accent-royal-blue-800);
+    --color-chart-river-series-best: var(--color-accent-royal-blue-800);
+    --color-chart-river-series-best-bg: var(--color-accent-royal-blue-600);
+    --color-chart-river-series-worst: var(--color-accent-royal-blue-400);
+    --color-chart-river-series-worst-bg: var(--color-accent-royal-blue-200);
+    --color-chart-river-series-baseline: var(--color-neutral-10);
+    --color-chart-river-series-working: var(--color-neutral-800);
+
+    --color-chart-radar-bg-gradient-stop-1: rgba(68, 226, 255, 0.42);
+    --color-chart-radar-bg-gradient-stop-2: rgba(2, 51, 232, 0.67);
+    --color-chart-radar-border-gradient-stop-1: rgba(24, 140, 229, 1);
+    --color-chart-radar-border-gradient-stop-2: rgba(161, 231, 165, 1);
+
+    /* Carousels. */
+
+    /* Checkboxes. */
+
+    /* Chips. */
+
+    /* Content dividers */
+
+    /* Comments. */
+
+    /* Content switcher. */
+
+    /* Date picker. */
+
+    /* Dropdown. */
+
+    /* Empty state. */
+
+    /* File uploader. */
+
+    /* Filter. */
+
+    /* Footer. */
+
+    /* Header. */
+
+    /* Hero. */
+
+    --color-hero-gradient-start: var(--color-neutral-900);
+    --color-hero-gradient-end: var(--color-neutral-900);
+
+    /* Icon. */
+
+    /* Inline. */
+
+    /* Input. */
+
+    /* Menu. */
+
+    /* Modal. */
+
+    /* Navigation. */
+
+    --color-navigation-button-bg: var(--color-brand-600);
+
+    --color-navigation-link: var(--color-neutral-secondary);
+    --color-navigation-link-hover: var(--color-neutral-primary);
+
+    /* Panel menu. */
+
+    /* Pagination. */
+
+    /* Progress indicator. */
+
+    /* Progress loader. */
+
+    /* Project management. */
+
+    /* Radio button. */
+
+    /* Selects. */
+
+    --color-select-input-bg: var(--color-neutral-10);
+    --color-select-input-text: var(--color-neutral-10);
+
+    --color-select-input-hover-bg: var(--color-neutral-800);
+    --color-select-input-hover-text: var(--color-neutral-10);
+
+    /* Skeleton. */
+
+    --color-skeleton-bg: var(--color-neutral-200);
+
+    /* Slider */
+
+    /* Table. */
+
+    /* Tab navigation. */
+
+    /* Text area. */
+
+    /* Text link. */
+
+    /* Toast. */
+
+    /* Toggle switch. */
+
+    /* Toolbar. */
+
+    /* Tooltip. */
+
+    /* Vertical navigation. */
+}
