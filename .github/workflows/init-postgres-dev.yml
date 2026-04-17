@@ -1,0 +1,128 @@
+# Same behavior as init-postgres.yml, but checks out ey-ai-finance from branch **dev**
+# (instead of the repository default branch, e.g. main).
+#
+# Use when you need init.sql and schema SQL from dev while targeting the same manual
+# postgresHost / databaseName inputs as production-style init.
+#
+# LIMITATIONS / SECRETS / follow-up: see init-postgres.yml header comments.
+
+name: Initialize PostgreSQL DB (ey-ai-finance dev branch)
+
+on:
+  workflow_dispatch:
+    inputs:
+      postgresHost:
+        description: "PostgreSQL host"
+        required: true
+        default: ""
+      databaseName:
+        description: "Database name"
+        required: true
+        default: "citus"
+      appChoice:
+        description: "App variant (checks which init.sql to use)"
+        required: true
+        type: choice
+        options:
+          - aifinance-next
+          - aifinance
+        default: "aifinance-next"
+      preapprovedUserEmails:
+        description: "Preapproved Admin Emails: Comma-separated emails upserted into preapproved_users (is_admin true)."
+        required: true
+        type: string
+        default: ""
+
+jobs:
+  init-database:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout infra repo (scripts)
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Checkout ey-ai-finance repo (dev branch)
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: ${{ github.repository_owner }}/ey-ai-finance
+          ref: dev
+          path: ey-ai-finance
+          token: ${{ secrets.EY_AI_FINANCE_REPO_TOKEN }}
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Run init.sql on Postgres
+        env:
+          PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+          PGCONNECT_TIMEOUT: "30"
+        run: |
+          set -euo pipefail
+
+          INIT_SQL="ey-ai-finance/resources/${{ inputs.appChoice }}/db/init.sql"
+          PG_HOST="${{ inputs.postgresHost }}"
+          PG_DB="${{ inputs.databaseName }}"
+          WS="${GITHUB_WORKSPACE}"
+          APP_CHOICE="${{ inputs.appChoice }}"
+
+          echo "Connecting to: ${PG_HOST}"
+          echo "Database: ${PG_DB}"
+          echo "Schema: ${APP_CHOICE}"
+          echo "Script (from ey-ai-finance dev): ${INIT_SQL}"
+
+          if [[ ! -f "${INIT_SQL}" ]]; then
+            echo "Error: ${INIT_SQL} not found"
+            exit 1
+          fi
+
+          SCHEMA_SRC=""
+          for d in \
+            "${WS}/ey-ai-finance/resources/${APP_CHOICE}/db/schemas" \
+            "${WS}/ey-ai-finance/resources/${APP_CHOICE}/schemas" \
+            "${WS}/ey-ai-finance/schemas" \
+            "${WS}/ey-ai-finance/db/${APP_CHOICE}/schemas" \
+            "${WS}/ey-ai-finance/db/schemas"
+          do
+            if [[ -d "${d}/forecasts" ]]; then
+              SCHEMA_SRC="${d}"
+              break
+            fi
+          done
+          if [[ -z "${SCHEMA_SRC}" ]]; then
+            FOUND=$(find "${WS}/ey-ai-finance" -type f -path '*/forecasts/create_schema.sql' 2>/dev/null | head -1 || true)
+            if [[ -n "${FOUND}" ]]; then
+              SCHEMA_SRC="$(dirname "$(dirname "${FOUND}")")"
+            fi
+          fi
+          if [[ -n "${SCHEMA_SRC}" ]]; then
+            sudo ln -sfn "${SCHEMA_SRC}" /schemas
+            echo "Linked /schemas -> ${SCHEMA_SRC}"
+          else
+            echo "::error::Could not find schema SQL layout for \\i /schemas/... — expected a directory containing forecasts/ (e.g. ey-ai-finance/resources/${APP_CHOICE}/db/schemas, ey-ai-finance/schemas, or ey-ai-finance/db/${APP_CHOICE}/schemas) with forecasts/create_schema.sql. Commit those files in ey-ai-finance or change \\i to repo-relative paths."
+            exit 1
+          fi
+
+          psql "host=${PG_HOST} port=5432 dbname=${PG_DB} user=citus sslmode=require" \
+            -c "SELECT 1;" > /dev/null
+
+          echo "Connection successful. Running init.sql..."
+
+          psql "host=${PG_HOST} port=5432 dbname=${PG_DB} user=citus sslmode=require" \
+            -v ON_ERROR_STOP=1 \
+            -f "${INIT_SQL}"
+
+          echo "Database initialization completed successfully."
+
+      - name: Insert preapproved admin users
+        env:
+          PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+          PGHOST: ${{ inputs.postgresHost }}
+          PGDATABASE: ${{ inputs.databaseName }}
+          PGUSER: citus
+          PGSSLMODE: require
+          PREAPPROVED_EXTRA_EMAILS: ${{ inputs.preapprovedUserEmails }}
+        run: |
+          set -euo pipefail
+          python3 scripts/upsert_preapproved_users.py
