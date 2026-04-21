@@ -14,6 +14,8 @@
 # Matches Deploy POC job init-postgres: resources/<appChoice>/db/init.sql, /schemas symlink for \i /schemas/..., then upsert_preapproved_users.py.
 
 # SECRETS: EY_AI_FINANCE_REPO_TOKEN: Provides access to ey-ai-finance repo | POSTGRES_ADMIN_PASSWORD: PostgreSQL citus user password
+#
+# For the same job against ey-ai-finance branch **dev**, use **init-postgres-dev.yml**.
 
 name: Initialize PostgreSQL DB
 on:
